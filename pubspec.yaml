@@ -35,6 +35,9 @@ dependencies:
   flutter_bloc: ^8.1.6
   bloc: ^8.1.4
   equatable: ^2.0.5
+  
+  # Dependency Injection
+  get_it: ^7.7.0
 
   # Network & API
   dio: ^5.7.0
