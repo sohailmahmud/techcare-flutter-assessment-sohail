@@ -1,4 +1,4 @@
-/// Spacing constants
+/// Spacing constants for consistent UI layout throughout the app
 class Spacing {
   // Private constructor
   const Spacing._();
@@ -16,8 +16,9 @@ class Spacing {
   static const double space48 = 48.0;
   static const double space64 = 64.0;
 
-  // Header height
+  // Header height  
   static const double headerExpandedHeight = 120.0;
+  static const double headerCollapsedHeight = 80.0;
 
   // Balance card height
   static const double balanceCardHeight = 200.0;
@@ -73,4 +74,9 @@ class Spacing {
   static const double iconL = 32.0;
   static const double iconXL = 48.0;
   static const double iconXXL = 64.0;
+
+  // Badge sizes
+  static const double badgeSize = 12.0;
+  static const double badgeFontSize = 8.0;
+  static const double badgeOffset = 2.0;
 }

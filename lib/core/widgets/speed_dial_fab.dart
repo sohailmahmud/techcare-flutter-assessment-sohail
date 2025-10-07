@@ -111,6 +111,7 @@ class _SpeedDialFABState extends State<SpeedDialFAB>
                   padding: const EdgeInsets.only(bottom: Spacing.space16),
                   child: _SpeedDialActionButton(
                     action: action,
+                    heroTag: "speed_dial_action_$index",
                     onPressed: () {
                       _close();
                       action.onPressed();
@@ -122,6 +123,7 @@ class _SpeedDialFABState extends State<SpeedDialFAB>
 
             // Main FAB
             FloatingActionButton(
+              heroTag: "speed_dial_main_fab",
               onPressed: _toggle,
               backgroundColor: widget.backgroundColor ?? AppColors.primary,
               foregroundColor: widget.foregroundColor ?? Colors.white,
@@ -161,10 +163,12 @@ class SpeedDialAction {
 class _SpeedDialActionButton extends StatelessWidget {
   final SpeedDialAction action;
   final VoidCallback onPressed;
+  final String heroTag;
 
   const _SpeedDialActionButton({
     required this.action,
     required this.onPressed,
+    required this.heroTag,
   });
 
   @override
@@ -194,12 +198,26 @@ class _SpeedDialActionButton extends StatelessWidget {
         const SizedBox(width: Spacing.space12),
 
         // Button
-        FloatingActionButton.small(
-          onPressed: onPressed,
-          backgroundColor: action.backgroundColor ?? AppColors.primary,
-          foregroundColor: action.foregroundColor ?? Colors.white,
+        Material(
           elevation: Spacing.elevation4,
-          child: Icon(action.icon),
+          shape: const CircleBorder(),
+          color: action.backgroundColor ?? AppColors.primary,
+          child: InkWell(
+            onTap: onPressed,
+            customBorder: const CircleBorder(),
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                action.icon,
+                color: action.foregroundColor ?? Colors.white,
+                size: Spacing.iconS,
+              ),
+            ),
+          ),
         ),
       ],
     );

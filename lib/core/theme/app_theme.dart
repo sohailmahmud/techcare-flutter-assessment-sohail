@@ -82,6 +82,39 @@ class AppTheme {
         unselectedItemColor: AppColors.textSecondary,
         elevation: Spacing.elevation8,
       ),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: AppColors.surface,
+        elevation: Spacing.elevation2,
+        height: 80,
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return AppTypography.labelSmall.copyWith(
+              color: AppColors.primary,
+              fontWeight: FontWeight.w600,
+            );
+          }
+          return AppTypography.labelSmall.copyWith(
+            color: AppColors.textSecondary,
+            fontWeight: FontWeight.w500,
+          );
+        }),
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return const IconThemeData(
+              color: AppColors.primary,
+              size: 24,
+            );
+          }
+          return const IconThemeData(
+            color: AppColors.textSecondary,
+            size: 24,
+          );
+        }),
+        indicatorColor: AppColors.primary.withValues(alpha: 0.12),
+        indicatorShape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(Spacing.radiusL),
+        ),
+      ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.surfaceVariant,

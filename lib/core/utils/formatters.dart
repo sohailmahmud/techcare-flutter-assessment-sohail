@@ -6,8 +6,8 @@ class CurrencyFormatter {
   const CurrencyFormatter._();
 
   static final NumberFormat _currencyFormat = NumberFormat.currency(
-    symbol: '\$',
-    decimalDigits: 2,
+    symbol: '৳',
+    decimalDigits: 0, // Taka typically doesn't use decimal places
   );
 
   /// Format a number as currency
@@ -15,10 +15,10 @@ class CurrencyFormatter {
     return _currencyFormat.format(amount);
   }
 
-  /// Format with compact notation (e.g., $1.2K, $1.5M)
+  /// Format with compact notation (e.g., ৳1.2K, ৳1.5M)
   static String formatCompact(double amount) {
     final formatter = NumberFormat.compactCurrency(
-      symbol: '\$',
+      symbol: '৳',
       decimalDigits: 1,
     );
     return formatter.format(amount);
