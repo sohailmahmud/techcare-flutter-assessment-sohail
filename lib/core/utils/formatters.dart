@@ -71,4 +71,22 @@ class DateFormatter {
       return formatDisplay(date);
     }
   }
+
+  /// Format date for grouping transactions (e.g., "Today", "Yesterday", "Jan 15")
+  static String formatDateGrouping(DateTime date) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+    final dateOnly = DateTime(date.year, date.month, date.day);
+
+    if (dateOnly == today) {
+      return 'Today';
+    } else if (dateOnly == yesterday) {
+      return 'Yesterday';
+    } else if (dateOnly.year == today.year) {
+      return DateFormat('MMM dd').format(date);
+    } else {
+      return DateFormat('MMM dd, yyyy').format(date);
+    }
+  }
 }

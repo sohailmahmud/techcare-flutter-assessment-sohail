@@ -1,4 +1,4 @@
-/// Spacing and layout design tokens
+/// Spacing constants
 class Spacing {
   // Private constructor
   const Spacing._();
@@ -15,6 +15,37 @@ class Spacing {
   static const double space40 = 40.0;
   static const double space48 = 48.0;
   static const double space64 = 64.0;
+
+  // Header height
+  static const double headerExpandedHeight = 120.0;
+
+  // Balance card height
+  static const double balanceCardHeight = 200.0;
+
+  // Pie chart height
+  static const double pieChartHeight = 300.0;
+
+  // Pie chart dimensions
+  static const double pieChartCenterRadius = 45.0;
+  static const double pieChartSectionsSpace = 2.0;
+  static const double pieChartTouchedRadius = 65.0;
+  static const double pieChartSelectedRadius = 60.0;
+  static const double pieChartNormalRadius = 55.0;
+  static const double pieChartEmptyStateHeight = 200.0;
+
+  // Color constants
+  static const int maxCategoryColors = 10;
+
+   // Profile avatar size
+  static const double profileAvatarSize = 40.0;
+
+  // Transaction display limits
+  static const int maxDisplayTransactions = 5;
+  static const int maxRecentTransactions = 10;
+
+  // Transaction dimensions
+  static const double transactionItemHeight = 72.0;
+  static const double transactionIconSize = 48.0;
 
   // Border radius
   static const double radiusXS = 4.0;

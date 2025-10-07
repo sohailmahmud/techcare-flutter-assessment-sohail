@@ -4,10 +4,14 @@ class AppConstants {
   const AppConstants._();
 
   // Animation Durations
-  static const Duration itemAnimation = Duration(milliseconds: 60);
-  static const Duration cardAnimation = Duration(milliseconds: 600);
+  static const Duration listItemAnimation = Duration(milliseconds: 50);
+  static const Duration flipAnimation = Duration(milliseconds: 600);
   static const Duration counterAnimation = Duration(milliseconds: 800);
   static const Duration chartAnimation = Duration(milliseconds: 1000);
+  static const Duration speedDialAnimation = Duration(milliseconds: 250);
+  static const Duration refreshDelay = Duration(milliseconds: 1000);
+  static const Duration pageTransition = Duration(milliseconds: 300);
+  static const Duration modalTransition = Duration(milliseconds: 250);
 
   // Cache expiry duration
   static const Duration cacheExpiry = Duration(minutes: 5);
@@ -19,4 +23,7 @@ class AppConstants {
 
   // Minimum screen width
   static const double minScreenWidth = 320;
+  
+  // Notification constants
+  static const int defaultNotificationCount = 3;
 }
