@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'core/theme/app_theme.dart';
 import 'presentation/app_navigation.dart';
+import 'presentation/transactions/bloc/transactions_bloc.dart';
+import 'injection_container.dart' as di;
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await di.init();
   runApp(const FinTrackApp());
 }
 
@@ -13,11 +18,14 @@ class FinTrackApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Personal Finance Tracker',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      home: const AppNavigationPage(),
+    return BlocProvider(
+      create: (context) => di.sl<TransactionsBloc>(),
+      child: MaterialApp(
+        title: 'Personal Finance Tracker',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.lightTheme,
+        home: const AppNavigationPage(),
+      ),
     );
   }
 }
