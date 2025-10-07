@@ -12,6 +12,7 @@ class AppConstants {
   static const Duration refreshDelay = Duration(milliseconds: 1000);
   static const Duration pageTransition = Duration(milliseconds: 300);
   static const Duration modalTransition = Duration(milliseconds: 250);
+  static const Duration debounceDuration = Duration(milliseconds: 300);
 
   // Cache expiry duration
   static const Duration cacheExpiry = Duration(minutes: 5);
@@ -26,4 +27,8 @@ class AppConstants {
   
   // Notification constants
   static const int defaultNotificationCount = 3;
+
+  // Transaction display limits
+  static const int maxDisplayTransactions = 5;
+  static const int maxRecentTransactions = 10;
 }

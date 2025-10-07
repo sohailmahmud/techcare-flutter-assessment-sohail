@@ -8,13 +8,15 @@ import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../domain/entities/transaction.dart';
 
-/// Enhanced recent transactions list with swipe gestures and grouping
+/// Enhanced recent transactions list with lazy loading and swipe gestures
 class TransactionsList extends StatefulWidget {
   final List<Transaction> transactions;
   final Function(String)? onEdit;
   final Function(String)? onDelete;
   final VoidCallback? onViewAll;
   final bool isLoading;
+  final int? maxItems; // Optional limit for dashboard view
+  final bool enableLazyLoading; // Enable lazy loading for large datasets
 
   const TransactionsList({
     super.key,
@@ -23,6 +25,8 @@ class TransactionsList extends StatefulWidget {
     this.onDelete,
     this.onViewAll,
     this.isLoading = false,
+    this.maxItems,
+    this.enableLazyLoading = false,
   });
 
   @override
@@ -33,6 +37,12 @@ class _TransactionsListState extends State<TransactionsList>
     with TickerProviderStateMixin {
   late AnimationController _listAnimationController;
   late Animation<double> _listAnimation;
+  
+  // Lazy loading state
+  int _displayedItemsCount = 5;
+  final int _itemsPerPage = 10;
+  bool _isLoadingMore = false;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -46,12 +56,49 @@ class _TransactionsListState extends State<TransactionsList>
       curve: Curves.easeOutCubic,
     );
     _listAnimationController.forward();
+    
+    // Set up lazy loading
+    if (widget.enableLazyLoading) {
+      _displayedItemsCount = _itemsPerPage;
+      _scrollController.addListener(_onScroll);
+    } else {
+      _displayedItemsCount = widget.maxItems ?? AppConstants.maxRecentTransactions;
+    }
   }
 
   @override
   void dispose() {
     _listAnimationController.dispose();
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >= 
+        _scrollController.position.maxScrollExtent - 200 &&
+        !_isLoadingMore &&
+        _displayedItemsCount < widget.transactions.length) {
+      _loadMoreItems();
+    }
+  }
+
+  void _loadMoreItems() {
+    if (_isLoadingMore) return;
+    
+    setState(() {
+      _isLoadingMore = true;
+    });
+
+    // Simulate loading delay for smooth UX
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (mounted) {
+        setState(() {
+          _displayedItemsCount = (_displayedItemsCount + _itemsPerPage)
+              .clamp(0, widget.transactions.length);
+          _isLoadingMore = false;
+        });
+      }
+    });
   }
 
   @override
@@ -165,6 +212,14 @@ class _TransactionsListState extends State<TransactionsList>
   }
 
   Widget _buildTransactionsList() {
+    if (widget.enableLazyLoading) {
+      return _buildLazyLoadingList();
+    } else {
+      return _buildStandardList();
+    }
+  }
+
+  Widget _buildStandardList() {
     final groupedTransactions = _groupTransactionsByDate();
     
     return AnimatedBuilder(
@@ -208,10 +263,91 @@ class _TransactionsListState extends State<TransactionsList>
     );
   }
 
-  Map<String, List<Transaction>> _groupTransactionsByDate() {
-    final Map<String, List<Transaction>> grouped = {};
+  /// Builds a lazy-loading ListView for large transaction datasets
+  Widget _buildLazyLoadingList() {
+    final displayedTransactions = widget.transactions.take(_displayedItemsCount).toList();
+    final groupedTransactions = _groupTransactionsByDate(displayedTransactions);
     
-    for (final transaction in widget.transactions.take(Spacing.maxRecentTransactions)) {
+    // Calculate total items for ListView (groups + transactions + loading indicator)
+    int totalItems = 0;
+    for (final entry in groupedTransactions.entries) {
+      totalItems += 1; // Date header
+      totalItems += entry.value.length; // Transactions
+    }
+    if (_isLoadingMore) totalItems += 1; // Loading indicator
+    
+    return SizedBox(
+      height: 400, // Fixed height for lazy loading
+      child: ListView.builder(
+        controller: _scrollController,
+        itemCount: totalItems,
+        itemBuilder: (context, index) {
+          int currentIndex = 0;
+          
+          for (final entry in groupedTransactions.entries) {
+            final date = entry.key;
+            final transactions = entry.value;
+            
+            // Date header
+            if (index == currentIndex) {
+              currentIndex++;
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: _buildDateHeader(date),
+              );
+            }
+            currentIndex++;
+            
+            // Transaction items
+            for (int i = 0; i < transactions.length; i++) {
+              if (index == currentIndex) {
+                currentIndex++;
+                return AnimatedBuilder(
+                  animation: _listAnimation,
+                  builder: (context, child) {
+                    return SlideTransition(
+                      position: Tween<Offset>(
+                        begin: const Offset(1, 0),
+                        end: Offset.zero,
+                      ).animate(CurvedAnimation(
+                        parent: _listAnimation,
+                        curve: Interval(
+                          i * 0.05,
+                          1.0,
+                          curve: Curves.easeOutCubic,
+                        ),
+                      )),
+                      child: _buildTransactionItem(transactions[i]),
+                    );
+                  },
+                );
+              }
+              currentIndex++;
+            }
+          }
+          
+          // Loading indicator
+          if (_isLoadingMore && index == totalItems - 1) {
+            return const Padding(
+              padding: EdgeInsets.all(16),
+              child: Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
+          }
+          
+          return const SizedBox.shrink();
+        },
+      ),
+    );
+  }
+
+  Map<String, List<Transaction>> _groupTransactionsByDate([List<Transaction>? transactions]) {
+    final Map<String, List<Transaction>> grouped = {};
+    final List<Transaction> transactionsToGroup = transactions ?? 
+        widget.transactions.take(widget.maxItems ?? AppConstants.maxRecentTransactions).toList();
+    
+    for (final transaction in transactionsToGroup) {
       final dateKey = DateFormatter.formatDateGrouping(transaction.date);
       grouped.putIfAbsent(dateKey, () => []).add(transaction);
     }

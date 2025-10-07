@@ -16,18 +16,29 @@ class AppNavigationPage extends StatefulWidget {
 class _AppNavigationPageState extends State<AppNavigationPage> {
   int _currentIndex = 0;
 
-  static const List<Widget> _pages = [
-    DashboardPage(),
-    TransactionsPage(),
-    AnalyticsPage(),
-  ];
+  Widget _getPage(int index) {
+    switch (index) {
+      case 0:
+        return const DashboardPage();
+      case 1:
+        return const TransactionsPage();
+      case 2:
+        return const AnalyticsPage();
+      default:
+        return const DashboardPage();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
-        children: _pages,
+        children: [
+          _getPage(0),
+          _getPage(1),
+          _getPage(2),
+        ],
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(

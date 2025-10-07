@@ -40,10 +40,6 @@ class Spacing {
    // Profile avatar size
   static const double profileAvatarSize = 40.0;
 
-  // Transaction display limits
-  static const int maxDisplayTransactions = 5;
-  static const int maxRecentTransactions = 10;
-
   // Transaction dimensions
   static const double transactionItemHeight = 72.0;
   static const double transactionIconSize = 48.0;
