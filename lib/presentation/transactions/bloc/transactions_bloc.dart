@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:developer' as dev;
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import '../../../data/cache/hive_cache_manager.dart';
 import '../../../domain/entities/transaction.dart' as tx;
 import '../../../domain/entities/transaction_filter.dart';
 
@@ -63,6 +65,39 @@ class UpdateTransaction extends TransactionsEvent {
 
   @override
   List<Object> get props => [transaction];
+}
+
+// Cache Events
+class InvalidateCache extends TransactionsEvent {
+  final TransactionFilter? filter;
+  final List<String>? transactionIds;
+  final bool invalidateAll;
+
+  const InvalidateCache({
+    this.filter,
+    this.transactionIds,
+    this.invalidateAll = false,
+  });
+
+  @override
+  List<Object?> get props => [filter, transactionIds, invalidateAll];
+}
+
+class RefreshCache extends TransactionsEvent {
+  final TransactionFilter? filter;
+
+  const RefreshCache({this.filter});
+
+  @override
+  List<Object?> get props => [filter];
+}
+
+class GetCacheStats extends TransactionsEvent {
+  const GetCacheStats();
+}
+
+class ClearAllCache extends TransactionsEvent {
+  const ClearAllCache();
 }
 
 // States
@@ -137,13 +172,57 @@ class TransactionsError extends TransactionsState {
   List<Object> get props => [message, cachedTransactions, currentFilter];
 }
 
+// Cache States
+class CacheStatsState extends TransactionsState {
+  final CacheStatistics stats;
+
+  const CacheStatsState(this.stats);
+
+  @override
+  List<Object> get props => [stats];
+}
+
+class CacheInvalidatedState extends TransactionsState {
+  final String message;
+
+  const CacheInvalidatedState(this.message);
+
+  @override
+  List<Object> get props => [message];
+}
+
+class TransactionsLoadedFromCache extends TransactionsLoaded {
+  final bool isStale;
+  final DateTime cacheTime;
+
+  const TransactionsLoadedFromCache({
+    required super.transactions,
+    required super.currentFilter,
+    required super.paginationInfo,
+    super.isSearching,
+    super.errorMessage,
+    this.isStale = false,
+    required this.cacheTime,
+  });
+
+  @override
+  List<Object?> get props => [
+        ...super.props,
+        isStale,
+        cacheTime,
+      ];
+}
+
 // BLoC Implementation
 class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
   Timer? _searchDebouncer;
   final List<tx.Transaction> _allTransactions = [];
   final Duration _searchDebounceDelay = const Duration(milliseconds: 300);
+  final HiveCacheManager _cacheManager;
 
-  TransactionsBloc() : super(const TransactionsInitial()) {
+  TransactionsBloc({HiveCacheManager? cacheManager}) 
+    : _cacheManager = cacheManager ?? HiveCacheManager(),
+      super(const TransactionsInitial()) {
     on<LoadTransactions>(_onLoadTransactions);
     on<LoadMoreTransactions>(_onLoadMoreTransactions);
     on<SearchTransactions>(_onSearchTransactions);
@@ -151,11 +230,28 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
     on<ClearFilters>(_onClearFilters);
     on<DeleteTransaction>(_onDeleteTransaction);
     on<UpdateTransaction>(_onUpdateTransaction);
+    on<InvalidateCache>(_onInvalidateCache);
+    on<RefreshCache>(_onRefreshCache);
+    on<GetCacheStats>(_onGetCacheStats);
+    on<ClearAllCache>(_onClearAllCache);
+    
+    // Initialize cache
+    _initializeCache();
+  }
+
+  Future<void> _initializeCache() async {
+    try {
+      await _cacheManager.initialize();
+      dev.log('Cache initialized successfully');
+    } catch (e) {
+      dev.log('Failed to initialize cache: $e');
+    }
   }
 
   @override
   Future<void> close() {
     _searchDebouncer?.cancel();
+    _cacheManager.dispose();
     return super.close();
   }
 
@@ -459,5 +555,72 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
     }
 
     return transactions;
+  }
+
+  // Cache Event Handlers
+  Future<void> _onInvalidateCache(
+    InvalidateCache event,
+    Emitter<TransactionsState> emit,
+  ) async {
+    try {
+      await _cacheManager.invalidateCache(
+        filter: event.filter,
+        transactionIds: event.transactionIds,
+        invalidateAll: event.invalidateAll,
+        type: CacheInvalidationType.soft,
+      );
+      
+      emit(const CacheInvalidatedState('Cache invalidated successfully'));
+      
+      // Reload data if needed
+      if (event.invalidateAll || event.filter == null) {
+        add(const LoadTransactions(refresh: true));
+      }
+    } catch (e) {
+      emit(TransactionsError(message: 'Failed to invalidate cache: $e'));
+    }
+  }
+
+  Future<void> _onRefreshCache(
+    RefreshCache event,
+    Emitter<TransactionsState> emit,
+  ) async {
+    try {
+      // Clear existing cache and reload from network
+      await _cacheManager.invalidateCache(
+        filter: event.filter,
+        type: CacheInvalidationType.hard,
+      );
+      
+      // Reload transactions
+      add(LoadTransactions(refresh: true));
+    } catch (e) {
+      emit(TransactionsError(message: 'Failed to refresh cache: $e'));
+    }
+  }
+
+  Future<void> _onGetCacheStats(
+    GetCacheStats event,
+    Emitter<TransactionsState> emit,
+  ) async {
+    try {
+      final stats = await _cacheManager.getCacheStats();
+      emit(CacheStatsState(stats));
+    } catch (e) {
+      emit(TransactionsError(message: 'Failed to get cache stats: $e'));
+    }
+  }
+
+  Future<void> _onClearAllCache(
+    ClearAllCache event,
+    Emitter<TransactionsState> emit,
+  ) async {
+    try {
+      await _cacheManager.clearAll();
+      emit(const CacheInvalidatedState('All cache cleared'));
+      add(const LoadTransactions(refresh: true));
+    } catch (e) {
+      emit(TransactionsError(message: 'Failed to clear cache: $e'));
+    }
   }
 }

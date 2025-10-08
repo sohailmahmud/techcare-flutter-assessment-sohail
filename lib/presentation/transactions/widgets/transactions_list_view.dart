@@ -283,13 +283,19 @@ class _TransactionsListViewState extends State<TransactionsListView> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text(
-                      CurrencyFormatter.format(transaction.amount.abs()),
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: transaction.isIncome 
-                            ? Colors.green[600]
-                            : Colors.red[600],
+                    Hero(
+                      tag: 'transaction_amount_${transaction.id}',
+                      child: Material(
+                        color: Colors.transparent,
+                        child: Text(
+                          CurrencyFormatter.format(transaction.amount.abs()),
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: transaction.isIncome 
+                                ? Colors.green[600]
+                                : Colors.red[600],
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 2),

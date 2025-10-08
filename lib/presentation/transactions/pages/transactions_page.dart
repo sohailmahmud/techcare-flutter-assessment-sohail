@@ -4,13 +4,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/spacing.dart';
-import '../../../core/utils/formatters.dart';
 import '../../../domain/entities/transaction.dart' as tx;
 import '../../../domain/entities/transaction_filter.dart';
 import '../bloc/transactions_bloc.dart';
 import '../widgets/search_bar_widget.dart';
 import '../widgets/filter_bottom_sheet.dart';
 import '../widgets/transactions_list_view.dart';
+import '../widgets/transaction_details_modal.dart';
+import '../../transaction_form/pages/add_edit_transaction_screen.dart';
+import 'cache_debug_screen.dart';
 
 class TransactionsPage extends StatefulWidget {
   const TransactionsPage({super.key});
@@ -70,10 +72,24 @@ class _TransactionsPageState extends State<TransactionsPage>
   }
 
   void _showTransactionDetails(tx.Transaction transaction) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => _TransactionDetailsSheet(transaction: transaction),
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        opaque: false,
+        barrierColor: Colors.black.withValues(alpha: 0.5),
+        pageBuilder: (context, animation, secondaryAnimation) => 
+            TransactionDetailsModal(
+              transaction: transaction,
+              heroTag: 'transaction_amount_${transaction.id}',
+            ),
+        transitionDuration: const Duration(milliseconds: 300),
+        reverseTransitionDuration: const Duration(milliseconds: 250),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(
+            opacity: animation,
+            child: child,
+          );
+        },
+      ),
     );
   }
 
@@ -116,6 +132,21 @@ class _TransactionsPageState extends State<TransactionsPage>
           elevation: 0,
           scrolledUnderElevation: 0,
           actions: [
+            // Debug button (only show in debug mode)
+            if (const bool.fromEnvironment('dart.vm.product') == false)
+              IconButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const CacheDebugScreen(),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.bug_report_outlined),
+                tooltip: 'Cache Debug',
+                color: AppColors.textSecondary,
+              ),
             BlocBuilder<TransactionsBloc, TransactionsState>(
               builder: (context, state) {
                 if (state is TransactionsLoaded) {
@@ -144,6 +175,7 @@ class _TransactionsPageState extends State<TransactionsPage>
         },
       ),
         floatingActionButton: FloatingActionButton(
+          heroTag: "add_transaction_fab",
           onPressed: _showAddTransaction,
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
@@ -261,190 +293,21 @@ class _TransactionsPageState extends State<TransactionsPage>
   }
 
   void _showAddTransaction() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Add Transaction - Feature coming soon!'),
-        action: SnackBarAction(
-          label: 'OK',
-          onPressed: () {},
-        ),
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => 
+            const AddEditTransactionScreen(),
+        transitionDuration: const Duration(milliseconds: 400),
+        reverseTransitionDuration: const Duration(milliseconds: 300),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(
+            opacity: animation,
+            child: child,
+          );
+        },
       ),
     );
   }
 }
 
-class _TransactionDetailsSheet extends StatelessWidget {
-  final tx.Transaction transaction;
 
-  const _TransactionDetailsSheet({required this.transaction});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    
-    return Container(
-      margin: const EdgeInsets.all(Spacing.space16),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            margin: const EdgeInsets.only(top: Spacing.space12),
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: theme.colorScheme.onSurface.withAlpha(77),
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(Spacing.space24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 60,
-                      height: 60,
-                      decoration: BoxDecoration(
-                        color: _getTransactionColor().withAlpha(25),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Icon(
-                        transaction.isIncome 
-                            ? Icons.trending_up_rounded
-                            : Icons.trending_down_rounded,
-                        color: _getTransactionColor(),
-                        size: 30,
-                      ),
-                    ),
-                    const SizedBox(width: Spacing.space16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            transaction.title,
-                            style: theme.textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '${DateFormatter.formatDisplay(transaction.date)} • ${DateFormatter.formatTime(transaction.date)}',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.colorScheme.onSurface.withAlpha(153),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: Spacing.space24),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(Spacing.space20),
-                  decoration: BoxDecoration(
-                    color: _getTransactionColor().withAlpha(25),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: _getTransactionColor().withAlpha(51),
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        transaction.isIncome ? 'Income' : 'Expense',
-                        style: theme.textTheme.labelMedium?.copyWith(
-                          color: _getTransactionColor(),
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        CurrencyFormatter.format(transaction.amount.abs()),
-                        style: theme.textTheme.headlineMedium?.copyWith(
-                          color: _getTransactionColor(),
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: Spacing.space20),
-                _buildDetailRow('Category', transaction.categoryName),
-                if (transaction.notes != null && transaction.notes!.isNotEmpty)
-                  _buildDetailRow('Notes', transaction.notes!),
-                _buildDetailRow('Transaction ID', transaction.id),
-                const SizedBox(height: Spacing.space24),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () => Navigator.pop(context),
-                        icon: const Icon(Icons.edit_rounded),
-                        label: const Text('Edit'),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: Spacing.space12),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () => Navigator.pop(context),
-                        icon: const Icon(Icons.close_rounded),
-                        label: const Text('Close'),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDetailRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: Spacing.space12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 100,
-            child: Text(
-              label,
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Color _getTransactionColor() {
-    return transaction.isIncome ? Colors.green : Colors.red;
-  }
-}

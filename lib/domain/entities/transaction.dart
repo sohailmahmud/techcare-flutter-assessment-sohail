@@ -42,6 +42,7 @@ class Transaction extends Equatable {
 }
 
 enum TransactionType {
+  all,
   income,
   expense,
 }
