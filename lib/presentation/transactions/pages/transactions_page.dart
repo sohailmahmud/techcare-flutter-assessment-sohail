@@ -5,13 +5,13 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/spacing.dart';
 import '../../../domain/entities/transaction.dart' as tx;
-import '../../../domain/entities/transaction_filter.dart';
+// import '../../../domain/entities/transaction_filter.dart';
 import '../bloc/transactions_bloc.dart';
 import '../widgets/search_bar_widget.dart';
-import '../widgets/filter_bottom_sheet.dart';
+// import '../widgets/filter_bottom_sheet.dart';
 import '../widgets/transactions_list_view.dart';
 import '../widgets/transaction_details_modal.dart';
-import '../../transaction_form/pages/add_edit_transaction_screen.dart';
+import '../form/pages/add_edit_transaction_screen.dart';
 import 'cache_debug_screen.dart';
 
 class TransactionsPage extends StatefulWidget {
@@ -38,25 +38,22 @@ class _TransactionsPageState extends State<TransactionsPage>
     context.read<TransactionsBloc>().add(SearchTransactions(query));
   }
 
-  void _onFilterTap(TransactionFilter currentFilter) {
-    showFilterBottomSheet(
-      context: context,
-      currentFilter: currentFilter,
-      onApplyFilters: (filter) {
-        context.read<TransactionsBloc>().add(ApplyFilters(filter));
-      },
-      onClearFilters: () {
-        context.read<TransactionsBloc>().add(const ClearFilters());
-      },
+  void _onFilterTap() {
+    // TODO: Implement filter bottom sheet
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Filter functionality coming soon!')),
     );
   }
 
   void _onLoadMore() {
-    context.read<TransactionsBloc>().add(const LoadMoreTransactions());
+    final currentState = context.read<TransactionsBloc>().state;
+    if (currentState is TransactionLoaded) {
+      context.read<TransactionsBloc>().add(LoadTransactions(page: currentState.currentPage + 1));
+    }
   }
 
   void _onRefresh() {
-    context.read<TransactionsBloc>().add(const LoadTransactions(refresh: true));
+    context.read<TransactionsBloc>().add(const RefreshTransactions());
   }
 
   void _onTransactionTap(tx.Transaction transaction) {
@@ -79,7 +76,7 @@ class _TransactionsPageState extends State<TransactionsPage>
         pageBuilder: (context, animation, secondaryAnimation) => 
             TransactionDetailsModal(
               transaction: transaction,
-              heroTag: 'transaction_amount_${transaction.id}',
+              heroTag: 'transaction_amount_${transaction.id}_transactions_page',
             ),
         transitionDuration: const Duration(milliseconds: 300),
         reverseTransitionDuration: const Duration(milliseconds: 250),
@@ -149,7 +146,7 @@ class _TransactionsPageState extends State<TransactionsPage>
               ),
             BlocBuilder<TransactionsBloc, TransactionsState>(
               builder: (context, state) {
-                if (state is TransactionsLoaded) {
+                if (state is TransactionLoaded) {
                   return IconButton(
                     onPressed: _onRefresh,
                     icon: const Icon(Icons.refresh_rounded),
@@ -189,34 +186,31 @@ class _TransactionsPageState extends State<TransactionsPage>
     String currentQuery = '';
     int activeFilterCount = 0;
     bool isSearching = false;
-    TransactionFilter currentFilter = const TransactionFilter();
 
-    if (state is TransactionsLoaded) {
-      currentQuery = state.currentFilter.searchQuery;
-      activeFilterCount = state.currentFilter.activeFilterCount;
-      isSearching = state.isSearching;
-      currentFilter = state.currentFilter;
+    if (state is TransactionLoaded) {
+      currentQuery = state.searchQuery ?? '';
+      activeFilterCount = state.currentFilters?.length ?? 0;
     }
 
     return TransactionSearchBar(
       initialQuery: currentQuery,
       onSearchChanged: _onSearchChanged,
-      onFilterTap: () => _onFilterTap(currentFilter),
+      onFilterTap: () => _onFilterTap(),
       activeFilterCount: activeFilterCount,
       isLoading: isSearching,
     );
   }
 
   Widget _buildContent(TransactionsState state) {
-    if (state is TransactionsLoading) {
+    if (state is TransactionLoading) {
       return const TransactionListSkeleton();
     }
 
-    if (state is TransactionsError) {
+    if (state is TransactionError) {
       return _buildErrorState(state);
     }
 
-    if (state is TransactionsLoaded) {
+    if (state is TransactionLoaded) {
       return RefreshIndicator(
         onRefresh: () async {
           _onRefresh();
@@ -224,8 +218,8 @@ class _TransactionsPageState extends State<TransactionsPage>
         },
         child: TransactionsListView(
           transactions: state.transactions,
-          isLoading: state.paginationInfo.isLoading,
-          hasNextPage: state.paginationInfo.hasNextPage,
+          isLoading: false,
+          hasNextPage: state.hasMore,
           onLoadMore: _onLoadMore,
           onTransactionTap: _onTransactionTap,
           onEdit: _onEditTransaction,
@@ -239,7 +233,7 @@ class _TransactionsPageState extends State<TransactionsPage>
     );
   }
 
-  Widget _buildErrorState(TransactionsError state) {
+  Widget _buildErrorState(TransactionError state) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(Spacing.space32),
@@ -268,7 +262,7 @@ class _TransactionsPageState extends State<TransactionsPage>
             ),
             const SizedBox(height: Spacing.space8),
             Text(
-              state.message,
+              state.error,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onSurface.withAlpha(153),
               ),

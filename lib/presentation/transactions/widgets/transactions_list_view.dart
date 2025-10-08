@@ -16,6 +16,7 @@ class TransactionsListView extends StatefulWidget {
   final Function(tx.Transaction)? onTransactionTap;
   final Function(tx.Transaction)? onEdit;
   final Function(tx.Transaction)? onDelete;
+  final String heroTagPrefix;
 
   const TransactionsListView({
     super.key,
@@ -26,6 +27,7 @@ class TransactionsListView extends StatefulWidget {
     this.onTransactionTap,
     this.onEdit,
     this.onDelete,
+    this.heroTagPrefix = 'transactions_page',
   });
 
   @override
@@ -284,7 +286,7 @@ class _TransactionsListViewState extends State<TransactionsListView> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Hero(
-                      tag: 'transaction_amount_${transaction.id}',
+                      tag: 'transaction_amount_${transaction.id}_${widget.heroTagPrefix}',
                       child: Material(
                         color: Colors.transparent,
                         child: Text(
@@ -546,7 +548,7 @@ class _TransactionsListViewState extends State<TransactionsListView> {
             const SizedBox(height: Spacing.space24),
             ElevatedButton.icon(
               onPressed: () {
-                context.read<TransactionsBloc>().add(const ClearFilters());
+                context.read<TransactionsBloc>().add(const FilterTransactions({}));
               },
               icon: const Icon(Icons.clear_all_rounded),
               label: const Text('Clear Filters'),
