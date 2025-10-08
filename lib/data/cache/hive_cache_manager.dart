@@ -363,8 +363,8 @@ class HiveCacheManager {
     if (filter == null) return true;
 
     // Text search
-    if (filter.searchQuery?.isNotEmpty == true) {
-      final query = filter.searchQuery!.toLowerCase();
+    if (filter.searchQuery.isNotEmpty) {
+      final query = filter.searchQuery.toLowerCase();
       if (!transaction.title.toLowerCase().contains(query) &&
           !(transaction.notes?.toLowerCase().contains(query) ?? false) &&
           !transaction.categoryName.toLowerCase().contains(query)) {
