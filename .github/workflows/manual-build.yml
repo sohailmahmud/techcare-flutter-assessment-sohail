@@ -1,0 +1,152 @@
+name: Manual APK Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Build type'
+        required: true
+        default: 'release'
+        type: choice
+        options:
+        - release
+        - debug
+        - profile
+      create_release:
+        description: 'Create GitHub release'
+        required: false
+        default: false
+        type: boolean
+      release_name:
+        description: 'Release name (if creating release)'
+        required: false
+        default: 'Manual Build'
+
+jobs:
+  manual-build:
+    name: Manual APK Build
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.24.0'
+        channel: 'stable'
+        cache: true
+    
+    - name: Setup Java
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+    
+    - name: Get Flutter dependencies
+      run: flutter pub get
+    
+    - name: Run tests (for release builds)
+      if: inputs.build_type == 'release'
+      run: flutter test
+    
+    - name: Build APK
+      run: |
+        case "${{ inputs.build_type }}" in
+          "release")
+            echo "Building release APK..."
+            flutter build apk --release --split-per-abi
+            ;;
+          "debug")
+            echo "Building debug APK..."
+            flutter build apk --debug
+            ;;
+          "profile")
+            echo "Building profile APK..."
+            flutter build apk --profile
+            ;;
+        esac
+    
+    - name: Get build info
+      id: build_info
+      run: |
+        echo "BUILD_DATE=$(date +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_OUTPUT
+        echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+        echo "BRANCH_NAME=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
+        
+        # List built APKs
+        echo "Built APKs:"
+        ls -la build/app/outputs/flutter-apk/
+    
+    - name: Upload APK artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: fintrack-${{ inputs.build_type }}-${{ steps.build_info.outputs.SHORT_SHA }}
+        path: build/app/outputs/flutter-apk/*.apk
+        retention-days: 30
+    
+    - name: Create release (if requested)
+      if: inputs.create_release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: manual-${{ steps.build_info.outputs.SHORT_SHA }}
+        release_name: ${{ inputs.release_name || 'Manual Build' }} - ${{ inputs.build_type }}
+        body: |
+          ## 🛠️ Manual Build - ${{ inputs.build_type }}
+          
+          **Build Type**: ${{ inputs.build_type }}
+          **Branch**: ${{ steps.build_info.outputs.BRANCH_NAME }}
+          **Commit**: ${{ github.sha }}
+          **Build Date**: ${{ steps.build_info.outputs.BUILD_DATE }}
+          **Triggered by**: @${{ github.actor }}
+          
+          ### 📦 Downloads
+          - Universal APK (works on all devices)
+          - Split APKs for specific architectures (smaller size)
+          
+          ### ⚠️ Notice
+          This is a manually triggered build. Use appropriate caution when installing.
+        draft: false
+        prerelease: true
+    
+    - name: Upload Universal APK to release
+      if: inputs.create_release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: build/app/outputs/flutter-apk/app-${{ inputs.build_type }}.apk
+        asset_name: fintrack-${{ inputs.build_type }}.apk
+        asset_content_type: application/vnd.android.package-archive
+    
+    - name: Upload ARM64 APK to release (if release build)
+      if: inputs.create_release && inputs.build_type == 'release'
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: build/app/outputs/flutter-apk/app-arm64-v8a-${{ inputs.build_type }}.apk
+        asset_name: fintrack-arm64-v8a-${{ inputs.build_type }}.apk
+        asset_content_type: application/vnd.android.package-archive
+    
+    - name: Build summary
+      run: |
+        echo "## 📋 Build Summary" >> $GITHUB_STEP_SUMMARY
+        echo "- **Build Type**: ${{ inputs.build_type }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Branch**: ${{ steps.build_info.outputs.BRANCH_NAME }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Commit**: \`${{ steps.build_info.outputs.SHORT_SHA }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "- **Build Date**: ${{ steps.build_info.outputs.BUILD_DATE }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Create Release**: ${{ inputs.create_release }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 📦 Built APKs" >> $GITHUB_STEP_SUMMARY
+        echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+        ls -lh build/app/outputs/flutter-apk/*.apk >> $GITHUB_STEP_SUMMARY
+        echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "✅ Build completed successfully!" >> $GITHUB_STEP_SUMMARY

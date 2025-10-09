@@ -1,0 +1,155 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  release:
+    types: [ published ]
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.24.0'
+        channel: 'stable'
+    
+    - name: Get dependencies
+      run: flutter pub get
+    
+    - name: Verify formatting
+      run: dart format --output=none --set-exit-if-changed .
+    
+    - name: Analyze project source
+      run: flutter analyze
+    
+    - name: Run unit tests
+      run: flutter test --coverage
+    
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: coverage/lcov.info
+        fail_ci_if_error: false
+
+  build-android:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'push' || github.event_name == 'release'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.24.0'
+        channel: 'stable'
+    
+    - name: Setup Java
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+    
+    - name: Get dependencies
+      run: flutter pub get
+    
+    - name: Build APK
+      run: flutter build apk --release
+    
+    - name: Upload APK artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: fintrack-apk
+        path: build/app/outputs/flutter-apk/app-release.apk
+        retention-days: 30
+
+  build-ios:
+    name: Build iOS
+    runs-on: macos-latest
+    needs: test
+    if: github.event_name == 'push' || github.event_name == 'release'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.24.0'
+        channel: 'stable'
+    
+    - name: Get dependencies
+      run: flutter pub get
+    
+    - name: Build iOS (no code signing)
+      run: flutter build ios --release --no-codesign
+    
+    - name: Create iOS build archive
+      run: |
+        cd build/ios/iphoneos
+        tar -czf fintrack-ios.tar.gz Runner.app
+    
+    - name: Upload iOS artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: fintrack-ios
+        path: build/ios/iphoneos/fintrack-ios.tar.gz
+        retention-days: 30
+
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: [build-android, build-ios]
+    if: github.event_name == 'release'
+    
+    steps:
+    - name: Download Android APK
+      uses: actions/download-artifact@v3
+      with:
+        name: fintrack-apk
+        path: ./artifacts
+    
+    - name: Download iOS build
+      uses: actions/download-artifact@v3
+      with:
+        name: fintrack-ios
+        path: ./artifacts
+    
+    - name: Upload Release Assets
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          ./artifacts/app-release.apk
+          ./artifacts/fintrack-ios.tar.gz
+        body: |
+          ## 📱 FinTrack Release
+          
+          ### Features
+          - Personal Finance Tracking
+          - Transaction Management
+          - Analytics & Insights
+          - Budget Monitoring
+          
+          ### Downloads
+          - **Android**: Download `app-release.apk`
+          - **iOS**: Download `fintrack-ios.tar.gz` (requires development setup)
+          
+          ### Installation
+          - Android: Enable "Unknown Sources" and install APK
+          - iOS: Extract and use Xcode for installation
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

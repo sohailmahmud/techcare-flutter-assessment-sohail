@@ -1,0 +1,137 @@
+name: Continuous Deployment
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - 'README.md'
+      - 'docs/**'
+      - '.gitignore'
+      - '.github/workflows/**'
+
+jobs:
+  build-and-deploy:
+    name: Build and Deploy APK
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.24.0'
+        channel: 'stable'
+        cache: true
+    
+    - name: Setup Java
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+    
+    - name: Get Flutter dependencies
+      run: flutter pub get
+    
+    - name: Run tests
+      run: flutter test --reporter github
+    
+    - name: Analyze code
+      run: flutter analyze
+    
+    - name: Build debug APK for testing
+      run: flutter build apk --debug
+    
+    - name: Build release APK
+      run: flutter build apk --release
+    
+    - name: Get commit info
+      id: commit_info
+      run: |
+        echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+        echo "COMMIT_MSG=$(git log -1 --pretty=%B | head -n 1)" >> $GITHUB_OUTPUT
+        echo "BUILD_DATE=$(date +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_OUTPUT
+    
+    - name: Create development release
+      id: create_dev_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: dev-${{ steps.commit_info.outputs.SHORT_SHA }}
+        release_name: Development Build - ${{ steps.commit_info.outputs.SHORT_SHA }}
+        body: |
+          ## 🚧 Development Build
+          
+          **Commit**: ${{ steps.commit_info.outputs.COMMIT_MSG }}
+          **SHA**: `${{ github.sha }}`
+          **Build Date**: ${{ steps.commit_info.outputs.BUILD_DATE }}
+          
+          ### ⚠️ Notice
+          This is an automated development build from the main branch. 
+          Use for testing purposes only.
+          
+          ### 📦 Downloads
+          - `fintrack-dev.apk` - Latest development version
+          
+          ### 🔄 Auto-Cleanup
+          Development releases are automatically cleaned up after 7 days.
+        draft: false
+        prerelease: true
+    
+    - name: Upload APK to release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_dev_release.outputs.upload_url }}
+        asset_path: build/app/outputs/flutter-apk/app-release.apk
+        asset_name: fintrack-dev.apk
+        asset_content_type: application/vnd.android.package-archive
+    
+    - name: Upload APK artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: fintrack-dev-${{ steps.commit_info.outputs.SHORT_SHA }}
+        path: build/app/outputs/flutter-apk/app-release.apk
+        retention-days: 7
+    
+    - name: Clean up old development releases
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const { owner, repo } = context.repo;
+          const releases = await github.rest.repos.listReleases({ owner, repo });
+          
+          const devReleases = releases.data.filter(release => 
+            release.tag_name.startsWith('dev-') && 
+            release.prerelease === true
+          );
+          
+          // Keep only the 5 most recent dev releases
+          const releasesToDelete = devReleases
+            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+            .slice(5);
+          
+          for (const release of releasesToDelete) {
+            console.log(`Deleting old dev release: ${release.tag_name}`);
+            await github.rest.repos.deleteRelease({
+              owner,
+              repo,
+              release_id: release.id
+            });
+            
+            // Delete the tag as well
+            try {
+              await github.rest.git.deleteRef({
+                owner,
+                repo,
+                ref: `tags/${release.tag_name}`
+              });
+            } catch (error) {
+              console.log(`Could not delete tag ${release.tag_name}: ${error.message}`);
+            }
+          }

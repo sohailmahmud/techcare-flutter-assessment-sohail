@@ -1,0 +1,195 @@
+name: Build and Release APK
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+      - 'v*.*.*-*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag for release'
+        required: true
+        default: 'v1.0.0'
+
+jobs:
+  build-and-release:
+    name: Build APK and Create Release
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.24.0'
+        channel: 'stable'
+        cache: true
+    
+    - name: Setup Java
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+    
+    - name: Get Flutter dependencies
+      run: flutter pub get
+    
+    - name: Run tests
+      run: flutter test
+    
+    - name: Analyze code
+      run: flutter analyze
+    
+    - name: Build APK
+      run: flutter build apk --release --split-per-abi
+    
+    - name: Build App Bundle
+      run: flutter build appbundle --release
+    
+    - name: Get version from tag
+      id: get_version
+      run: |
+        if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+        else
+          echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        fi
+    
+    - name: Generate release notes
+      id: release_notes
+      run: |
+        cat << 'EOF' > release_notes.md
+        ## 📱 FinTrack ${{ steps.get_version.outputs.VERSION }}
+        
+        ### 🚀 Features
+        - **Personal Finance Tracking**: Track income and expenses with categorization
+        - **Interactive Dashboard**: Real-time balance overview with spending insights
+        - **Transaction Management**: Add, edit, delete transactions with search and filters
+        - **Analytics & Charts**: Visual spending patterns and budget monitoring
+        - **Responsive Design**: Optimized for phones and tablets
+        
+        ### 🏗️ Technical Highlights
+        - **Flutter 3.24+**: Latest stable Flutter framework
+        - **BLoC Pattern**: Clean architecture with state management
+        - **Material Design 3**: Modern UI with smooth animations
+        - **Offline Support**: Local data caching with Hive
+        - **Performance Optimized**: 60 FPS animations and efficient rendering
+        
+        ### 📦 Downloads
+        - **Universal APK**: `fintrack-universal.apk` (Works on all Android devices)
+        - **Optimized APKs**:
+          - ARM64: `fintrack-arm64-v8a.apk` (Recommended for most devices)
+          - ARMv7: `fintrack-armeabi-v7a.apk` (Older devices)
+          - x86_64: `fintrack-x86_64.apk` (Intel-based Android devices)
+        - **Play Store Bundle**: `fintrack-release.aab` (For Play Store upload)
+        
+        ### 📱 Installation
+        1. Download the appropriate APK for your device
+        2. Enable "Install from Unknown Sources" in Android settings
+        3. Install the APK file
+        4. Grant necessary permissions when prompted
+        
+        ### 🐛 Bug Reports
+        Please report issues on [GitHub Issues](https://github.com/${{ github.repository }}/issues)
+        
+        ### 📊 App Size
+        - Universal APK: ~20MB
+        - Optimized APKs: ~15MB each
+        EOF
+    
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.get_version.outputs.VERSION }}
+        release_name: FinTrack ${{ steps.get_version.outputs.VERSION }}
+        body_path: release_notes.md
+        draft: false
+        prerelease: ${{ contains(steps.get_version.outputs.VERSION, '-') }}
+    
+    - name: Upload Universal APK
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: build/app/outputs/flutter-apk/app-release.apk
+        asset_name: fintrack-universal.apk
+        asset_content_type: application/vnd.android.package-archive
+    
+    - name: Upload ARM64 APK
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+        asset_name: fintrack-arm64-v8a.apk
+        asset_content_type: application/vnd.android.package-archive
+    
+    - name: Upload ARMv7 APK
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+        asset_name: fintrack-armeabi-v7a.apk
+        asset_content_type: application/vnd.android.package-archive
+    
+    - name: Upload x86_64 APK
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: build/app/outputs/flutter-apk/app-x86_64-release.apk
+        asset_name: fintrack-x86_64.apk
+        asset_content_type: application/vnd.android.package-archive
+    
+    - name: Upload App Bundle
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: build/app/outputs/bundle/release/app-release.aab
+        asset_name: fintrack-release.aab
+        asset_content_type: application/octet-stream
+    
+    - name: Generate APK info
+      run: |
+        echo "## 📦 Build Information" >> build_info.md
+        echo "- **Build Date**: $(date)" >> build_info.md
+        echo "- **Flutter Version**: $(flutter --version | head -n 1)" >> build_info.md
+        echo "- **Dart Version**: $(dart --version)" >> build_info.md
+        echo "" >> build_info.md
+        echo "### APK Sizes" >> build_info.md
+        ls -lh build/app/outputs/flutter-apk/*.apk | awk '{print "- " $9 ": " $5}' >> build_info.md
+        echo "" >> build_info.md
+        echo "### App Bundle Size" >> build_info.md
+        ls -lh build/app/outputs/bundle/release/app-release.aab | awk '{print "- " $9 ": " $5}' >> build_info.md
+        
+        cat build_info.md
+    
+    - name: Update release with build info
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs').promises;
+          const buildInfo = await fs.readFile('build_info.md', 'utf8');
+          const releaseNotes = await fs.readFile('release_notes.md', 'utf8');
+          
+          await github.rest.repos.updateRelease({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            release_id: ${{ steps.create_release.outputs.id }},
+            body: releaseNotes + '\n\n' + buildInfo
+          });
