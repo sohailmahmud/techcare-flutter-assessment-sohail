@@ -29,21 +29,39 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     LoadDashboard event,
     Emitter<DashboardState> emit,
   ) async {
-    emit(const DashboardLoading());
-    
-    final result = await _getDashboardSummary(NoParams());
-    
-    result.fold(
-      (failure) => emit(DashboardError(
-        message: _mapFailureToMessage(failure),
+    try {
+      debugPrint('🔄 DashboardBloc: Starting to load dashboard');
+      emit(const DashboardLoading());
+      
+      debugPrint('🔄 DashboardBloc: Calling getDashboardSummary use case');
+      final result = await _getDashboardSummary(NoParams());
+      
+      debugPrint('🔄 DashboardBloc: Got result from use case');
+      result.fold(
+        (failure) {
+          debugPrint('❌ DashboardBloc: Failure occurred: $failure');
+          emit(DashboardError(
+            message: _mapFailureToMessage(failure),
+            canRetry: true,
+          ));
+        },
+        (summary) {
+          debugPrint('✅ DashboardBloc: Success! Loaded summary with ${summary.recentTransactions.length} transactions');
+          emit(DashboardLoaded(
+            summary: summary,
+            filteredTransactions: summary.recentTransactions,
+            isBalanceVisible: true,
+          ));
+        },
+      );
+    } catch (e, stackTrace) {
+      debugPrint('💥 DashboardBloc: Unexpected error in _onLoadDashboard: $e');
+      debugPrint('💥 StackTrace: $stackTrace');
+      emit(DashboardError(
+        message: 'Unexpected error occurred: $e',
         canRetry: true,
-      )),
-      (summary) => emit(DashboardLoaded(
-        summary: summary,
-        filteredTransactions: summary.recentTransactions,
-        isBalanceVisible: true,
-      )),
-    );
+      ));
+    }
   }
 
   Future<void> _onRefreshDashboard(
@@ -145,11 +163,16 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   }
 
   String _mapFailureToMessage(failure) {
-    // Map specific failures to user-friendly messages
-    return failure.toString().contains('network')
-        ? 'No internet connection. Please check your network.'
-        : failure.toString().contains('server')
-        ? 'Server error. Please try again later.'
-        : 'Something went wrong. Please try again.';
+    // Map specific failures to user-friendly messages with more details for debugging
+    final failureString = failure.toString();
+    debugPrint('🔍 DashboardBloc: Mapping failure: $failureString');
+    
+    if (failureString.contains('network') || failureString.contains('Network')) {
+      return 'No internet connection. Please check your network.\n\nDetails: $failureString';
+    } else if (failureString.contains('server') || failureString.contains('Server')) {
+      return 'Server error. Please try again later.\n\nDetails: $failureString';
+    } else {
+      return 'Something went wrong. Please try again.\n\nDetails: $failureString';
+    }
   }
 }

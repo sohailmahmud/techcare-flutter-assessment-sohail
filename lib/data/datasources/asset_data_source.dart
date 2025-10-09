@@ -12,30 +12,51 @@ class AssetDataSource {
 
   Future<PaginatedTransactionsResponse> getTransactions() async {
     try {
+      print('🔄 AssetDataSource: Loading transactions from $_transactionsPath');
       final jsonString = await rootBundle.loadString(_transactionsPath);
+      print('✅ AssetDataSource: Loaded transactions JSON, length: ${jsonString.length}');
       final jsonData = json.decode(jsonString) as Map<String, dynamic>;
-      return PaginatedTransactionsResponse.fromJson(jsonData);
-    } catch (e) {
+      print('✅ AssetDataSource: Decoded JSON, keys: ${jsonData.keys}');
+      final response = PaginatedTransactionsResponse.fromJson(jsonData);
+      print('✅ AssetDataSource: Created response with ${response.data.length} transactions');
+      return response;
+    } catch (e, stackTrace) {
+      print('💥 AssetDataSource: Failed to load transactions: $e');
+      print('💥 StackTrace: $stackTrace');
       throw Exception('Failed to load transactions: $e');
     }
   }
 
   Future<CategoriesResponse> getCategories() async {
     try {
+      print('🔄 AssetDataSource: Loading categories from $_categoriesPath');
       final jsonString = await rootBundle.loadString(_categoriesPath);
+      print('✅ AssetDataSource: Loaded categories JSON, length: ${jsonString.length}');
       final jsonData = json.decode(jsonString) as Map<String, dynamic>;
-      return CategoriesResponse.fromJson(jsonData);
-    } catch (e) {
+      print('✅ AssetDataSource: Decoded JSON, keys: ${jsonData.keys}');
+      final response = CategoriesResponse.fromJson(jsonData);
+      print('✅ AssetDataSource: Created response with ${response.categories.length} categories');
+      return response;
+    } catch (e, stackTrace) {
+      print('💥 AssetDataSource: Failed to load categories: $e');
+      print('💥 StackTrace: $stackTrace');
       throw Exception('Failed to load categories: $e');
     }
   }
 
   Future<AnalyticsResponse> getAnalytics() async {
     try {
+      print('🔄 AssetDataSource: Loading analytics from $_analyticsPath');
       final jsonString = await rootBundle.loadString(_analyticsPath);
+      print('✅ AssetDataSource: Loaded analytics JSON, length: ${jsonString.length}');
       final jsonData = json.decode(jsonString) as Map<String, dynamic>;
-      return AnalyticsResponse.fromJson(jsonData);
-    } catch (e) {
+      print('✅ AssetDataSource: Decoded JSON, keys: ${jsonData.keys}');
+      final response = AnalyticsResponse.fromJson(jsonData);
+      print('✅ AssetDataSource: Created analytics response');
+      return response;
+    } catch (e, stackTrace) {
+      print('💥 AssetDataSource: Failed to load analytics: $e');  
+      print('💥 StackTrace: $stackTrace');
       throw Exception('Failed to load analytics: $e');
     }
   }

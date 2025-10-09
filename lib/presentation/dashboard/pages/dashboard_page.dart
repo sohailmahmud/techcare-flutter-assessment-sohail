@@ -12,6 +12,7 @@ import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/widgets/speed_dial_fab.dart';
 import '../../../core/utils/page_transitions.dart';
 import '../../../injection_container.dart' as di;
+import '../../transactions/list/pages/transactions_page.dart';
 import '../bloc/dashboard_bloc.dart';
 import '../bloc/dashboard_event.dart';
 import '../bloc/dashboard_state.dart';
@@ -19,9 +20,7 @@ import '../widgets/balance_card.dart';
 import '../widgets/spending_pie_chart.dart';
 import '../../../domain/entities/transaction.dart';
 import '../widgets/transactions_list.dart';
-import '../../transactions/form/bloc/transaction_form_bloc.dart';
 import '../../transactions/form/pages/add_edit_transaction_screen.dart';
-import '../../transactions/list/bloc/transactions_bloc.dart';
 
 /// Dashboard page showing user's financial overview with BLoC state management
 class DashboardPage extends StatefulWidget {
@@ -48,56 +47,70 @@ class _DashboardPageState extends State<DashboardPage> {
         child: Scaffold(
           backgroundColor: AppColors.background,
           extendBodyBehindAppBar: true,
-          body: BlocBuilder<DashboardBloc, DashboardState>(
-            builder: (context, state) {
-              // Show full skeleton loader for initial loading
-              if (state is DashboardInitial || state is DashboardLoading) {
-                debugPrint('🔄 Showing skeleton loader - State: ${state.runtimeType}');
-                return const DashboardSkeletonLoader();
-              }
-              
-              debugPrint('✅ Showing main content - State: ${state.runtimeType}');
-              
-              return RefreshIndicator(
-                onRefresh: () async {
-                  final completer = Completer<void>();
-                  context.read<DashboardBloc>().add(const RefreshDashboardData());
+          body: Stack(
+            children: [
+              BlocBuilder<DashboardBloc, DashboardState>(
+                builder: (context, state) {
+                  // Show full skeleton loader for initial loading
+                  if (state is DashboardInitial || state is DashboardLoading) {
+                    debugPrint('🔄 Dashboard UI: Showing skeleton loader - State: ${state.runtimeType}');
+                    return const DashboardSkeletonLoader();
+                  }
                   
-                  // Listen for state changes to complete refresh
-                  final subscription = context.read<DashboardBloc>().stream.listen((newState) {
-                    if (newState is DashboardLoaded || newState is DashboardError) {
-                      if (!completer.isCompleted) {
-                        completer.complete();
-                      }
-                    }
-                  });
+                  // Show error state
+                  if (state is DashboardError) {
+                    debugPrint('❌ Dashboard UI: Showing error state - ${state.message}');
+                    return Center(
+                      child: _buildErrorCard(state.message, () {
+                        context.read<DashboardBloc>().add(const RetryLoadDashboard());
+                      }),
+                    );
+                  }
                   
-                  // Timeout after reasonable time
-                  Timer(AppConstants.refreshDelay * 2, () {
-                    if (!completer.isCompleted) {
-                      completer.complete();
-                    }
-                    subscription.cancel();
-                  });
-                  
-                  await completer.future;
-                  subscription.cancel();
+                  debugPrint('✅ Dashboard UI: Showing main content - State: ${state.runtimeType}');
+                  return RefreshIndicator(
+                    onRefresh: () async {
+                      final completer = Completer<void>();
+                      context.read<DashboardBloc>().add(const RefreshDashboardData());
+                      
+                      // Listen for state changes to complete refresh
+                      final subscription = context.read<DashboardBloc>().stream.listen((newState) {
+                        if (newState is DashboardLoaded || newState is DashboardError) {
+                          if (!completer.isCompleted) {
+                            completer.complete();
+                          }
+                        }
+                      });
+                      
+                      // Timeout after reasonable time
+                      Timer(AppConstants.refreshDelay * 2, () {
+                        if (!completer.isCompleted) {
+                          completer.complete();
+                        }
+                        subscription.cancel();
+                      });
+                      
+                      await completer.future;
+                      subscription.cancel();
+                    },
+                    displacement: 40.0, // Adjust position to work with header
+                    strokeWidth: 2.5,
+                    backgroundColor: AppColors.surface,
+                    color: AppColors.primary,
+                    child: CustomScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(), // Ensure scroll works even with short content
+                      slivers: [
+                        _buildHeader(),
+                        _buildContent(state, context),
+                      ],
+                    ),
+                  );
                 },
-                displacement: 40.0, // Adjust position to work with header
-                strokeWidth: 2.5,
-                backgroundColor: AppColors.surface,
-                color: AppColors.primary,
-                child: CustomScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(), // Ensure scroll works even with short content
-                  slivers: [
-                    _buildHeader(),
-                    _buildContent(state, context),
-                  ],
-                ),
-              );
-            },
+              ),
+              // Custom Speed Dial FAB with backdrop
+              _buildSpeedDialWithBackdrop(),
+            ],
           ),
-          floatingActionButton: _buildSpeedDialFAB(),
         ),
       ),
     );
@@ -216,7 +229,12 @@ class _DashboardPageState extends State<DashboardPage> {
               _showDeleteConfirmation(context, transactionId);
             },
             onViewAll: () {
-              Navigator.pushNamed(context, '/transactions');
+              // Navigate to transaction navigation tab
+              Navigator.of(context).push(
+                AppPageTransitions.slideTransition(
+                  page: const TransactionsPage(), // Assuming TransactionsPage exists
+                )
+              );
             },
           );
         },
@@ -282,23 +300,32 @@ class _DashboardPageState extends State<DashboardPage> {
 
 
 
-  Widget _buildSpeedDialFAB() {
-    return SpeedDialFAB(
-      icon: Icons.add,
-      backgroundColor: AppColors.primary,
-      foregroundColor: Colors.white,
-      actions: [
-        SpeedDialAction(
-          icon: Icons.add,
-          label: 'Add Income',
-          backgroundColor: AppColors.success,
-          onPressed: () => _navigateToAddTransaction(TransactionType.income),
-        ),
-        SpeedDialAction(
-          icon: Icons.remove,
-          label: 'Add Expense',
-          backgroundColor: AppColors.error,
-          onPressed: () => _navigateToAddTransaction(TransactionType.expense),
+  Widget _buildSpeedDialWithBackdrop() {
+    return Stack(
+      children: [
+        // Speed Dial FAB positioned at exact bottom right location
+        Positioned(
+          bottom: 16.0,
+          right: 16.0,
+          child: SpeedDialFAB(
+            icon: Icons.add,
+            backgroundColor: AppColors.primary,
+            foregroundColor: Colors.white,
+            actions: [
+              SpeedDialAction(
+                icon: Icons.add,
+                label: 'Add Income',
+                backgroundColor: AppColors.success,
+                onPressed: () => _navigateToAddTransaction(TransactionType.income),
+              ),
+              SpeedDialAction(
+                icon: Icons.remove,
+                label: 'Add Expense',
+                backgroundColor: AppColors.error,
+                onPressed: () => _navigateToAddTransaction(TransactionType.expense),
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -308,14 +335,9 @@ class _DashboardPageState extends State<DashboardPage> {
     // Navigate to add transaction screen with hero animation
     Navigator.of(context).push(
       AppPageTransitions.scaleTransition(
-        page: BlocProvider(
-          create: (context) => TransactionFormBloc(
-            transactionsBloc: context.read<TransactionsBloc>(),
-          ),
-          child: const AddEditTransactionScreen(),
-        ),
+        page: const AddEditTransactionScreen(),
         settings: RouteSettings(
-          name: '/add-transaction',
+          name: '/add-edit-transaction',
           arguments: {'type': type},
         ),
       ),
@@ -323,11 +345,16 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   void _showEditTransaction(BuildContext context, String transactionId) {
-    // Navigate to edit transaction screen
-    Navigator.pushNamed(
-      context,
-      '/edit-transaction',
-      arguments: {'transactionId': transactionId},
+    // TODO: Get the transaction from TransactionsBloc or repository
+    // For now, navigate to edit screen without transaction data
+    Navigator.of(context).push(
+      AppPageTransitions.scaleTransition(
+        page: const AddEditTransactionScreen(), // Will be in edit mode if transaction is provided
+        settings: RouteSettings(
+          name: '/edit-transaction',
+          arguments: {'transactionId': transactionId},
+        ),
+      ),
     );
   }
 
@@ -839,4 +866,43 @@ class _HeaderPatternPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+/// Wrapper widget that provides backdrop overlay functionality for SpeedDialFAB
+class _SpeedDialOverlayWrapper extends StatefulWidget {
+  final Widget child;
+
+  const _SpeedDialOverlayWrapper({required this.child});
+
+  @override
+  State<_SpeedDialOverlayWrapper> createState() => _SpeedDialOverlayWrapperState();
+}
+
+class _SpeedDialOverlayWrapperState extends State<_SpeedDialOverlayWrapper> {
+  bool _isSpeedDialOpen = false;
+
+  void _toggleSpeedDial(bool isOpen) {
+    setState(() {
+      _isSpeedDialOpen = isOpen;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        widget.child,
+        // Backdrop overlay
+        if (_isSpeedDialOpen)
+          Positioned.fill(
+            child: GestureDetector(
+              onTap: () => _toggleSpeedDial(false),
+              child: Container(
+                color: AppColors.scrim,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
 }

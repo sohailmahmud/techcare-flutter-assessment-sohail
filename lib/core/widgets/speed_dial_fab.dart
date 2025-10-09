@@ -75,24 +75,30 @@ class _SpeedDialFABState extends State<SpeedDialFAB>
   @override
   Widget build(BuildContext context) {
     return Stack(
-      alignment: Alignment.bottomRight,
+      clipBehavior: Clip.none,
       children: [
-        // Backdrop
+        // Backdrop overlay when expanded - positioned to cover entire screen
         if (_isOpen)
-          GestureDetector(
-            onTap: _close,
-            child: Container(
-              color: AppColors.scrim,
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height,
+          Positioned(
+            // Position to cover entire screen from this widget's position
+            top: -MediaQuery.of(context).size.height,
+            left: -MediaQuery.of(context).size.width,
+            width: MediaQuery.of(context).size.width * 2,
+            height: MediaQuery.of(context).size.height * 2,
+            child: GestureDetector(
+              onTap: _close,
+              child: Container(
+                color: Colors.black.withOpacity(0.5),
+              ),
             ),
           ),
-
-        // Action buttons
+        
+        // Speed dial content in exact same position
         Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
+            // Action buttons
             ...widget.actions.asMap().entries.map((entry) {
               final index = entry.key;
               final action = entry.value;

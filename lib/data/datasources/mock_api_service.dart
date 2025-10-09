@@ -22,6 +22,7 @@ class MockApiService {
     if (_isInitialized) return;
     
     try {
+      print('🔄 MockApiService: Starting initialization');
       // Load data from assets
       final transactionsResponse = await _assetDataSource.getTransactions();
       final categoriesResponse = await _assetDataSource.getCategories();
@@ -32,9 +33,9 @@ class MockApiService {
       _analytics = analyticsResponse.analytics;
       
       _isInitialized = true;
-      print('MockApiService initialized with ${_transactions.length} transactions and ${_categories.length} categories');
+      print('✅ MockApiService initialized with ${_transactions.length} transactions and ${_categories.length} categories');
     } catch (e) {
-      print('Failed to initialize MockApiService: $e');
+      print('💥 Failed to initialize MockApiService: $e');
       rethrow;
     }
   }
@@ -45,15 +46,9 @@ class MockApiService {
     await Future.delayed(Duration(milliseconds: delay));
   }
 
-  /// Simulate network error (10% chance)
+  /// Simulate network error (disabled for debugging)
   void _simulateNetworkError() {
-    if (_random.nextInt(10) == 0) {
-      throw DioException(
-        requestOptions: RequestOptions(path: '/api/test'),
-        type: DioExceptionType.connectionTimeout,
-        message: 'Simulated network error',
-      );
-    }
+    // Disabled completely for debugging
   }
 
   /// Get transactions with pagination and filtering
@@ -417,41 +412,134 @@ class MockApiService {
 
   /// Get dashboard summary data
   Future<Response<Map<String, dynamic>>> getDashboardSummary() async {
-    await initialize();
-    await _simulateDelay();
-    _simulateNetworkError();
+    try {
+      print('🔄 MockApiService: Starting getDashboardSummary');
+      await initialize();
+      await _simulateDelay();
+      _simulateNetworkError();
 
-    // Calculate summary from current transactions
-    final now = DateTime.now();
-    final currentMonth = DateTime(now.year, now.month, 1);
-    final currentMonthTransactions = _transactions.where((t) {
-      final transactionDate = t.date;
-      return transactionDate.isAfter(currentMonth.subtract(const Duration(days: 1)));
-    }).toList();
+      print('🔄 MockApiService: Processing ${_transactions.length} transactions');
 
-    final totalIncome = currentMonthTransactions
-        .where((t) => t.typeString == 'income')
-        .fold<double>(0.0, (sum, t) => sum + t.amount);
-    
-    final totalExpenses = currentMonthTransactions
-        .where((t) => t.typeString == 'expense')
-        .fold<double>(0.0, (sum, t) => sum + t.amount);
-
-    final response = {
-      'data': {
-        'totalIncome': totalIncome,
-        'totalExpenses': totalExpenses,
-        'netBalance': totalIncome - totalExpenses,
-        'totalTransactions': currentMonthTransactions.length,
-        'savingsRate': totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome) * 100 : 0.0,
-        'lastUpdated': DateTime.now().toIso8601String(),
+      // If no transactions loaded, return empty but valid response
+      if (_transactions.isEmpty) {
+        print('⚠️ MockApiService: No transactions found, returning empty response');
+        final response = {
+          'success': true,
+          'data': {
+            'summary': {
+              'totalBalance': 0.0,
+              'monthlyIncome': 0.0,
+              'monthlyExpense': 0.0,
+            },
+            'categoryExpenses': <Map<String, dynamic>>[],
+            'recentTransactions': <Map<String, dynamic>>[],
+          }
+        };
+        return Response<Map<String, dynamic>>(
+          data: response,
+          statusCode: 200,
+          requestOptions: RequestOptions(path: '/api/dashboard/summary'),
+        );
       }
-    };
 
-    return Response<Map<String, dynamic>>(
-      data: response,
-      statusCode: 200,
-      requestOptions: RequestOptions(path: '/api/dashboard/summary'),
-    );
+      // Calculate summary from current transactions
+      final now = DateTime.now();
+      final currentMonth = DateTime(now.year, now.month, 1);
+      final currentMonthTransactions = _transactions.where((t) {
+        final transactionDate = t.date;
+        return transactionDate.isAfter(currentMonth.subtract(const Duration(days: 1)));
+      }).toList();
+
+      print('🔄 MockApiService: Found ${currentMonthTransactions.length} transactions for current month');
+
+      final totalIncome = currentMonthTransactions
+          .where((t) => t.typeString == 'income')
+          .fold<double>(0.0, (sum, t) => sum + t.amount);
+      
+      final totalExpenses = currentMonthTransactions
+          .where((t) => t.typeString == 'expense')
+          .fold<double>(0.0, (sum, t) => sum + t.amount);
+
+      print('🔄 MockApiService: Total income: $totalIncome, Total expenses: $totalExpenses');
+
+      // Calculate category expenses
+      final categoryExpenseMap = <String, Map<String, dynamic>>{};
+      final expenseTransactions = currentMonthTransactions
+          .where((t) => t.typeString == 'expense')
+          .toList();
+
+      for (final transaction in expenseTransactions) {
+        final categoryId = transaction.category.id;
+        if (categoryExpenseMap.containsKey(categoryId)) {
+          categoryExpenseMap[categoryId]!['amount'] += transaction.amount;
+          categoryExpenseMap[categoryId]!['transactionCount']++;
+        } else {
+          categoryExpenseMap[categoryId] = {
+            'categoryId': categoryId,
+            'categoryName': transaction.category.name,
+            'amount': transaction.amount,
+            'transactionCount': 1,
+          };
+        }
+      }
+
+      // Calculate percentages and create category expenses list
+      final categoryExpenses = categoryExpenseMap.values.map((category) {
+        final amount = category['amount'] as double;
+        final percentage = totalExpenses > 0 ? (amount / totalExpenses) * 100 : 0.0;
+        return {
+          'categoryId': category['categoryId'],
+          'categoryName': category['categoryName'],
+          'amount': amount,
+          'percentage': percentage,
+          'transactionCount': category['transactionCount'],
+        };
+      }).toList();
+
+      // Get recent transactions (limit to 10)
+      final recentTransactions = _transactions
+          .take(10)
+          .map((t) => {
+            'id': t.id,
+            'title': t.title,
+            'amount': t.amount,
+            'type': t.typeString,
+            'category': {
+              'id': t.category.id,
+              'name': t.category.name,
+              'icon': t.category.icon,
+              'color': t.category.color,
+              'budget': t.category.budget,
+            },
+            'date': t.date.toIso8601String(),
+            'description': t.description,
+          })
+          .toList();
+
+      final response = {
+        'success': true,
+        'data': {
+          'summary': {
+            'totalBalance': totalIncome - totalExpenses,
+            'monthlyIncome': totalIncome,
+            'monthlyExpense': totalExpenses,
+          },
+          'categoryExpenses': categoryExpenses,
+          'recentTransactions': recentTransactions,
+        }
+      };
+
+      print('✅ MockApiService: Returning dashboard summary with ${categoryExpenses.length} categories and ${recentTransactions.length} recent transactions');
+
+      return Response<Map<String, dynamic>>(
+        data: response,
+        statusCode: 200,
+        requestOptions: RequestOptions(path: '/api/dashboard/summary'),
+      );
+    } catch (e, stackTrace) {
+      print('💥 MockApiService: Error in getDashboardSummary: $e');
+      print('💥 StackTrace: $stackTrace');
+      rethrow;
+    }
   }
 }

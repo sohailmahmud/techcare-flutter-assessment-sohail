@@ -47,7 +47,7 @@ class DashboardSkeletonLoaders {
       height: Spacing.balanceCardHeight,
       padding: const EdgeInsets.all(Spacing.space16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: AppColors.textTertiary,
         borderRadius: BorderRadius.circular(Spacing.radiusL),
         boxShadow: [
           BoxShadow(
@@ -65,7 +65,7 @@ class DashboardSkeletonLoaders {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               SkeletonLoader(width: 80, height: 16, borderRadius: Spacing.radiusS),
-              SkeletonLoader(width: 24, height: 24, borderRadius: 12),
+              SkeletonLoader(width: 24, height: 24, borderRadius: Spacing.radiusM),
             ],
           ),
           SizedBox(height: Spacing.space16),

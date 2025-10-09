@@ -63,14 +63,14 @@ Future<void> init() async {
   sl.registerLazySingleton(() => delete_usecase.DeleteTransaction(sl()));
   
   // Bloc
-  sl.registerFactory(() => TransactionsBloc(
+  sl.registerLazySingleton(() => TransactionsBloc(
     cacheManager: sl(),
     transactionRepository: sl<TransactionRepository>(),
   ));
   
   //! Features - Transaction Form
   // Bloc
-  sl.registerFactory(() => TransactionFormBloc(transactionsBloc: sl()));
+  sl.registerFactory(() => TransactionFormBloc(transactionsBloc: sl<TransactionsBloc>()));
   
   //! Features - Analytics
   // Use cases
@@ -109,10 +109,8 @@ Future<void> init() async {
   );
 
   //! API Integration - Data Sources
-  // Register and initialize MockApiService
-  final mockApiService = MockApiService();
-  await mockApiService.initialize();
-  sl.registerLazySingleton<MockApiService>(() => mockApiService);
+  // Register MockApiService (initialization will happen on first use)
+  sl.registerLazySingleton<MockApiService>(() => MockApiService());
   
   sl.registerLazySingleton<RemoteDataSource>(
     () => RemoteDataSourceImpl(sl<MockApiService>()),
@@ -128,7 +126,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => RefreshDashboard(sl()));
 
   //! Existing - Repository
-  sl.registerFactory<DashboardRepository>(
+  sl.registerLazySingleton<DashboardRepository>(
     () => DashboardRepositoryImpl(
       apiService: sl(),
     ),
