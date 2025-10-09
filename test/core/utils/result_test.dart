@@ -85,7 +85,8 @@ void main() {
     test('flatMap should propagate failure from second result', () {
       final result = Result.success(5);
       const secondFailure = ValidationFailure('Second error');
-      final flatMapped = result.flatMap((value) => const ResultFailure<int>(secondFailure));
+      final flatMapped =
+          result.flatMap((value) => const ResultFailure<int>(secondFailure));
 
       expect(flatMapped.isFailure, isTrue);
       expect(flatMapped.failure, equals(secondFailure));
@@ -118,7 +119,8 @@ void main() {
     });
 
     test('tryCompute should return failure for throwing computation', () {
-      final result = Result.tryCompute<int>(() => throw Exception('Test error'));
+      final result =
+          Result.tryCompute<int>(() => throw Exception('Test error'));
 
       expect(result.isFailure, isTrue);
       expect(result.failure, isA<UnknownFailure>());

@@ -25,7 +25,8 @@ class AddEditTransactionScreen extends StatefulWidget {
   });
 
   @override
-  State<AddEditTransactionScreen> createState() => _AddEditTransactionScreenState();
+  State<AddEditTransactionScreen> createState() =>
+      _AddEditTransactionScreenState();
 }
 
 class _AddEditTransactionScreenState extends State<AddEditTransactionScreen>
@@ -42,13 +43,13 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen>
   @override
   void initState() {
     super.initState();
-    
+
     // Hero animation controller
     _heroAnimationController = AnimationController(
       duration: const Duration(milliseconds: 400),
       vsync: this,
     );
-    
+
     // Content animation controller
     _contentAnimationController = AnimationController(
       duration: const Duration(milliseconds: 600),
@@ -108,9 +109,10 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen>
   @override
   Widget build(BuildContext context) {
     // Get route arguments for transaction type if provided
-    final routeArgs = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    final routeArgs =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
     final transactionType = routeArgs?['type'] as TransactionType?;
-    
+
     return BlocProvider(
       create: (context) {
         final bloc = di.sl<TransactionFormBloc>();
@@ -188,7 +190,7 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen>
             },
           ),
           const SizedBox(width: Spacing.space16),
-          
+
           // Title
           Expanded(
             child: AnimatedBuilder(
@@ -228,8 +230,11 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen>
               // Amount Input
               AmountInputField(
                 value: state.formData.amount,
-                onChanged: (value) => context.read<TransactionFormBloc>().add(AmountChanged(value)),
-                errorText: state.getFieldError(TransactionFormError.amountRequired),
+                onChanged: (value) => context
+                    .read<TransactionFormBloc>()
+                    .add(AmountChanged(value)),
+                errorText:
+                    state.getFieldError(TransactionFormError.amountRequired),
                 autofocus: !isEditMode,
                 focusNode: _amountFocusNode,
               ),
@@ -238,7 +243,9 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen>
               // Transaction Type Selector
               TransactionTypeSelector(
                 selectedType: state.formData.type,
-                onChanged: (type) => context.read<TransactionFormBloc>().add(TransactionTypeChanged(type)),
+                onChanged: (type) => context
+                    .read<TransactionFormBloc>()
+                    .add(TransactionTypeChanged(type)),
               ),
               const SizedBox(height: Spacing.space24),
 
@@ -246,8 +253,11 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen>
               CategorySelector(
                 categories: state.formData.availableCategories,
                 selectedCategory: state.formData.selectedCategory,
-                onCategorySelected: (category) => context.read<TransactionFormBloc>().add(CategorySelected(category)),
-                errorText: state.getFieldError(TransactionFormError.categoryRequired),
+                onCategorySelected: (category) => context
+                    .read<TransactionFormBloc>()
+                    .add(CategorySelected(category)),
+                errorText:
+                    state.getFieldError(TransactionFormError.categoryRequired),
               ),
               const SizedBox(height: Spacing.space24),
 
@@ -257,16 +267,25 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen>
                 notes: state.formData.notes,
                 selectedDate: state.formData.date,
                 selectedTime: state.formData.time,
-                onTitleChanged: (title) => context.read<TransactionFormBloc>().add(TitleChanged(title)),
-                onNotesChanged: (notes) => context.read<TransactionFormBloc>().add(NotesChanged(notes)),
-                onDateChanged: (date) => context.read<TransactionFormBloc>().add(DateChanged(date)),
-                onTimeChanged: (time) => context.read<TransactionFormBloc>().add(TimeChanged(time)),
-                titleError: state.getFieldError(TransactionFormError.titleRequired) ?? 
-                           state.getFieldError(TransactionFormError.titleTooLong),
-                notesError: state.getFieldError(TransactionFormError.notesTooLong),
-                dateError: state.getFieldError(TransactionFormError.dateInFuture),
+                onTitleChanged: (title) => context
+                    .read<TransactionFormBloc>()
+                    .add(TitleChanged(title)),
+                onNotesChanged: (notes) => context
+                    .read<TransactionFormBloc>()
+                    .add(NotesChanged(notes)),
+                onDateChanged: (date) =>
+                    context.read<TransactionFormBloc>().add(DateChanged(date)),
+                onTimeChanged: (time) =>
+                    context.read<TransactionFormBloc>().add(TimeChanged(time)),
+                titleError:
+                    state.getFieldError(TransactionFormError.titleRequired) ??
+                        state.getFieldError(TransactionFormError.titleTooLong),
+                notesError:
+                    state.getFieldError(TransactionFormError.notesTooLong),
+                dateError:
+                    state.getFieldError(TransactionFormError.dateInFuture),
               ),
-              
+
               // Bottom spacing for action buttons
               const SizedBox(height: 100),
             ],
@@ -302,7 +321,8 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen>
                 child: OutlinedButton(
                   onPressed: state.isSubmitting ? null : _onBackPressed,
                   style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: Spacing.space16),
+                    padding:
+                        const EdgeInsets.symmetric(vertical: Spacing.space16),
                     side: const BorderSide(color: AppColors.textSecondary),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(Spacing.radiusL),
@@ -318,16 +338,19 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen>
                 ),
               ),
               const SizedBox(width: Spacing.space16),
-              
+
               // Save Button
               Expanded(
                 flex: 2,
                 child: ElevatedButton(
-                  onPressed: state.isSubmitting || !state.isValid ? null : _onSavePressed,
+                  onPressed: state.isSubmitting || !state.isValid
+                      ? null
+                      : _onSavePressed,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: Spacing.space16),
+                    padding:
+                        const EdgeInsets.symmetric(vertical: Spacing.space16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(Spacing.radiusL),
                     ),
@@ -342,7 +365,8 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen>
                               height: 20,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                valueColor:
+                                    AlwaysStoppedAnimation<Color>(Colors.white),
                               ),
                             ),
                             const SizedBox(width: Spacing.space8),
@@ -356,7 +380,9 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen>
                           ],
                         )
                       : Text(
-                          isEditMode ? 'Update Transaction' : 'Save Transaction',
+                          isEditMode
+                              ? 'Update Transaction'
+                              : 'Save Transaction',
                           style: AppTypography.titleMedium.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.w600,
@@ -374,7 +400,7 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen>
   void _onBackPressed() {
     // Add haptic feedback
     HapticFeedback.lightImpact();
-    
+
     // Animate out and then navigate back
     _heroAnimationController.reverse();
     _contentAnimationController.reverse().then((_) {
@@ -395,10 +421,10 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen>
     // Get any extra data passed to this route
     final routeState = GoRouterState.of(context);
     final extra = routeState.extra as Map<String, dynamic>?;
-    
+
     // Check if theres a source page indication in extra data
     final sourcePage = extra?['sourcePage'] as String?;
-    
+
     if (sourcePage == 'transactions') {
       context.go(AppRoutes.transactions);
     } else if (sourcePage == 'dashboard') {
@@ -412,7 +438,7 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen>
   void _onSavePressed() {
     // Add haptic feedback
     HapticFeedback.mediumImpact();
-    
+
     // Validate and submit form
     context.read<TransactionFormBloc>().add(const ValidateForm());
     context.read<TransactionFormBloc>().add(const SubmitForm());
@@ -421,7 +447,7 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen>
   void _onFormSubmissionSuccess() {
     // Add haptic feedback
     HapticFeedback.heavyImpact();
-    
+
     // Show success message
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(

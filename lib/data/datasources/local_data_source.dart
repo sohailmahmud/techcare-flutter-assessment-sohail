@@ -13,7 +13,7 @@ import '../../domain/repositories/analytics_repository.dart';
 class PendingOperation {
   final String id;
   final String operationType; // 'CREATE', 'UPDATE', 'DELETE'
-  final String resourceType; // 'transaction', 'category' 
+  final String resourceType; // 'transaction', 'category'
   final Map<String, dynamic> data;
   final DateTime timestamp;
   final int retryCount;
@@ -83,10 +83,12 @@ extension HiveKeyValueExtension on HiveKeyValue {
 abstract class LocalDataSource {
   // Initialization
   Future<void> initialize();
-  
+
   // Transaction caching
-  Future<PaginatedTransactionsResponse?> getCachedTransactions(TransactionQuery query);
-  Future<void> cacheTransactions(TransactionQuery query, PaginatedTransactionsResponse response);
+  Future<PaginatedTransactionsResponse?> getCachedTransactions(
+      TransactionQuery query);
+  Future<void> cacheTransactions(
+      TransactionQuery query, PaginatedTransactionsResponse response);
   Future<TransactionModel?> getCachedTransaction(String id);
   Future<void> cacheTransaction(TransactionModel transaction);
   Future<void> deleteCachedTransaction(String id);
@@ -120,7 +122,7 @@ class LocalDataSourceImpl implements LocalDataSource {
   static const String _categoriesCacheKey = 'categories_cache';
   static const String _analyticsCachePrefix = 'analytics_cache_';
   static const String _pendingOperationsKey = 'pending_operations';
-  
+
   static const Duration _defaultCacheExpiry = Duration(minutes: 5);
 
   late final Box<HiveKeyValue> _cacheBox;
@@ -143,9 +145,10 @@ class LocalDataSourceImpl implements LocalDataSource {
   }
 
   @override
-  Future<PaginatedTransactionsResponse?> getCachedTransactions(TransactionQuery query) async {
+  Future<PaginatedTransactionsResponse?> getCachedTransactions(
+      TransactionQuery query) async {
     final key = _getTransactionsCacheKey(query);
-    
+
     if (!await isCacheValid(key)) {
       return null;
     }
@@ -165,7 +168,8 @@ class LocalDataSourceImpl implements LocalDataSource {
   }
 
   @override
-  Future<void> cacheTransactions(TransactionQuery query, PaginatedTransactionsResponse response) async {
+  Future<void> cacheTransactions(
+      TransactionQuery query, PaginatedTransactionsResponse response) async {
     await _ensureInitialized();
     final key = _getTransactionsCacheKey(query);
     final json = jsonEncode({
@@ -178,19 +182,21 @@ class LocalDataSourceImpl implements LocalDataSource {
         'hasMore': response.meta.hasMore,
       },
     });
-    
-    await _cacheBox.put(key, HiveKeyValue(
-      key: key,
-      value: json,
-      timestamp: DateTime.now().millisecondsSinceEpoch,
-    ));
+
+    await _cacheBox.put(
+        key,
+        HiveKeyValue(
+          key: key,
+          value: json,
+          timestamp: DateTime.now().millisecondsSinceEpoch,
+        ));
   }
 
   @override
   Future<TransactionModel?> getCachedTransaction(String id) async {
     await _ensureInitialized();
     final key = '$_transactionCachePrefix$id';
-    
+
     if (!await isCacheValid(key)) {
       return null;
     }
@@ -213,12 +219,14 @@ class LocalDataSourceImpl implements LocalDataSource {
     await _ensureInitialized();
     final key = '$_transactionCachePrefix${transaction.id}';
     final json = jsonEncode(transaction.toJson());
-    
-    await _cacheBox.put(key, HiveKeyValue(
-      key: key,
-      value: json,
-      timestamp: DateTime.now().millisecondsSinceEpoch,
-    ));
+
+    await _cacheBox.put(
+        key,
+        HiveKeyValue(
+          key: key,
+          value: json,
+          timestamp: DateTime.now().millisecondsSinceEpoch,
+        ));
   }
 
   @override
@@ -233,8 +241,8 @@ class LocalDataSourceImpl implements LocalDataSource {
     await _ensureInitialized();
     final keys = _cacheBox.keys.where((key) {
       final keyStr = key.toString();
-      return keyStr.startsWith(_transactionsCachePrefix) || 
-             keyStr.startsWith(_transactionCachePrefix);
+      return keyStr.startsWith(_transactionsCachePrefix) ||
+          keyStr.startsWith(_transactionCachePrefix);
     }).toList();
 
     for (final key in keys) {
@@ -245,7 +253,7 @@ class LocalDataSourceImpl implements LocalDataSource {
   @override
   Future<List<CategoryModel>?> getCachedCategories() async {
     await _ensureInitialized();
-    
+
     if (!await isCacheValid(_categoriesCacheKey)) {
       return null;
     }
@@ -267,12 +275,14 @@ class LocalDataSourceImpl implements LocalDataSource {
   Future<void> cacheCategories(List<CategoryModel> categories) async {
     await _ensureInitialized();
     final json = jsonEncode(categories.map((c) => c.toJson()).toList());
-    
-    await _cacheBox.put(_categoriesCacheKey, HiveKeyValue(
-      key: _categoriesCacheKey,
-      value: json,
-      timestamp: DateTime.now().millisecondsSinceEpoch,
-    ));
+
+    await _cacheBox.put(
+        _categoriesCacheKey,
+        HiveKeyValue(
+          key: _categoriesCacheKey,
+          value: json,
+          timestamp: DateTime.now().millisecondsSinceEpoch,
+        ));
   }
 
   @override
@@ -285,7 +295,7 @@ class LocalDataSourceImpl implements LocalDataSource {
   Future<AnalyticsDataModel?> getCachedAnalytics(AnalyticsQuery query) async {
     await _ensureInitialized();
     final key = _getAnalyticsCacheKey(query);
-    
+
     if (!await isCacheValid(key)) {
       return null;
     }
@@ -304,16 +314,19 @@ class LocalDataSourceImpl implements LocalDataSource {
   }
 
   @override
-  Future<void> cacheAnalytics(AnalyticsQuery query, AnalyticsDataModel data) async {
+  Future<void> cacheAnalytics(
+      AnalyticsQuery query, AnalyticsDataModel data) async {
     await _ensureInitialized();
     final key = _getAnalyticsCacheKey(query);
     final json = jsonEncode(data.toJson());
-    
-    await _cacheBox.put(key, HiveKeyValue(
-      key: key,
-      value: json,
-      timestamp: DateTime.now().millisecondsSinceEpoch,
-    ));
+
+    await _cacheBox.put(
+        key,
+        HiveKeyValue(
+          key: key,
+          value: json,
+          timestamp: DateTime.now().millisecondsSinceEpoch,
+        ));
   }
 
   @override
@@ -348,13 +361,15 @@ class LocalDataSourceImpl implements LocalDataSource {
     await _ensureInitialized();
     final operations = await getPendingOperations();
     operations.add(operation);
-    
+
     final json = jsonEncode(operations.map((op) => op.toJson()).toList());
-    await _cacheBox.put(_pendingOperationsKey, HiveKeyValue(
-      key: _pendingOperationsKey,
-      value: json,
-      timestamp: DateTime.now().millisecondsSinceEpoch,
-    ));
+    await _cacheBox.put(
+        _pendingOperationsKey,
+        HiveKeyValue(
+          key: _pendingOperationsKey,
+          value: json,
+          timestamp: DateTime.now().millisecondsSinceEpoch,
+        ));
   }
 
   @override
@@ -362,13 +377,15 @@ class LocalDataSourceImpl implements LocalDataSource {
     await _ensureInitialized();
     final operations = await getPendingOperations();
     operations.removeWhere((op) => op.id == operationId);
-    
+
     final json = jsonEncode(operations.map((op) => op.toJson()).toList());
-    await _cacheBox.put(_pendingOperationsKey, HiveKeyValue(
-      key: _pendingOperationsKey,
-      value: json,
-      timestamp: DateTime.now().millisecondsSinceEpoch,
-    ));
+    await _cacheBox.put(
+        _pendingOperationsKey,
+        HiveKeyValue(
+          key: _pendingOperationsKey,
+          value: json,
+          timestamp: DateTime.now().millisecondsSinceEpoch,
+        ));
   }
 
   @override
@@ -382,7 +399,7 @@ class LocalDataSourceImpl implements LocalDataSource {
     await _ensureInitialized();
     final cached = _cacheBox.get(key);
     if (cached == null) return false;
-    
+
     return cached.isValid(maxAge: maxAge ?? _defaultCacheExpiry);
   }
 
@@ -399,7 +416,8 @@ class LocalDataSourceImpl implements LocalDataSource {
       'limit:${query.limit}',
       if (query.category != null) 'category:${query.category}',
       if (query.type != null) 'type:${query.type!.name}',
-      if (query.startDate != null) 'start:${query.startDate!.millisecondsSinceEpoch}',
+      if (query.startDate != null)
+        'start:${query.startDate!.millisecondsSinceEpoch}',
       if (query.endDate != null) 'end:${query.endDate!.millisecondsSinceEpoch}',
     ].join('_');
     return '$_transactionsCachePrefix$params';

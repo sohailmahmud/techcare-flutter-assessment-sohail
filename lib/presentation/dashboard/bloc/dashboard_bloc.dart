@@ -30,9 +30,9 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   ) async {
     try {
       emit(const DashboardLoading());
-      
+
       final result = await _getDashboardSummary(NoParams());
-      
+
       result.fold(
         (failure) {
           emit(DashboardError(
@@ -83,12 +83,13 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
         }
       },
       (summary) {
-        final currentState = state is DashboardLoaded ? state as DashboardLoaded : null;
+        final currentState =
+            state is DashboardLoaded ? state as DashboardLoaded : null;
         final filteredTransactions = _applyTransactionFilter(
           summary.recentTransactions,
           currentState?.selectedCategoryFilter,
         );
-        
+
         emit(DashboardLoaded(
           summary: summary,
           filteredTransactions: filteredTransactions,
@@ -144,7 +145,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     if (categoryFilter == null) {
       return transactions;
     }
-    
+
     return transactions
         .where((transaction) => transaction.categoryId == categoryFilter)
         .toList();
@@ -153,10 +154,12 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   String _mapFailureToMessage(failure) {
     // Map specific failures to user-friendly messages with more details for debugging
     final failureString = failure.toString();
-    
-    if (failureString.contains('network') || failureString.contains('Network')) {
+
+    if (failureString.contains('network') ||
+        failureString.contains('Network')) {
       return 'No internet connection. Please check your network.\n\nDetails: $failureString';
-    } else if (failureString.contains('server') || failureString.contains('Server')) {
+    } else if (failureString.contains('server') ||
+        failureString.contains('Server')) {
       return 'Server error. Please try again later.\n\nDetails: $failureString';
     } else {
       return 'Something went wrong. Please try again.\n\nDetails: $failureString';

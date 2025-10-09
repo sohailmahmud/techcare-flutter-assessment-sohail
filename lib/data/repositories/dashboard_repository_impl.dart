@@ -21,13 +21,13 @@ class DashboardRepositoryImpl implements DashboardRepository {
     try {
       Logger.d('DashboardRepo: Initializing API service');
       await apiService.initialize();
-      
+
       Logger.d('DashboardRepo: Calling API service getDashboardSummary');
       final response = await apiService.getDashboardSummary();
       final responseData = response.data as Map<String, dynamic>;
-      
+
       Logger.d('DashboardRepo: Got response: ${responseData.keys}');
-      
+
       if (responseData['success'] == true) {
         final data = responseData['data'] as Map<String, dynamic>;
         Logger.d('DashboardRepo: Response data keys: ${data.keys}');
@@ -39,7 +39,8 @@ class DashboardRepositoryImpl implements DashboardRepository {
         return const Left(ServerFailure('Dashboard API returned error'));
       }
     } catch (e, stackTrace) {
-      Logger.e('DashboardRepo: Error occurred', error: e, stackTrace: stackTrace);
+      Logger.e('DashboardRepo: Error occurred',
+          error: e, stackTrace: stackTrace);
       return Left(NetworkFailure('Failed to get dashboard summary: $e'));
     }
   }
@@ -73,7 +74,7 @@ class DashboardRepositoryImpl implements DashboardRepository {
     final recentTransactions = recentTransactionsData.map((item) {
       final transaction = item as Map<String, dynamic>;
       final categoryData = transaction['category'] as Map<String, dynamic>;
-      
+
       return Transaction(
         id: transaction['id'] ?? '',
         title: transaction['title'] ?? '',
@@ -94,7 +95,8 @@ class DashboardRepositoryImpl implements DashboardRepository {
     return DashboardSummary(
       totalBalance: (summaryData['totalBalance'] as num?)?.toDouble() ?? 0.0,
       monthlyIncome: (summaryData['monthlyIncome'] as num?)?.toDouble() ?? 0.0,
-      monthlyExpense: (summaryData['monthlyExpense'] as num?)?.toDouble() ?? 0.0,
+      monthlyExpense:
+          (summaryData['monthlyExpense'] as num?)?.toDouble() ?? 0.0,
       categoryExpenses: categoryExpenses,
       recentTransactions: recentTransactions,
       lastUpdated: DateTime.now(),
@@ -148,19 +150,20 @@ class DashboardRepositoryImpl implements DashboardRepository {
     if (colorHex == null || colorHex.isEmpty) {
       return Colors.grey; // Default fallback color
     }
-    
+
     try {
       // Remove # if present
       String hex = colorHex.replaceAll('#', '');
-      
+
       // Add alpha channel if not present (6 digits -> 8 digits)
       if (hex.length == 6) {
         hex = 'FF$hex';
       }
-      
+
       return Color(int.parse(hex, radix: 16));
     } catch (e) {
-      Logger.w('Failed to parse color: $colorHex, using default grey', error: e);
+      Logger.w('Failed to parse color: $colorHex, using default grey',
+          error: e);
       return Colors.grey;
     }
   }

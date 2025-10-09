@@ -45,7 +45,8 @@ class _AnalyticsPageState extends State<AnalyticsPage>
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => di.sl<AnalyticsBloc>()..add(const ChangePeriod(TimePeriod.thisWeek)),
+      create: (context) =>
+          di.sl<AnalyticsBloc>()..add(const ChangePeriod(TimePeriod.thisWeek)),
       child: BlocListener<TransactionsBloc, TransactionsState>(
         listener: (context, state) {
           // Refresh analytics when transactions are added/updated/deleted
@@ -54,30 +55,30 @@ class _AnalyticsPageState extends State<AnalyticsPage>
           }
         },
         child: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: const SystemUiOverlayStyle(
-          statusBarColor: Colors.transparent,
-          statusBarIconBrightness: Brightness.dark,
-          statusBarBrightness: Brightness.light,
-          systemNavigationBarColor: AppColors.background,
-          systemNavigationBarIconBrightness: Brightness.dark,
-        ),
-        child: Scaffold(
-          backgroundColor: AppColors.background,
-          appBar: _buildAppBar(),
-          body: BlocBuilder<AnalyticsBloc, AnalyticsState>(
-            builder: (context, state) {
-              return RefreshIndicator(
-                onRefresh: () => _onRefresh(context),
-                child: SingleChildScrollView(
-                  controller: _scrollController,
-                  physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.all(Spacing.space16),
-                  child: _buildContent(context, state),
-                ),
-              );
-            },
+          value: const SystemUiOverlayStyle(
+            statusBarColor: Colors.transparent,
+            statusBarIconBrightness: Brightness.dark,
+            statusBarBrightness: Brightness.light,
+            systemNavigationBarColor: AppColors.background,
+            systemNavigationBarIconBrightness: Brightness.dark,
           ),
-        ),
+          child: Scaffold(
+            backgroundColor: AppColors.background,
+            appBar: _buildAppBar(),
+            body: BlocBuilder<AnalyticsBloc, AnalyticsState>(
+              builder: (context, state) {
+                return RefreshIndicator(
+                  onRefresh: () => _onRefresh(context),
+                  child: SingleChildScrollView(
+                    controller: _scrollController,
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.all(Spacing.space16),
+                    child: _buildContent(context, state),
+                  ),
+                );
+              },
+            ),
+          ),
         ),
       ),
     );
@@ -261,18 +262,18 @@ class _AnalyticsPageState extends State<AnalyticsPage>
           },
           onCustomRangeChanged: (range) {
             context.read<AnalyticsBloc>().add(
-              ChangePeriod(TimePeriod.custom, customRange: range),
-            );
+                  ChangePeriod(TimePeriod.custom, customRange: range),
+                );
           },
         ),
-        
+
         const SizedBox(height: Spacing.space16), // Reduced spacing
-        
+
         // Summary Statistics
         ResponsiveSummaryStats(statistics: data),
-        
+
         const SizedBox(height: Spacing.space16), // Reduced spacing
-        
+
         // Spending Trend Chart with constrained height
         ConstrainedBox(
           constraints: const BoxConstraints(maxHeight: 280),
@@ -281,9 +282,9 @@ class _AnalyticsPageState extends State<AnalyticsPage>
             isLoading: false,
           ),
         ),
-        
+
         const SizedBox(height: Spacing.space16), // Reduced spacing
-        
+
         // Category Breakdown and Budget Progress (side by side on tablets/desktop)
         LayoutBuilder(
           builder: (context, constraints) {
@@ -315,20 +316,20 @@ class _AnalyticsPageState extends State<AnalyticsPage>
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   CategoryBreakdownChart(
-                      categoryData: data.categoryBreakdown,
-                      isLoading: false,
-                    ),
+                    categoryData: data.categoryBreakdown,
+                    isLoading: false,
+                  ),
                   const SizedBox(height: Spacing.space16),
                   BudgetProgressIndicators(
-                      budgetData: data.budgetComparisons,
-                      isLoading: false,
-                    ),
+                    budgetData: data.budgetComparisons,
+                    isLoading: false,
+                  ),
                 ],
               );
             }
           },
         ),
-        
+
         // Bottom spacing for better scroll experience - adjusted for mobile
         SizedBox(
           height: MediaQuery.of(context).size.height * 0.1,
@@ -340,12 +341,11 @@ class _AnalyticsPageState extends State<AnalyticsPage>
   Future<void> _onRefresh(BuildContext context) async {
     _refreshController.forward();
     context.read<AnalyticsBloc>().add(const RefreshAnalytics());
-    
+
     // Wait for the animation to complete
     await _refreshController.forward();
     _refreshController.reset();
   }
-
 }
 
 /// Extension for responsive design breakpoints

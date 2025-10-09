@@ -92,7 +92,7 @@ class _SpeedDialFABState extends State<SpeedDialFAB>
               ),
             ),
           ),
-        
+
         // Speed dial content in exact same position
         Column(
           mainAxisSize: MainAxisSize.min,

@@ -254,7 +254,7 @@ class ResultCombiner {
   ) {
     if (result1.isFailure) return ResultFailure(result1.failure);
     if (result2.isFailure) return ResultFailure(result2.failure);
-    
+
     return Success((result1.data, result2.data));
   }
 
@@ -267,7 +267,7 @@ class ResultCombiner {
     if (result1.isFailure) return ResultFailure(result1.failure);
     if (result2.isFailure) return ResultFailure(result2.failure);
     if (result3.isFailure) return ResultFailure(result3.failure);
-    
+
     return Success((result1.data, result2.data, result3.data));
   }
 
@@ -277,7 +277,7 @@ class ResultCombiner {
     if (failures.isNotEmpty) {
       return ResultFailure(failures.first);
     }
-    
+
     return Success(results.successes);
   }
 

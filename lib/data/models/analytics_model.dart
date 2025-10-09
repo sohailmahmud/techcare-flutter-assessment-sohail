@@ -18,7 +18,7 @@ class AnalyticsSummaryModel {
     required this.savingsRate,
   });
 
-  factory AnalyticsSummaryModel.fromJson(Map<String, dynamic> json) => 
+  factory AnalyticsSummaryModel.fromJson(Map<String, dynamic> json) =>
       _$AnalyticsSummaryModelFromJson(json);
 
   Map<String, dynamic> toJson() => _$AnalyticsSummaryModelToJson(this);
@@ -42,7 +42,7 @@ class CategoryBreakdownModel {
     required this.budgetUtilization,
   });
 
-  factory CategoryBreakdownModel.fromJson(Map<String, dynamic> json) => 
+  factory CategoryBreakdownModel.fromJson(Map<String, dynamic> json) =>
       _$CategoryBreakdownModelFromJson(json);
 
   Map<String, dynamic> toJson() => _$CategoryBreakdownModelToJson(this);
@@ -60,7 +60,7 @@ class MonthlyTrendModel {
     required this.expense,
   });
 
-  factory MonthlyTrendModel.fromJson(Map<String, dynamic> json) => 
+  factory MonthlyTrendModel.fromJson(Map<String, dynamic> json) =>
       _$MonthlyTrendModelFromJson(json);
 
   Map<String, dynamic> toJson() => _$MonthlyTrendModelToJson(this);
@@ -78,7 +78,7 @@ class AnalyticsDataModel {
     required this.monthlyTrend,
   });
 
-  factory AnalyticsDataModel.fromJson(Map<String, dynamic> json) => 
+  factory AnalyticsDataModel.fromJson(Map<String, dynamic> json) =>
       _$AnalyticsDataModelFromJson(json);
 
   Map<String, dynamic> toJson() => _$AnalyticsDataModelToJson(this);
@@ -89,44 +89,46 @@ class AnalyticsDataModel {
       startDate: DateTime.now().subtract(const Duration(days: 30)),
       endDate: DateTime.now(),
     );
-    
+
     return AnalyticsData(
       dateRange: dateRange,
       period: TimePeriod.thisMonth,
       totalIncome: summary.totalIncome,
       totalExpenses: summary.totalExpense,
       netAmount: summary.netBalance,
-      totalTransactions: categoryBreakdown.fold<int>(0, (sum, cat) => sum + cat.transactionCount),
-      averageTransactionAmount: categoryBreakdown.isNotEmpty 
-          ? categoryBreakdown.map((c) => c.amount).reduce((a, b) => a + b) / categoryBreakdown.length
+      totalTransactions: categoryBreakdown.fold<int>(
+          0, (sum, cat) => sum + cat.transactionCount),
+      averageTransactionAmount: categoryBreakdown.isNotEmpty
+          ? categoryBreakdown.map((c) => c.amount).reduce((a, b) => a + b) /
+              categoryBreakdown.length
           : 0.0,
       lastUpdated: DateTime.now(),
-      categoryBreakdown: categoryBreakdown.map((model) => 
-        CategoryBreakdown(
-          categoryId: model.category.id,
-          categoryName: model.category.name,
-          amount: model.amount,
-          percentage: model.percentage,
-          transactionCount: model.transactionCount,
-        )
-      ).toList(),
-      budgetComparisons: const [], // No budget comparisons in this model 
+      categoryBreakdown: categoryBreakdown
+          .map((model) => CategoryBreakdown(
+                categoryId: model.category.id,
+                categoryName: model.category.name,
+                amount: model.amount,
+                percentage: model.percentage,
+                transactionCount: model.transactionCount,
+              ))
+          .toList(),
+      budgetComparisons: const [], // No budget comparisons in this model
       trendData: TrendData(
         dateRange: dateRange,
-        incomePoints: monthlyTrend.map((trend) => 
-          ChartDataPoint(
-            label: trend.month,
-            value: trend.income,
-            date: _parseMonthString(trend.month),
-          )
-        ).toList(),
-        expensePoints: monthlyTrend.map((trend) => 
-          ChartDataPoint(
-            label: trend.month,
-            value: trend.expense,
-            date: _parseMonthString(trend.month),
-          )
-        ).toList(),
+        incomePoints: monthlyTrend
+            .map((trend) => ChartDataPoint(
+                  label: trend.month,
+                  value: trend.income,
+                  date: _parseMonthString(trend.month),
+                ))
+            .toList(),
+        expensePoints: monthlyTrend
+            .map((trend) => ChartDataPoint(
+                  label: trend.month,
+                  value: trend.expense,
+                  date: _parseMonthString(trend.month),
+                ))
+            .toList(),
       ),
     );
   }
@@ -153,7 +155,7 @@ class AnalyticsResponse {
 
   const AnalyticsResponse({required this.analytics});
 
-  factory AnalyticsResponse.fromJson(Map<String, dynamic> json) => 
+  factory AnalyticsResponse.fromJson(Map<String, dynamic> json) =>
       _$AnalyticsResponseFromJson(json);
 
   Map<String, dynamic> toJson() => _$AnalyticsResponseToJson(this);

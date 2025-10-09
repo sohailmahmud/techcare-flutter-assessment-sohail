@@ -37,7 +37,7 @@ class AppRouter {
               child: DashboardPage(),
             ),
           ),
-          
+
           // Transactions route
           GoRoute(
             path: AppRoutes.transactions,
@@ -46,7 +46,7 @@ class AppRouter {
               child: TransactionsPage(),
             ),
           ),
-          
+
           // Analytics route
           GoRoute(
             path: AppRoutes.analytics,
@@ -57,7 +57,7 @@ class AppRouter {
           ),
         ],
       ),
-      
+
       // Full screen routes (outside shell)
       GoRoute(
         path: AppRoutes.addTransaction,
@@ -73,7 +73,7 @@ class AppRouter {
           );
         },
       ),
-      
+
       GoRoute(
         path: AppRoutes.editTransaction,
         name: AppRoutes.editTransactionName,
@@ -81,7 +81,7 @@ class AppRouter {
         pageBuilder: (context, state) {
           final extra = state.extra as Map<String, dynamic>?;
           final transaction = extra?['transaction'] as Transaction?;
-          
+
           return MaterialPage(
             child: AddEditTransactionScreen(
               transaction: transaction,
@@ -89,7 +89,7 @@ class AppRouter {
           );
         },
       ),
-      
+
       GoRoute(
         path: AppRoutes.transactionDetails,
         name: AppRoutes.transactionDetailsName,
@@ -98,7 +98,7 @@ class AppRouter {
           final extra = state.extra as Map<String, dynamic>?;
           final transaction = extra?['transaction'] as Transaction;
           final sourcePage = extra?['sourcePage'] as String?;
-          
+
           return MaterialPage(
             child: TransactionDetailsModal(
               transaction: transaction,
@@ -108,7 +108,7 @@ class AppRouter {
         },
       ),
     ],
-    
+
     // Error handling
     errorBuilder: (context, state) => Scaffold(
       appBar: AppBar(
@@ -138,7 +138,7 @@ class AppRouter {
         ),
       ),
     ),
-    
+
     // Route redirection logic
     redirect: (context, state) {
       // Add any authentication or conditional routing logic here

@@ -1,10 +1,8 @@
-
-
 /// Comprehensive form validation handler for transaction forms
 class FormValidationHandler {
   static const double _maxAmount = 1000000000; // 1 billion limit
   static const int _minTitleLength = 1;
-  static const int _maxTitleLength = 100;  
+  static const int _maxTitleLength = 100;
   static const int _maxDescriptionLength = 500;
 
   /// Validate amount field
@@ -15,7 +13,7 @@ class FormValidationHandler {
 
     // Remove commas and currency symbols for parsing
     final cleanValue = value.replaceAll(RegExp(r'[৳,\s]'), '');
-    
+
     final amount = double.tryParse(cleanValue);
     if (amount == null) {
       return 'Please enter a valid amount';
@@ -39,7 +37,7 @@ class FormValidationHandler {
     }
 
     final trimmedValue = value.trim();
-    
+
     if (trimmedValue.length < _minTitleLength) {
       return 'Title must be at least $_minTitleLength character';
     }
@@ -80,7 +78,7 @@ class FormValidationHandler {
 
     final now = DateTime.now();
     final maxFutureDate = now.add(const Duration(days: 1));
-    
+
     if (date.isAfter(maxFutureDate)) {
       return 'Transaction date cannot be in the future';
     }
@@ -127,9 +125,9 @@ class FormValidationHandler {
   /// Format number with commas
   static String _formatNumber(double number) {
     return number.toStringAsFixed(0).replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (Match m) => '${m[1]},',
-    );
+          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+          (Match m) => '${m[1]},',
+        );
   }
 
   /// Clean and parse amount string

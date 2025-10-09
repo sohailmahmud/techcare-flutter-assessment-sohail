@@ -14,7 +14,8 @@ void main() {
 
     setUp(() {
       mockTransactionsBloc = MockTransactionsBloc();
-      transactionFormBloc = TransactionFormBloc(transactionsBloc: mockTransactionsBloc);
+      transactionFormBloc =
+          TransactionFormBloc(transactionsBloc: mockTransactionsBloc);
     });
 
     tearDown(() {
@@ -147,15 +148,17 @@ void main() {
           isA<TransactionFormReady>(),
           isA<TransactionFormReady>(),
           isA<TransactionFormReady>(),
-          isA<TransactionFormReady>().having(
-            (state) => state.formData.title,
-            'title',
-            isEmpty,
-          ).having(
-            (state) => state.formData.amount,
-            'amount',
-            isEmpty,
-          ),
+          isA<TransactionFormReady>()
+              .having(
+                (state) => state.formData.title,
+                'title',
+                isEmpty,
+              )
+              .having(
+                (state) => state.formData.amount,
+                'amount',
+                isEmpty,
+              ),
         ],
       );
     });

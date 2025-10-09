@@ -176,13 +176,15 @@ class _PeriodSelectorState extends State<PeriodSelector>
                 color: isSelected ? AppColors.primary : AppColors.border,
                 width: 1,
               ),
-              boxShadow: isSelected ? [
-                BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.2),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ] : null,
+              boxShadow: isSelected
+                  ? [
+                      BoxShadow(
+                        color: AppColors.primary.withValues(alpha: 0.2),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ]
+                  : null,
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -194,10 +196,12 @@ class _PeriodSelectorState extends State<PeriodSelector>
                       Icons.calendar_today_rounded,
                       key: ValueKey('calendar_icon_$isSelected'),
                       size: 16,
-                      color: isSelected ? Colors.white : AppColors.textSecondary,
+                      color:
+                          isSelected ? Colors.white : AppColors.textSecondary,
                     ),
                   ),
-                if (period == TimePeriod.custom) const SizedBox(width: Spacing.space4),
+                if (period == TimePeriod.custom)
+                  const SizedBox(width: Spacing.space4),
                 AnimatedDefaultTextStyle(
                   duration: const Duration(milliseconds: 200),
                   style: AppTypography.labelMedium.copyWith(
@@ -228,16 +232,17 @@ class _PeriodSelectorState extends State<PeriodSelector>
 
   Future<void> _showCustomDatePicker() async {
     final now = DateTime.now();
-    final startDate = widget.dateRange.startDate.isBefore(DateTime(2020)) 
-        ? DateTime(2020) 
-        : (widget.dateRange.startDate.isAfter(now) ? now : widget.dateRange.startDate);
-    final endDate = widget.dateRange.endDate.isAfter(now) 
-        ? now 
-        : widget.dateRange.endDate;
-    
+    final startDate = widget.dateRange.startDate.isBefore(DateTime(2020))
+        ? DateTime(2020)
+        : (widget.dateRange.startDate.isAfter(now)
+            ? now
+            : widget.dateRange.startDate);
+    final endDate =
+        widget.dateRange.endDate.isAfter(now) ? now : widget.dateRange.endDate;
+
     // Ensure startDate is not after endDate
     final safeStartDate = startDate.isAfter(endDate) ? endDate : startDate;
-    
+
     final DateTimeRange? picked = await showDateRangePicker(
       context: context,
       firstDate: DateTime(2020),
@@ -250,11 +255,11 @@ class _PeriodSelectorState extends State<PeriodSelector>
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: AppColors.primary,
-              onPrimary: Colors.white,
-              surface: AppColors.surface,
-              onSurface: AppColors.textPrimary,
-            ),
+                  primary: AppColors.primary,
+                  onPrimary: Colors.white,
+                  surface: AppColors.surface,
+                  onSurface: AppColors.textPrimary,
+                ),
           ),
           child: child!,
         );
@@ -266,18 +271,18 @@ class _PeriodSelectorState extends State<PeriodSelector>
         startDate: picked.start,
         endDate: picked.end,
       );
-      
+
       setState(() {
         _selectedPeriod = TimePeriod.custom;
       });
-      
+
       widget.onPeriodChanged(TimePeriod.custom);
       widget.onCustomRangeChanged?.call(customRange);
-      
+
       if (mounted) {
         context.read<AnalyticsBloc>().add(
-          ChangePeriod(TimePeriod.custom, customRange: customRange),
-        );
+              ChangePeriod(TimePeriod.custom, customRange: customRange),
+            );
       }
     }
   }
@@ -285,11 +290,11 @@ class _PeriodSelectorState extends State<PeriodSelector>
   String _formatDateRange(DateRange range) {
     final start = DateFormatter.formatDisplay(range.startDate);
     final end = DateFormatter.formatDisplay(range.endDate);
-    
+
     if (range.dayCount == 1) {
       return start;
     }
-    
+
     return '$start - $end';
   }
 }

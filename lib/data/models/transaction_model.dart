@@ -32,15 +32,15 @@ class TransactionModel {
     if (json == null) {
       throw ArgumentError('Category cannot be null');
     }
-    
+
     if (json is Map<String, dynamic>) {
       return CategoryModel.fromJson(json);
-    } 
-    
+    }
+
     if (json is CategoryModel) {
       return json;
     }
-    
+
     // Handle string category ID (fallback)
     if (json is String) {
       // Create a default category model for the ID
@@ -52,8 +52,9 @@ class TransactionModel {
         budget: 0.0,
       );
     }
-    
-    throw ArgumentError('Invalid category data type: ${json.runtimeType}. Expected Map<String, dynamic> or CategoryModel, got: $json');
+
+    throw ArgumentError(
+        'Invalid category data type: ${json.runtimeType}. Expected Map<String, dynamic> or CategoryModel, got: $json');
   }
 
   static dynamic _categoryToJson(CategoryModel category) {
@@ -65,25 +66,26 @@ class TransactionModel {
     if (json == null) {
       throw ArgumentError('Date cannot be null');
     }
-    
+
     if (json is String) {
       try {
         return DateTime.parse(json);
       } catch (e) {
         throw ArgumentError('Invalid date string format: $json');
       }
-    } 
-    
+    }
+
     if (json is DateTime) {
       return json;
     }
-    
+
     if (json is int) {
       // Handle timestamp in milliseconds
       return DateTime.fromMillisecondsSinceEpoch(json);
     }
-    
-    throw ArgumentError('Invalid date data type: ${json.runtimeType}. Expected String, DateTime, or int, got: $json');
+
+    throw ArgumentError(
+        'Invalid date data type: ${json.runtimeType}. Expected String, DateTime, or int, got: $json');
   }
 
   static String _dateToJson(DateTime date) {
@@ -94,7 +96,8 @@ class TransactionModel {
     try {
       return _$TransactionModelFromJson(json);
     } catch (e) {
-      throw ArgumentError('Failed to parse TransactionModel from JSON: $json. Error: $e');
+      throw ArgumentError(
+          'Failed to parse TransactionModel from JSON: $json. Error: $e');
     }
   }
 
@@ -102,7 +105,8 @@ class TransactionModel {
     try {
       return _$TransactionModelToJson(this);
     } catch (e) {
-      throw ArgumentError('Failed to convert TransactionModel to JSON. Error: $e');
+      throw ArgumentError(
+          'Failed to convert TransactionModel to JSON. Error: $e');
     }
   }
 
@@ -138,7 +142,8 @@ class TransactionModel {
       case 'expense':
         return TransactionType.expense;
       default:
-        throw ArgumentError('Invalid transaction type: $typeString. Expected "income" or "expense"');
+        throw ArgumentError(
+            'Invalid transaction type: $typeString. Expected "income" or "expense"');
     }
   }
 
@@ -156,9 +161,9 @@ class TransactionModel {
   // Validation method to ensure data integrity
   bool isValid() {
     return id.isNotEmpty &&
-           title.isNotEmpty &&
-           amount > 0 &&
-           (typeString == 'income' || typeString == 'expense');
+        title.isNotEmpty &&
+        amount > 0 &&
+        (typeString == 'income' || typeString == 'expense');
   }
 
   @override
@@ -170,13 +175,13 @@ class TransactionModel {
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     return other is TransactionModel &&
-           other.id == id &&
-           other.title == title &&
-           other.description == description &&
-           other.amount == amount &&
-           other.typeString == typeString &&
-           other.category == category &&
-           other.date == date;
+        other.id == id &&
+        other.title == title &&
+        other.description == description &&
+        other.amount == amount &&
+        other.typeString == typeString &&
+        other.category == category &&
+        other.date == date;
   }
 
   @override

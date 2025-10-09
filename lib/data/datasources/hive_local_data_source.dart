@@ -37,7 +37,6 @@ class HiveLocalDataSource {
     if (_isInitialized) return Result.success(null);
 
     try {
-      
       // Note: Run 'flutter packages pub run build_runner build' first
       /*
       if (!Hive.isAdapterRegistered(HiveTypeIds.transactionType)) {

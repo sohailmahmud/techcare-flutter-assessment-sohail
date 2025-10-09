@@ -74,7 +74,8 @@ void main() {
 
     test('should handle validation failure', () async {
       // Arrange
-      const validationFailure = ValidationFailure('Amount must be greater than 0');
+      const validationFailure =
+          ValidationFailure('Amount must be greater than 0');
       when(() => mockRepository.createTransaction(any()))
           .thenAnswer((_) async => const Left(validationFailure));
 
@@ -138,7 +139,8 @@ void main() {
 
       // Assert
       expect(result, Right(incomeTransaction));
-      verify(() => mockRepository.createTransaction(incomeTransaction)).called(1);
+      verify(() => mockRepository.createTransaction(incomeTransaction))
+          .called(1);
     });
   });
 }

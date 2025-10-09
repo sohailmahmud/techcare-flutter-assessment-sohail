@@ -8,13 +8,13 @@ import 'injection_container.dart' as di;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Initialize dependency injection
   await di.init();
-  
+
   // Set up BLoC observer for debugging and monitoring
   Bloc.observer = AppBlocObserver();
-  
+
   runApp(const FinTrackApp());
 }
 

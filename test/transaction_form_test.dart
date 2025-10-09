@@ -3,7 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Transaction Form Tests', () {
-    testWidgets('Transaction form widgets render correctly', (WidgetTester tester) async {
+    testWidgets('Transaction form widgets render correctly',
+        (WidgetTester tester) async {
       // Test basic form widgets without full screen initialization
       await tester.pumpWidget(
         MaterialApp(
@@ -42,7 +43,7 @@ void main() {
       expect(find.text('Title'), findsOneWidget);
       expect(find.text('Transaction Type'), findsOneWidget);
       expect(find.text('Category'), findsOneWidget);
-      
+
       // Verify that the widgets build without errors
       expect(tester.takeException(), isNull);
     });

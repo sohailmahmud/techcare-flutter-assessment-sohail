@@ -16,7 +16,8 @@ void main() {
         expect(DateRangePreset.today.displayName, equals('Today'));
         expect(DateRangePreset.thisWeek.displayName, equals('This Week'));
         expect(DateRangePreset.thisMonth.displayName, equals('This Month'));
-        expect(DateRangePreset.lastThreeMonths.displayName, equals('Last 3 Months'));
+        expect(DateRangePreset.lastThreeMonths.displayName,
+            equals('Last 3 Months'));
         expect(DateRangePreset.custom.displayName, equals('Custom Range'));
       });
     });
@@ -26,7 +27,7 @@ void main() {
         final range = DateRangePreset.today.getDateRange();
         final now = DateTime.now();
         final today = DateTime(now.year, now.month, now.day);
-        
+
         expect(range.start.year, equals(today.year));
         expect(range.start.month, equals(today.month));
         expect(range.start.day, equals(today.day));
@@ -37,7 +38,7 @@ void main() {
         final now = DateTime.now();
         final startOfWeek = DateTime(now.year, now.month, now.day)
             .subtract(Duration(days: now.weekday - 1));
-        
+
         expect(range.start.year, equals(startOfWeek.year));
         expect(range.start.month, equals(startOfWeek.month));
         expect(range.start.day, equals(startOfWeek.day));
@@ -47,7 +48,7 @@ void main() {
         final range = DateRangePreset.thisMonth.getDateRange();
         final now = DateTime.now();
         final startOfMonth = DateTime(now.year, now.month, 1);
-        
+
         expect(range.start, equals(startOfMonth));
         expect(range.end.year, equals(now.year));
         expect(range.end.month, equals(now.month));
@@ -57,7 +58,7 @@ void main() {
         final range = DateRangePreset.lastThreeMonths.getDateRange();
         final now = DateTime.now();
         final threeMonthsAgo = DateTime(now.year, now.month - 3, now.day);
-        
+
         expect(range.start.year, equals(threeMonthsAgo.year));
         expect(range.start.month, equals(threeMonthsAgo.month));
         expect(range.start.day, equals(threeMonthsAgo.day));
@@ -65,7 +66,7 @@ void main() {
 
       test('should return default range for custom preset', () {
         final range = DateRangePreset.custom.getDateRange();
-        
+
         // Should return some default range
         expect(range.start, isA<DateTime>());
         expect(range.end, isA<DateTime>());
@@ -124,7 +125,7 @@ void main() {
         start: DateTime(2024, 1, 15, 0, 0, 0),
         end: DateTime(2024, 1, 20, 23, 59, 59),
       );
-      
+
       expect(dateRange, equals(anotherRange));
       expect(dateRange.hashCode, equals(anotherRange.hashCode));
     });
@@ -202,7 +203,8 @@ void main() {
       });
 
       test('should return true when filters are active', () {
-        final filter = baseFilter.copyWith(transactionType: TransactionType.income);
+        final filter =
+            baseFilter.copyWith(transactionType: TransactionType.income);
         expect(filter.hasActiveFilters, isTrue);
       });
     });
@@ -224,12 +226,14 @@ void main() {
 
     group('copyWith method', () {
       test('should create copy with modified type', () {
-        final copied = baseFilter.copyWith(transactionType: TransactionType.income);
+        final copied =
+            baseFilter.copyWith(transactionType: TransactionType.income);
         expect(copied.transactionType, equals(TransactionType.income));
       });
 
       test('should create copy with modified categories', () {
-        final copied = baseFilter.copyWith(selectedCategories: ['cat1', 'cat2']);
+        final copied =
+            baseFilter.copyWith(selectedCategories: ['cat1', 'cat2']);
         expect(copied.selectedCategories, containsAll(['cat1', 'cat2']));
       });
     });
@@ -271,7 +275,7 @@ void main() {
 
       test('should identify first page correctly', () {
         expect(basePagination.isFirstPage, isTrue);
-        
+
         const nextPage = PaginationInfo(currentPage: 1);
         expect(nextPage.isFirstPage, isFalse);
       });
@@ -279,7 +283,7 @@ void main() {
       test('should identify last page correctly', () {
         const lastPage = PaginationInfo(hasNextPage: false);
         expect(lastPage.isLastPage, isTrue);
-        
+
         expect(basePagination.isLastPage, isFalse);
       });
     });
@@ -291,7 +295,7 @@ void main() {
           totalItems: 100,
           isLoading: true,
         );
-        
+
         expect(copied.currentPage, equals(2));
         expect(copied.totalItems, equals(100));
         expect(copied.isLoading, isTrue);

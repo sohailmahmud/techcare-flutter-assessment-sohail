@@ -102,10 +102,12 @@ abstract class TransactionRepository {
   Future<Either<Failure, Transaction>> getTransaction(String id);
 
   /// Create a new transaction
-  Future<Either<Failure, Transaction>> createTransaction(Transaction transaction);
+  Future<Either<Failure, Transaction>> createTransaction(
+      Transaction transaction);
 
   /// Update an existing transaction
-  Future<Either<Failure, Transaction>> updateTransaction(Transaction transaction);
+  Future<Either<Failure, Transaction>> updateTransaction(
+      Transaction transaction);
 
   /// Delete a transaction
   Future<Either<Failure, void>> deleteTransaction(String id);

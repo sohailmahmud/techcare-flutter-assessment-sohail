@@ -7,7 +7,6 @@ import '../../domain/entities/analytics.dart';
 import '../datasources/remote_data_source.dart';
 import '../datasources/local_data_source.dart';
 
-
 /// Implementation of AnalyticsRepository
 class AnalyticsRepositoryImpl implements AnalyticsRepository {
   final RemoteDataSource _remoteDataSource;
@@ -21,7 +20,8 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
   );
 
   @override
-  Future<Either<Failure, AnalyticsData>> getAnalytics(AnalyticsQuery query) async {
+  Future<Either<Failure, AnalyticsData>> getAnalytics(
+      AnalyticsQuery query) async {
     try {
       // Check network connectivity
       final connectivityResult = await _connectivity.checkConnectivity();
@@ -34,21 +34,23 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
             startDate: query.startDate.toIso8601String(),
             endDate: query.endDate.toIso8601String(),
           );
-          
+
           // Cache the data model directly
           await _localDataSource.cacheAnalytics(query, remoteAnalytics);
-          
+
           return Right(remoteAnalytics.toEntity());
         } on ServerException catch (e) {
           // If remote fails, try cache
-          final cachedAnalytics = await _localDataSource.getCachedAnalytics(query);
+          final cachedAnalytics =
+              await _localDataSource.getCachedAnalytics(query);
           if (cachedAnalytics != null) {
             return Right(cachedAnalytics.toEntity());
           }
           return Left(ServerFailure(e.message));
         } on NetworkException catch (e) {
           // If network fails, try cache
-          final cachedAnalytics = await _localDataSource.getCachedAnalytics(query);
+          final cachedAnalytics =
+              await _localDataSource.getCachedAnalytics(query);
           if (cachedAnalytics != null) {
             return Right(cachedAnalytics.toEntity());
           }
@@ -56,11 +58,13 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
         }
       } else {
         // Offline - try cache first
-        final cachedAnalytics = await _localDataSource.getCachedAnalytics(query);
+        final cachedAnalytics =
+            await _localDataSource.getCachedAnalytics(query);
         if (cachedAnalytics != null) {
           return Right(cachedAnalytics.toEntity());
         }
-        return const Left(NetworkFailure('No internet connection and no cached analytics available'));
+        return const Left(NetworkFailure(
+            'No internet connection and no cached analytics available'));
       }
     } catch (e) {
       return Left(UnknownFailure(e.toString()));
@@ -68,7 +72,8 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
   }
 
   @override
-  Future<Either<Failure, AnalyticsData?>> getCachedAnalytics(AnalyticsQuery query) async {
+  Future<Either<Failure, AnalyticsData?>> getCachedAnalytics(
+      AnalyticsQuery query) async {
     try {
       final cachedAnalytics = await _localDataSource.getCachedAnalytics(query);
       return Right(cachedAnalytics?.toEntity());

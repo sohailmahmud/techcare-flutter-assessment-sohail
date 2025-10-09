@@ -252,7 +252,8 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart>
                       width: 32,
                       height: 32,
                       decoration: BoxDecoration(
-                        color: _getCategoryColor(data.categoryName).withValues(alpha: 0.1),
+                        color: _getCategoryColor(data.categoryName)
+                            .withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Icon(
@@ -319,7 +320,8 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart>
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            _getCategoryColor(data.categoryName).withValues(alpha: 0.7),
+                            _getCategoryColor(data.categoryName)
+                                .withValues(alpha: 0.7),
                             _getCategoryColor(data.categoryName),
                           ],
                         ),
@@ -341,10 +343,9 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart>
       0,
       (sum, data) => sum + data.amount,
     );
-    
-    final topCategory = widget.categoryData.isNotEmpty 
-        ? widget.categoryData.first 
-        : null;
+
+    final topCategory =
+        widget.categoryData.isNotEmpty ? widget.categoryData.first : null;
 
     return Container(
       padding: const EdgeInsets.all(Spacing.space16),
@@ -448,7 +449,8 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart>
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: _getCategoryColor(data.categoryName).withValues(alpha: 0.1),
+                  color: _getCategoryColor(data.categoryName)
+                      .withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
@@ -558,19 +560,22 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart>
   IconData _getCategoryIcon(String categoryName) {
     // Map category names to icons based on the JSON mock data structure
     final name = categoryName.toLowerCase();
-    
+
     // Direct mapping from JSON mock data categories
-    if (name.contains('food') || name.contains('dining')) return Icons.restaurant;
+    if (name.contains('food') || name.contains('dining'))
+      return Icons.restaurant;
     if (name.contains('transport')) return Icons.directions_car;
     if (name.contains('shopping')) return Icons.shopping_bag;
     if (name.contains('entertainment')) return Icons.movie;
-    if (name.contains('bills') || name.contains('utilities')) return Icons.receipt;
-    if (name.contains('health') || name.contains('fitness')) return Icons.fitness_center;
+    if (name.contains('bills') || name.contains('utilities'))
+      return Icons.receipt;
+    if (name.contains('health') || name.contains('fitness'))
+      return Icons.fitness_center;
     if (name.contains('education')) return Icons.school;
     if (name.contains('salary')) return Icons.payments;
     if (name.contains('freelance')) return Icons.work;
     if (name.contains('investment')) return Icons.trending_up;
-    
+
     return Icons.category; // default icon
   }
 }

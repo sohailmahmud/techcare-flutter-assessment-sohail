@@ -8,7 +8,7 @@ class AppRoutes {
   static const String editTransaction = '/edit-transaction/:id';
   static const String transactionDetails = '/transaction-details/:id';
   static const String cacheDebug = '/cache-debug';
-  
+
   // Route names
   static const String dashboardName = 'dashboard';
   static const String transactionsName = 'transactions';

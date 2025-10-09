@@ -7,7 +7,7 @@ import '../core/router/app_routes.dart';
 /// Provides navigation between Dashboard, Transactions, and Analytics screens
 class AppNavigationPage extends StatefulWidget {
   final Widget child;
-  
+
   const AppNavigationPage({
     super.key,
     required this.child,
@@ -18,7 +18,6 @@ class AppNavigationPage extends StatefulWidget {
 }
 
 class _AppNavigationPageState extends State<AppNavigationPage> {
-  
   int get _calculateSelectedIndex {
     final String location = GoRouterState.of(context).matchedLocation;
     if (location == AppRoutes.transactions) return 1;
@@ -74,7 +73,8 @@ class _AppNavigationPageState extends State<AppNavigationPage> {
       NavigationDestination(
         icon: Icon(
           Icons.dashboard_outlined,
-          color: selectedIndex == 0 ? AppColors.primary : AppColors.textSecondary,
+          color:
+              selectedIndex == 0 ? AppColors.primary : AppColors.textSecondary,
         ),
         selectedIcon: const Icon(
           Icons.dashboard,
@@ -85,7 +85,8 @@ class _AppNavigationPageState extends State<AppNavigationPage> {
       NavigationDestination(
         icon: Icon(
           Icons.receipt_long_outlined,
-          color: selectedIndex == 1 ? AppColors.primary : AppColors.textSecondary,
+          color:
+              selectedIndex == 1 ? AppColors.primary : AppColors.textSecondary,
         ),
         selectedIcon: const Icon(
           Icons.receipt_long,
@@ -96,7 +97,8 @@ class _AppNavigationPageState extends State<AppNavigationPage> {
       NavigationDestination(
         icon: Icon(
           Icons.analytics_outlined,
-          color: selectedIndex == 2 ? AppColors.primary : AppColors.textSecondary,
+          color:
+              selectedIndex == 2 ? AppColors.primary : AppColors.textSecondary,
         ),
         selectedIcon: const Icon(
           Icons.analytics,

@@ -11,6 +11,7 @@ import 'package:fintrack/core/errors/failures.dart';
 class MockTransactionRepository extends Mock implements TransactionRepository {}
 
 class FakeTransaction extends Fake implements Transaction {}
+
 class FakeTransactionQuery extends Fake implements TransactionQuery {}
 
 void main() {
@@ -44,7 +45,7 @@ void main() {
     );
 
     const query = TransactionQuery(page: 1, limit: 20);
-    
+
     const mockMeta = PaginationMeta(
       currentPage: 1,
       totalPages: 1,
@@ -163,7 +164,8 @@ void main() {
 
         // Assert
         expect(result, Right(testTransaction));
-        verify(() => mockRepository.createTransaction(testTransaction)).called(1);
+        verify(() => mockRepository.createTransaction(testTransaction))
+            .called(1);
       });
 
       test('should return validation failure for invalid data', () async {
@@ -201,15 +203,18 @@ void main() {
             .thenAnswer((_) async => Right(updatedTransaction));
 
         // Act
-        final result = await mockRepository.updateTransaction(updatedTransaction);
+        final result =
+            await mockRepository.updateTransaction(updatedTransaction);
 
         // Assert
         expect(result, Right(updatedTransaction));
-        verify(() => mockRepository.updateTransaction(updatedTransaction)).called(1);
+        verify(() => mockRepository.updateTransaction(updatedTransaction))
+            .called(1);
         expect(result.fold((l) => null, (r) => r)?.amount, equals(30.0));
       });
 
-      test('should return not found failure for non-existent transaction', () async {
+      test('should return not found failure for non-existent transaction',
+          () async {
         // Arrange
         const failure = NotFoundFailure('Transaction not found');
         when(() => mockRepository.updateTransaction(any()))

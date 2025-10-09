@@ -59,7 +59,8 @@ void main() {
 
     group('convenience getters', () {
       test('isIncome returns true for income transactions', () {
-        final incomeTransaction = transaction.copyWith(type: TransactionType.income);
+        final incomeTransaction =
+            transaction.copyWith(type: TransactionType.income);
         expect(incomeTransaction.isIncome, isTrue);
         expect(incomeTransaction.isExpense, isFalse);
       });
@@ -170,7 +171,7 @@ void main() {
     group('toString', () {
       test('returns readable string representation', () {
         final string = transaction.toString();
-        
+
         expect(string, contains('Transaction'));
         expect(string, contains('1'));
         expect(string, contains('Lunch'));

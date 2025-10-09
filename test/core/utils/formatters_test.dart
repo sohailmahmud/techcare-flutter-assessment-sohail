@@ -44,7 +44,8 @@ void main() {
 
       test('should format date with time', () {
         final date = DateTime(2025, 10, 9, 14, 30);
-        expect(DateFormatter.formatDateTime(date), equals('Oct 09, 2025 02:30 PM'));
+        expect(DateFormatter.formatDateTime(date),
+            equals('Oct 09, 2025 02:30 PM'));
       });
 
       test('should format time only', () {
@@ -64,9 +65,11 @@ void main() {
         final lastYear = DateTime(2024, 8, 15);
 
         expect(DateFormatter.formatDateGrouping(today), equals('Today'));
-        expect(DateFormatter.formatDateGrouping(yesterday), equals('Yesterday'));
+        expect(
+            DateFormatter.formatDateGrouping(yesterday), equals('Yesterday'));
         expect(DateFormatter.formatDateGrouping(thisYear), equals('Aug 15'));
-        expect(DateFormatter.formatDateGrouping(lastYear), equals('Aug 15, 2024'));
+        expect(
+            DateFormatter.formatDateGrouping(lastYear), equals('Aug 15, 2024'));
       });
 
       test('should format relative time', () {

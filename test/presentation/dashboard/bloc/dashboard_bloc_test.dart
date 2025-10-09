@@ -12,6 +12,7 @@ import 'package:fintrack/core/errors/failures.dart';
 import 'package:fintrack/core/usecases/usecase.dart';
 
 class MockGetDashboardSummary extends Mock implements GetDashboardSummary {}
+
 class MockRefreshDashboard extends Mock implements RefreshDashboard {}
 
 void main() {
@@ -36,7 +37,7 @@ void main() {
     setUp(() {
       mockGetDashboardSummary = MockGetDashboardSummary();
       mockRefreshDashboard = MockRefreshDashboard();
-      
+
       dashboardBloc = DashboardBloc(
         getDashboardSummary: mockGetDashboardSummary,
         refreshDashboard: mockRefreshDashboard,
@@ -76,14 +77,15 @@ void main() {
         'emits [DashboardLoading, DashboardError] when dashboard loading fails',
         build: () => dashboardBloc,
         setUp: () {
-          when(() => mockGetDashboardSummary(any()))
-              .thenAnswer((_) async => const Left(NetworkFailure('Network error')));
+          when(() => mockGetDashboardSummary(any())).thenAnswer(
+              (_) async => const Left(NetworkFailure('Network error')));
         },
         act: (bloc) => bloc.add(const LoadDashboard()),
         expect: () => [
           const DashboardLoading(),
           const DashboardError(
-            message: 'No internet connection. Please check your network.\n\nDetails: NetworkFailure(Network error)',
+            message:
+                'No internet connection. Please check your network.\n\nDetails: NetworkFailure(Network error)',
             canRetry: true,
           ),
         ],
@@ -125,7 +127,8 @@ void main() {
         expect: () => [
           const DashboardLoading(),
           const DashboardError(
-            message: 'Something went wrong. Please try again.\n\nDetails: CacheFailure(Cache error)',
+            message:
+                'Something went wrong. Please try again.\n\nDetails: CacheFailure(Cache error)',
             canRetry: true,
           ),
         ],

@@ -2,7 +2,8 @@ import 'dart:async';
 import 'dart:developer' as dev;
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import '../../domain/entities/transaction.dart' hide TransactionType;
-import '../../domain/entities/transaction_filter.dart' as filter show TransactionFilter;
+import '../../domain/entities/transaction_filter.dart' as filter
+    show TransactionFilter;
 import '../../domain/entities/transaction_filter.dart';
 import '../models/cached_transaction.dart';
 import '../models/cache_metadata.dart';
@@ -33,7 +34,7 @@ class HiveCacheManager {
     try {
       // Initialize Hive Flutter
       await Hive.initFlutter();
-      
+
       // Register adapters if not already registered
       if (!Hive.isAdapterRegistered(0)) {
         Hive.registerAdapter(CachedTransactionAdapter());
@@ -43,13 +44,14 @@ class HiveCacheManager {
       }
 
       // Open boxes
-      _transactionsBox = await Hive.openBox<CachedTransaction>(_transactionsBoxName);
+      _transactionsBox =
+          await Hive.openBox<CachedTransaction>(_transactionsBoxName);
       _metadataBox = await Hive.openBox<CacheMetadata>(_metadataBoxName);
       _configBox = await Hive.openBox(_configBoxName);
 
       // Start periodic cleanup
       _startPeriodicCleanup();
-      
+
       _isInitialized = true;
       dev.log('HiveCacheManager initialized successfully');
     } catch (e) {
@@ -71,7 +73,8 @@ class HiveCacheManager {
       final cacheKey = _generateCacheKey(filter);
       final cacheTTL = ttl ?? _defaultTTL;
 
-      dev.log('Caching ${transactions.length} transactions with key: $cacheKey');
+      dev.log(
+          'Caching ${transactions.length} transactions with key: $cacheKey');
 
       // Clear existing cache if forced or filter changed
       if (forceClear || await _hasFilterChanged(filter)) {
@@ -81,7 +84,8 @@ class HiveCacheManager {
       // Cache transactions
       final cachedTransactions = <String, CachedTransaction>{};
       for (final transaction in transactions) {
-        final cached = CachedTransaction.fromTransaction(transaction, ttl: cacheTTL);
+        final cached =
+            CachedTransaction.fromTransaction(transaction, ttl: cacheTTL);
         cachedTransactions[transaction.id] = cached;
       }
 
@@ -92,7 +96,7 @@ class HiveCacheManager {
 
       // Enforce cache size limits
       await _enforceCacheLimits();
-      
+
       dev.log('Successfully cached ${transactions.length} transactions');
     } catch (e) {
       dev.log('Failed to cache transactions: $e');
@@ -115,7 +119,7 @@ class HiveCacheManager {
       var cached = _transactionsBox.values.where((transaction) {
         // Skip deleted items
         if (transaction.isDeleted) return false;
-        
+
         // Skip expired items unless requested
         if (!includeExpired && transaction.isExpired) return false;
 
@@ -134,7 +138,7 @@ class HiveCacheManager {
 
       final result = cached.map((c) => c.toTransaction()).toList();
       dev.log('Retrieved ${result.length} cached transactions');
-      
+
       return result;
     } catch (e) {
       _incrementCacheMiss();
@@ -153,12 +157,12 @@ class HiveCacheManager {
     try {
       final cacheKey = _generateCacheKey(filter);
       final metadata = _metadataBox.get(cacheKey);
-      
+
       if (metadata == null) return false;
 
       final age = maxAge ?? _defaultTTL;
       final isValid = !metadata.isStale(age) && metadata.totalItems > 0;
-      
+
       dev.log('Cache validity for $cacheKey: $isValid');
       return isValid;
     } catch (e) {
@@ -182,7 +186,8 @@ class HiveCacheManager {
         dev.log('Invalidated all cache (${type.name})');
       } else if (transactionIds != null) {
         await _invalidateTransactions(transactionIds, type);
-        dev.log('Invalidated ${transactionIds.length} transactions (${type.name})');
+        dev.log(
+            'Invalidated ${transactionIds.length} transactions (${type.name})');
       } else if (filter != null) {
         await _invalidateFilteredCache(filter, type);
         dev.log('Invalidated filtered cache (${type.name})');
@@ -244,9 +249,12 @@ class HiveCacheManager {
 
     try {
       final allTransactions = _transactionsBox.values.toList();
-      final activeTransactions = allTransactions.where((t) => !t.isDeleted).toList();
-      final expiredTransactions = activeTransactions.where((t) => t.isExpired).toList();
-      final staleTransactions = activeTransactions.where((t) => t.isStale).toList();
+      final activeTransactions =
+          allTransactions.where((t) => !t.isDeleted).toList();
+      final expiredTransactions =
+          activeTransactions.where((t) => t.isExpired).toList();
+      final staleTransactions =
+          activeTransactions.where((t) => t.isStale).toList();
 
       final hitCount = _configBox.get('cache_hits', defaultValue: 0);
       final missCount = _configBox.get('cache_misses', defaultValue: 0);
@@ -259,7 +267,8 @@ class HiveCacheManager {
         expiredItems: expiredTransactions.length,
         staleItems: staleTransactions.length,
         cacheSize: _transactionsBox.length,
-        lastCleanup: _configBox.get('last_cleanup', defaultValue: DateTime.now()),
+        lastCleanup:
+            _configBox.get('last_cleanup', defaultValue: DateTime.now()),
         hitRate: hitRate,
         hitCount: hitCount,
         missCount: missCount,
@@ -276,7 +285,7 @@ class HiveCacheManager {
 
     try {
       dev.log('Starting cache cleanup...');
-      
+
       // Remove expired and deleted transactions
       final expiredKeys = <String>[];
       for (final entry in _transactionsBox.toMap().entries) {
@@ -284,7 +293,7 @@ class HiveCacheManager {
           expiredKeys.add(entry.key);
         }
       }
-      
+
       await _transactionsBox.deleteAll(expiredKeys);
       dev.log('Removed ${expiredKeys.length} expired/deleted transactions');
 
@@ -293,7 +302,7 @@ class HiveCacheManager {
 
       await _configBox.put('last_cleanup', DateTime.now());
       await _updateAllMetadata();
-      
+
       dev.log('Cache cleanup completed');
     } catch (e) {
       dev.log('Failed to cleanup cache: $e');
@@ -304,7 +313,7 @@ class HiveCacheManager {
   /// Clear all cache
   Future<void> clearAll() async {
     await _ensureInitialized();
-    
+
     try {
       await _transactionsBox.clear();
       await _metadataBox.clear();
@@ -320,13 +329,13 @@ class HiveCacheManager {
   Future<void> dispose() async {
     try {
       _cleanupTimer?.cancel();
-      
+
       if (_isInitialized) {
         await _transactionsBox.close();
         await _metadataBox.close();
         await _configBox.close();
       }
-      
+
       _isInitialized = false;
       dev.log('HiveCacheManager disposed');
     } catch (e) {
@@ -344,22 +353,26 @@ class HiveCacheManager {
 
   String _generateCacheKey(filter.TransactionFilter? filter) {
     if (filter == null) return 'all_transactions';
-    
+
     final parts = <String>[];
     if (filter.searchQuery.isNotEmpty) parts.add('q:${filter.searchQuery}');
-    if (filter.selectedCategories.isNotEmpty) parts.add('cat:${filter.selectedCategories.join(',')}');
-    if (filter.transactionType != TransactionType.all) parts.add('type:${filter.transactionType.name}');
+    if (filter.selectedCategories.isNotEmpty)
+      parts.add('cat:${filter.selectedCategories.join(',')}');
+    if (filter.transactionType != TransactionType.all)
+      parts.add('type:${filter.transactionType.name}');
     if (filter.dateRange != null) {
-      parts.add('date:${filter.dateRange!.start.millisecondsSinceEpoch}-${filter.dateRange!.end.millisecondsSinceEpoch}');
+      parts.add(
+          'date:${filter.dateRange!.start.millisecondsSinceEpoch}-${filter.dateRange!.end.millisecondsSinceEpoch}');
     }
     if (filter.amountRange != null) {
       parts.add('amount:${filter.amountRange!.min}-${filter.amountRange!.max}');
     }
-    
+
     return parts.isEmpty ? 'all_transactions' : parts.join('|');
   }
 
-  bool _matchesFilter(CachedTransaction transaction, filter.TransactionFilter? filter) {
+  bool _matchesFilter(
+      CachedTransaction transaction, filter.TransactionFilter? filter) {
     if (filter == null) return true;
 
     // Text search
@@ -373,14 +386,16 @@ class HiveCacheManager {
     }
 
     // Category filter
-    if (filter.selectedCategories.isNotEmpty && 
+    if (filter.selectedCategories.isNotEmpty &&
         !filter.selectedCategories.contains(transaction.categoryId)) {
       return false;
     }
 
     // Type filter
     if (filter.transactionType != TransactionType.all) {
-      final transactionType = transaction.type == 0 ? TransactionType.income : TransactionType.expense;
+      final transactionType = transaction.type == 0
+          ? TransactionType.income
+          : TransactionType.expense;
       if (filter.transactionType != transactionType) {
         return false;
       }
@@ -423,15 +438,17 @@ class HiveCacheManager {
         matchingKeys.add(entry.key);
       }
     }
-    
+
     await _transactionsBox.deleteAll(matchingKeys);
   }
 
-  Future<void> _updateCacheMetadata(String cacheKey, int itemCount, filter.TransactionFilter? filter) async {
-    final metadata = _metadataBox.get(cacheKey) ?? CacheMetadata(
-      key: cacheKey,
-      lastUpdated: DateTime.now(),
-    );
+  Future<void> _updateCacheMetadata(
+      String cacheKey, int itemCount, filter.TransactionFilter? filter) async {
+    final metadata = _metadataBox.get(cacheKey) ??
+        CacheMetadata(
+          key: cacheKey,
+          lastUpdated: DateTime.now(),
+        );
 
     metadata.updateMetadata(
       totalItems: itemCount,
@@ -441,19 +458,23 @@ class HiveCacheManager {
 
   Map<String, dynamic> _filterToMap(filter.TransactionFilter? filter) {
     if (filter == null) return {};
-    
+
     return {
       'searchQuery': filter.searchQuery,
       'categoryIds': filter.selectedCategories,
       'transactionType': filter.transactionType.name,
-      'dateRange': filter.dateRange != null ? {
-        'start': filter.dateRange!.start.millisecondsSinceEpoch,
-        'end': filter.dateRange!.end.millisecondsSinceEpoch,
-      } : null,
-      'amountRange': filter.amountRange != null ? {
-        'min': filter.amountRange!.min,
-        'max': filter.amountRange!.max,
-      } : null,
+      'dateRange': filter.dateRange != null
+          ? {
+              'start': filter.dateRange!.start.millisecondsSinceEpoch,
+              'end': filter.dateRange!.end.millisecondsSinceEpoch,
+            }
+          : null,
+      'amountRange': filter.amountRange != null
+          ? {
+              'min': filter.amountRange!.min,
+              'max': filter.amountRange!.max,
+            }
+          : null,
     };
   }
 
@@ -463,10 +484,11 @@ class HiveCacheManager {
     // Remove oldest cached items
     final allTransactions = _transactionsBox.values.toList();
     allTransactions.sort((a, b) => a.cachedAt.compareTo(b.cachedAt));
-    
-    final itemsToRemove = allTransactions.take(_transactionsBox.length - _maxCacheSize);
+
+    final itemsToRemove =
+        allTransactions.take(_transactionsBox.length - _maxCacheSize);
     final keysToRemove = itemsToRemove.map((t) => t.id).toList();
-    
+
     await _transactionsBox.deleteAll(keysToRemove);
     dev.log('Enforced cache size limit, removed ${keysToRemove.length} items');
   }
@@ -476,7 +498,8 @@ class HiveCacheManager {
       case CacheInvalidationType.soft:
         // Mark all as expired
         for (final transaction in _transactionsBox.values) {
-          transaction.expiresAt = DateTime.now().subtract(const Duration(seconds: 1));
+          transaction.expiresAt =
+              DateTime.now().subtract(const Duration(seconds: 1));
           await transaction.save();
         }
         break;
@@ -487,13 +510,15 @@ class HiveCacheManager {
     }
   }
 
-  Future<void> _invalidateTransactions(List<String> transactionIds, CacheInvalidationType type) async {
+  Future<void> _invalidateTransactions(
+      List<String> transactionIds, CacheInvalidationType type) async {
     for (final id in transactionIds) {
       final transaction = _transactionsBox.get(id);
       if (transaction != null) {
         switch (type) {
           case CacheInvalidationType.soft:
-            transaction.expiresAt = DateTime.now().subtract(const Duration(seconds: 1));
+            transaction.expiresAt =
+                DateTime.now().subtract(const Duration(seconds: 1));
             await transaction.save();
             break;
           case CacheInvalidationType.hard:
@@ -504,13 +529,16 @@ class HiveCacheManager {
     }
   }
 
-  Future<void> _invalidateFilteredCache(filter.TransactionFilter filter, CacheInvalidationType type) async {
-    final matchingTransactions = _transactionsBox.values.where((t) => _matchesFilter(t, filter));
-    
+  Future<void> _invalidateFilteredCache(
+      filter.TransactionFilter filter, CacheInvalidationType type) async {
+    final matchingTransactions =
+        _transactionsBox.values.where((t) => _matchesFilter(t, filter));
+
     for (final transaction in matchingTransactions) {
       switch (type) {
         case CacheInvalidationType.soft:
-          transaction.expiresAt = DateTime.now().subtract(const Duration(seconds: 1));
+          transaction.expiresAt =
+              DateTime.now().subtract(const Duration(seconds: 1));
           await transaction.save();
           break;
         case CacheInvalidationType.hard:
@@ -522,7 +550,7 @@ class HiveCacheManager {
 
   Future<void> _updateAllMetadata() async {
     final stats = await getCacheStats();
-    
+
     for (final metadata in _metadataBox.values) {
       metadata.updateMetadata(
         totalItems: stats.activeItems,

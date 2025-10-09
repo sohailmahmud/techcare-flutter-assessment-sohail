@@ -28,19 +28,23 @@ void main() {
     });
 
     test('breakpoints are in ascending order', () {
-      expect(AppConstants.breakpointMobile, lessThan(AppConstants.breakpointTablet));
-      expect(AppConstants.breakpointTablet, lessThan(AppConstants.breakpointDesktop));
+      expect(AppConstants.breakpointMobile,
+          lessThan(AppConstants.breakpointTablet));
+      expect(AppConstants.breakpointTablet,
+          lessThan(AppConstants.breakpointDesktop));
     });
 
     test('screen width constraints are valid', () {
       expect(AppConstants.minScreenWidth, greaterThan(0));
-      expect(AppConstants.minScreenWidth, lessThan(AppConstants.breakpointMobile));
+      expect(
+          AppConstants.minScreenWidth, lessThan(AppConstants.breakpointMobile));
     });
 
     test('transaction limits are reasonable', () {
       expect(AppConstants.maxDisplayTransactions, greaterThan(0));
       expect(AppConstants.maxRecentTransactions, greaterThan(0));
-      expect(AppConstants.maxRecentTransactions, greaterThanOrEqualTo(AppConstants.maxDisplayTransactions));
+      expect(AppConstants.maxRecentTransactions,
+          greaterThanOrEqualTo(AppConstants.maxDisplayTransactions));
       expect(AppConstants.defaultNotificationCount, greaterThan(0));
     });
 
@@ -48,7 +52,7 @@ void main() {
       // Verify constants are compile-time constants
       const duration = AppConstants.counterAnimation;
       expect(duration, equals(const Duration(milliseconds: 800)));
-      
+
       const expiry = AppConstants.cacheExpiry;
       expect(expiry, equals(const Duration(minutes: 5)));
     });

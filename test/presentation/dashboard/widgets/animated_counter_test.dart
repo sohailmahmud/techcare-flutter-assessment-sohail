@@ -4,7 +4,8 @@ import 'package:fintrack/presentation/dashboard/widgets/animated_counter.dart';
 
 void main() {
   group('AnimatedCounter Widget', () {
-    testWidgets('displays initial value correctly', (WidgetTester tester) async {
+    testWidgets('displays initial value correctly',
+        (WidgetTester tester) async {
       // Build the widget
       await tester.pumpWidget(
         const MaterialApp(
@@ -22,7 +23,7 @@ void main() {
       // Find the text widget
       expect(find.byType(AnimatedCounter), findsOneWidget);
       expect(find.byType(Text), findsOneWidget);
-      
+
       // Initially should show 0 as animation starts from 0
       expect(find.text('\$0.00 USD'), findsOneWidget);
     });
@@ -95,7 +96,8 @@ void main() {
       expect(find.text('\$100'), findsOneWidget);
     });
 
-    testWidgets('respects decimal places parameter', (WidgetTester tester) async {
+    testWidgets('respects decimal places parameter',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(

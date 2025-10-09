@@ -6,7 +6,6 @@ import '../../../core/theme/spacing.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../domain/entities/analytics.dart';
 
-
 enum BudgetStatus { underBudget, approaching, exceeded }
 
 class BudgetProgressIndicators extends StatefulWidget {
@@ -20,7 +19,8 @@ class BudgetProgressIndicators extends StatefulWidget {
   });
 
   @override
-  State<BudgetProgressIndicators> createState() => _BudgetProgressIndicatorsState();
+  State<BudgetProgressIndicators> createState() =>
+      _BudgetProgressIndicatorsState();
 }
 
 class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
@@ -36,25 +36,31 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
   }
 
   void _initializeAnimations() {
-    final itemCount = math.min(widget.budgetData.length, 12); // Allow up to 12 animations for better performance
+    final itemCount = math.min(widget.budgetData.length,
+        12); // Allow up to 12 animations for better performance
     _controllers = List.generate(
       itemCount,
       (index) => AnimationController(
-        duration: Duration(milliseconds: 1000 + (index * 50)), // Reduced delay for more items
+        duration: Duration(
+            milliseconds: 1000 + (index * 50)), // Reduced delay for more items
         vsync: this,
       ),
     );
 
     _animations = _controllers.map((controller) {
       return Tween<double>(begin: 0.0, end: 1.0).animate(
-        CurvedAnimation(parent: controller, curve: Curves.easeOutCubic), // Changed from easeOutBack to avoid values > 1.0
+        CurvedAnimation(
+            parent: controller,
+            curve: Curves
+                .easeOutCubic), // Changed from easeOutBack to avoid values > 1.0
       );
     }).toList();
   }
 
   void _startAnimations() {
     for (int i = 0; i < _controllers.length; i++) {
-      Future.delayed(Duration(milliseconds: i * 100), () { // Reduced delay for smoother animation with more items
+      Future.delayed(Duration(milliseconds: i * 100), () {
+        // Reduced delay for smoother animation with more items
         if (mounted) {
           _controllers[i].forward();
         }
@@ -162,8 +168,11 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
   Widget _buildOverallStatus() {
     if (widget.budgetData.isEmpty) return const SizedBox.shrink();
 
-    final overBudgetCount = widget.budgetData.where((b) => b.isOverBudget).length;
-    final approachingCount = widget.budgetData.where((b) => _getBudgetStatus(b) == BudgetStatus.approaching).length;
+    final overBudgetCount =
+        widget.budgetData.where((b) => b.isOverBudget).length;
+    final approachingCount = widget.budgetData
+        .where((b) => _getBudgetStatus(b) == BudgetStatus.approaching)
+        .length;
 
     Color statusColor;
     String statusText;
@@ -269,38 +278,44 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
 
   Widget _buildBudgetGrid() {
     final displayData = widget.budgetData; // Show all categories
-    
+
     if (displayData.isEmpty) {
       return const SizedBox.shrink();
     }
-    
+
     return LayoutBuilder(
       builder: (context, constraints) {
         // Calculate dynamic dimensions based on available space and category count
-        final availableWidth = constraints.maxWidth > 0 ? constraints.maxWidth : 300.0;
+        final availableWidth =
+            constraints.maxWidth > 0 ? constraints.maxWidth : 300.0;
         final screenHeight = MediaQuery.of(context).size.height;
-        
+
         // Dynamic crossAxisCount based on screen width and category count
-        final crossAxisCount = availableWidth > 500 && displayData.length > 4 ? 3 : 2;
-        
+        final crossAxisCount =
+            availableWidth > 500 && displayData.length > 4 ? 3 : 2;
+
         // Calculate item dimensions with responsive aspect ratio
         final spacingWidth = (crossAxisCount - 1) * Spacing.space12;
         final itemWidth = (availableWidth - spacingWidth) / crossAxisCount;
-        final aspectRatio = displayData.length <= 2 ? 1.1 : 1.0; // Taller cards for few items
+        final aspectRatio =
+            displayData.length <= 2 ? 1.1 : 1.0; // Taller cards for few items
         final itemHeight = itemWidth / aspectRatio;
-        
+
         // Calculate optimal height with dynamic scaling
-        final constrainedHeight = _calculateOptimalHeight(displayData.length, itemHeight);
+        final constrainedHeight =
+            _calculateOptimalHeight(displayData.length, itemHeight);
         final minHeight = itemHeight; // At least one row
-        final maxHeight = math.min(constrainedHeight, screenHeight * 0.81); // Cap at 60% of screen
-        
+        final maxHeight = math.min(
+            constrainedHeight, screenHeight * 0.81); // Cap at 60% of screen
+
         return ConstrainedBox(
           constraints: BoxConstraints(
             maxHeight: math.max(maxHeight, minHeight),
             minHeight: minHeight,
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(Spacing.radiusS), // Clip any overflow
+            borderRadius:
+                BorderRadius.circular(Spacing.radiusS), // Clip any overflow
             child: GridView.builder(
               physics: const NeverScrollableScrollPhysics(),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -312,7 +327,8 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
               itemCount: displayData.length,
               itemBuilder: (context, index) {
                 if (index < _animations.length) {
-                  return _buildBudgetCard(displayData[index], _animations[index]);
+                  return _buildBudgetCard(
+                      displayData[index], _animations[index]);
                 }
                 return _buildBudgetCard(displayData[index], null);
               },
@@ -323,9 +339,10 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
     );
   }
 
-  Widget _buildBudgetCard(BudgetComparison budget, Animation<double>? animation) {
+  Widget _buildBudgetCard(
+      BudgetComparison budget, Animation<double>? animation) {
     final statusColor = _getStatusColor(_getBudgetStatus(budget));
-    
+
     Widget card = Container(
       padding: const EdgeInsets.all(Spacing.space16),
       decoration: BoxDecoration(
@@ -346,7 +363,8 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
                 width: 24,
                 height: 24,
                 decoration: BoxDecoration(
-                  color: _getCategoryColor(budget.categoryName).withValues(alpha: 0.1),
+                  color: _getCategoryColor(budget.categoryName)
+                      .withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Icon(
@@ -380,8 +398,8 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
                   width: 70,
                   height: 70,
                   child: CircularProgressIndicator(
-                    value: animation != null 
-                        ? (budget.percentage / 100) * animation.value 
+                    value: animation != null
+                        ? (budget.percentage / 100) * animation.value
                         : budget.percentage / 100,
                     strokeWidth: 5,
                     backgroundColor: AppColors.border,
@@ -400,7 +418,11 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
                       ),
                     ),
                     Text(
-                      _getBudgetStatus(budget) == BudgetStatus.underBudget ? 'Under' : _getBudgetStatus(budget) == BudgetStatus.approaching ? 'Approaching' : 'Over',
+                      _getBudgetStatus(budget) == BudgetStatus.underBudget
+                          ? 'Under'
+                          : _getBudgetStatus(budget) == BudgetStatus.approaching
+                              ? 'Approaching'
+                              : 'Over',
                       style: AppTypography.labelSmall.copyWith(
                         color: AppColors.textSecondary,
                         fontSize: 9,
@@ -441,7 +463,8 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
           return Transform.scale(
             scale: animation.value,
             child: Opacity(
-              opacity: animation.value.clamp(0.0, 1.0), // Ensure opacity is within valid range
+              opacity: animation.value
+                  .clamp(0.0, 1.0), // Ensure opacity is within valid range
               child: card,
             ),
           );
@@ -455,10 +478,11 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
   /// Calculate optimal height based on number of categories with dynamic scaling
   double _calculateOptimalHeight(int categoryCount, double itemHeight) {
     if (categoryCount == 0) return 200; // Empty state height
-    
+
     final rowCount = (categoryCount / 2).ceil();
-    final gridHeight = (rowCount * itemHeight) + ((rowCount - 1) * Spacing.space12);
-    
+    final gridHeight =
+        (rowCount * itemHeight) + ((rowCount - 1) * Spacing.space12);
+
     // Dynamic scaling based on category count
     if (categoryCount <= 2) {
       // 1 row: Show without scrolling, minimal height
@@ -475,13 +499,17 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
     } else if (categoryCount <= 12) {
       // 5-6 rows: Show up to 4 rows, then scroll
       const maxVisibleRows = 4;
-      final maxHeightWithoutScroll = (maxVisibleRows * itemHeight) + ((maxVisibleRows - 1) * Spacing.space12) + 32;
+      final maxHeightWithoutScroll = (maxVisibleRows * itemHeight) +
+          ((maxVisibleRows - 1) * Spacing.space12) +
+          32;
       return maxHeightWithoutScroll;
     } else {
       // Many categories: Progressive height increase with upper limit
       const maxVisibleRows = 5;
-      final maxHeightWithoutScroll = (maxVisibleRows * itemHeight) + ((maxVisibleRows - 1) * Spacing.space12) + 40;
-      
+      final maxHeightWithoutScroll = (maxVisibleRows * itemHeight) +
+          ((maxVisibleRows - 1) * Spacing.space12) +
+          40;
+
       // Scale height progressively but cap at reasonable limit
       final progressiveHeight = math.min(gridHeight + 40, 500.0);
       return math.min(maxHeightWithoutScroll, progressiveHeight);
@@ -522,19 +550,22 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
   IconData _getCategoryIcon(String categoryName) {
     // Map category names to icons based on the JSON mock data structure
     final name = categoryName.toLowerCase();
-    
+
     // Direct mapping from JSON mock data categories
-    if (name.contains('food') || name.contains('dining')) return Icons.restaurant;
+    if (name.contains('food') || name.contains('dining'))
+      return Icons.restaurant;
     if (name.contains('transport')) return Icons.directions_car;
     if (name.contains('shopping')) return Icons.shopping_bag;
     if (name.contains('entertainment')) return Icons.movie;
-    if (name.contains('bills') || name.contains('utilities')) return Icons.receipt;
-    if (name.contains('health') || name.contains('fitness')) return Icons.fitness_center;
+    if (name.contains('bills') || name.contains('utilities'))
+      return Icons.receipt;
+    if (name.contains('health') || name.contains('fitness'))
+      return Icons.fitness_center;
     if (name.contains('education')) return Icons.school;
     if (name.contains('salary')) return Icons.payments;
     if (name.contains('freelance')) return Icons.work;
     if (name.contains('investment')) return Icons.trending_up;
-    
+
     return Icons.category; // default icon
   }
 
@@ -564,7 +595,7 @@ class CompactBudgetProgress extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final displayData = budgetData.take(maxItems).toList();
-    
+
     return Column(
       children: displayData.map((budget) {
         return Container(
@@ -574,7 +605,8 @@ class CompactBudgetProgress extends StatelessWidget {
             color: AppColors.surface,
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: _getStatusColor(_getBudgetStatus(budget)).withValues(alpha: 0.2),
+              color: _getStatusColor(_getBudgetStatus(budget))
+                  .withValues(alpha: 0.2),
             ),
           ),
           child: Row(
@@ -584,7 +616,8 @@ class CompactBudgetProgress extends StatelessWidget {
                 width: 32,
                 height: 32,
                 decoration: BoxDecoration(
-                  color: _getCategoryColor(budget.categoryName).withValues(alpha: 0.1),
+                  color: _getCategoryColor(budget.categoryName)
+                      .withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
@@ -667,19 +700,22 @@ class CompactBudgetProgress extends StatelessWidget {
   IconData _getCategoryIcon(String categoryName) {
     // Map category names to icons based on the JSON mock data structure
     final name = categoryName.toLowerCase();
-    
+
     // Direct mapping from JSON mock data categories
-    if (name.contains('food') || name.contains('dining')) return Icons.restaurant;
+    if (name.contains('food') || name.contains('dining'))
+      return Icons.restaurant;
     if (name.contains('transport')) return Icons.directions_car;
     if (name.contains('shopping')) return Icons.shopping_bag;
     if (name.contains('entertainment')) return Icons.movie;
-    if (name.contains('bills') || name.contains('utilities')) return Icons.receipt;
-    if (name.contains('health') || name.contains('fitness')) return Icons.fitness_center;
+    if (name.contains('bills') || name.contains('utilities'))
+      return Icons.receipt;
+    if (name.contains('health') || name.contains('fitness'))
+      return Icons.fitness_center;
     if (name.contains('education')) return Icons.school;
     if (name.contains('salary')) return Icons.payments;
     if (name.contains('freelance')) return Icons.work;
     if (name.contains('investment')) return Icons.trending_up;
-    
+
     return Icons.category; // default icon
   }
 

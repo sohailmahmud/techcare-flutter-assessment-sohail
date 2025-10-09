@@ -33,7 +33,8 @@ class TransactionDetailsModal extends StatefulWidget {
   });
 
   @override
-  State<TransactionDetailsModal> createState() => _TransactionDetailsModalState();
+  State<TransactionDetailsModal> createState() =>
+      _TransactionDetailsModalState();
 }
 
 class _TransactionDetailsModalState extends State<TransactionDetailsModal>
@@ -87,17 +88,18 @@ class _TransactionDetailsModalState extends State<TransactionDetailsModal>
     // Convert drag distance to animation progress
     final screenHeight = MediaQuery.of(context).size.height;
     final dragDistance = details.primaryDelta! / screenHeight;
-    
+
     if (dragDistance > 0) {
       // Only allow downward swipes
-      final newValue = (_animationController.value - dragDistance * 2).clamp(0.0, 1.0);
+      final newValue =
+          (_animationController.value - dragDistance * 2).clamp(0.0, 1.0);
       _animationController.value = newValue;
     }
   }
 
   void _onVerticalDragEnd(DragEndDetails details) {
     final velocity = details.primaryVelocity ?? 0;
-    
+
     if (velocity > 500 || _animationController.value < 0.5) {
       // Dismiss if swiped fast or dragged more than halfway
       _dismissModal();
@@ -119,7 +121,8 @@ class _TransactionDetailsModalState extends State<TransactionDetailsModal>
             return Opacity(
               opacity: _fadeAnimation.value,
               child: Transform.translate(
-                offset: Offset(0, MediaQuery.of(context).size.height * _slideAnimation.value),
+                offset: Offset(0,
+                    MediaQuery.of(context).size.height * _slideAnimation.value),
                 child: GestureDetector(
                   onTap: () {}, // Prevent dismissal when tapping modal content
                   onVerticalDragUpdate: _onVerticalDragUpdate,
@@ -140,11 +143,13 @@ class _TransactionDetailsModalState extends State<TransactionDetailsModal>
                           children: [
                             // Drag handle
                             Container(
-                              margin: const EdgeInsets.only(top: Spacing.space12),
+                              margin:
+                                  const EdgeInsets.only(top: Spacing.space12),
                               width: 40,
                               height: 4,
                               decoration: BoxDecoration(
-                                color: AppColors.textSecondary.withValues(alpha: 0.3),
+                                color: AppColors.textSecondary
+                                    .withValues(alpha: 0.3),
                                 borderRadius: BorderRadius.circular(2),
                               ),
                             ),
@@ -193,7 +198,7 @@ class _TransactionDetailsModalState extends State<TransactionDetailsModal>
             borderRadius: BorderRadius.circular(16),
           ),
           child: Icon(
-            widget.transaction.isIncome 
+            widget.transaction.isIncome
                 ? Icons.trending_up_rounded
                 : Icons.trending_down_rounded,
             color: _getTransactionColor(),
@@ -227,8 +232,9 @@ class _TransactionDetailsModalState extends State<TransactionDetailsModal>
   }
 
   Widget _buildAmountDisplay() {
-    final heroTag = widget.heroTag ?? 'transaction_amount_${widget.transaction.id}';
-    
+    final heroTag =
+        widget.heroTag ?? 'transaction_amount_${widget.transaction.id}';
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(Spacing.space24),
@@ -289,7 +295,7 @@ class _TransactionDetailsModalState extends State<TransactionDetailsModal>
 
   Widget _buildCategoryBadge() {
     final category = AppCategories.findById(widget.transaction.categoryId);
-    
+
     return Container(
       padding: const EdgeInsets.all(Spacing.space16),
       decoration: BoxDecoration(
@@ -403,7 +409,8 @@ class _TransactionDetailsModalState extends State<TransactionDetailsModal>
           widget.transaction.id,
           Icons.tag_outlined,
         ),
-        if (widget.transaction.notes != null && widget.transaction.notes!.isNotEmpty)
+        if (widget.transaction.notes != null &&
+            widget.transaction.notes!.isNotEmpty)
           _buildDetailRow(
             'Description',
             widget.transaction.notes!,
@@ -412,7 +419,8 @@ class _TransactionDetailsModalState extends State<TransactionDetailsModal>
           ),
         _buildDetailRow(
           'Created',
-          DateFormatter.formatDisplay(widget.transaction.createdAt ?? widget.transaction.date),
+          DateFormatter.formatDisplay(
+              widget.transaction.createdAt ?? widget.transaction.date),
           Icons.access_time_outlined,
         ),
       ],
@@ -552,15 +560,15 @@ class _TransactionDetailsModalState extends State<TransactionDetailsModal>
   void _deleteTransaction() {
     // Close the confirmation dialog
     Navigator.of(context).pop();
-    
+
     // Dispatch delete event
     context.read<TransactionsBloc>().add(
-      DeleteTransaction(widget.transaction.id),
-    );
-    
+          DeleteTransaction(widget.transaction.id),
+        );
+
     // Close the modal
     _dismissModal();
-    
+
     // Show success message
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -576,9 +584,7 @@ class _TransactionDetailsModalState extends State<TransactionDetailsModal>
   }
 
   Color _getTransactionColor() {
-    return widget.transaction.isIncome 
-        ? AppColors.success 
-        : AppColors.error;
+    return widget.transaction.isIncome ? AppColors.success : AppColors.error;
   }
 }
 
@@ -662,8 +668,8 @@ class DeleteConfirmationDialog extends StatelessWidget {
                 Text(
                   CurrencyFormatter.format(transaction.amount.abs()),
                   style: AppTypography.bodyMedium.copyWith(
-                    color: transaction.isIncome 
-                        ? AppColors.success 
+                    color: transaction.isIncome
+                        ? AppColors.success
                         : AppColors.error,
                     fontWeight: FontWeight.w600,
                   ),

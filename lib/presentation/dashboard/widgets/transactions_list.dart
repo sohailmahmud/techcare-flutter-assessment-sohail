@@ -19,7 +19,6 @@ class TransactionsList extends StatefulWidget {
   final int? maxItems; // Optional limit for dashboard view
   final bool enableLazyLoading; // Enable lazy loading for large datasets
 
-
   const TransactionsList({
     super.key,
     required this.transactions,

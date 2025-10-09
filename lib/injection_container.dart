@@ -41,22 +41,23 @@ Future<void> init() async {
   //! Initialize Hive
   final appDocumentDir = await getApplicationDocumentsDirectory();
   Hive.init(appDocumentDir.path);
-  
+
   // Register all Hive type adapters using the generated registrar
   Hive.registerAdapters();
 
   //! External dependencies
   sl.registerLazySingleton<Connectivity>(() => Connectivity());
-  
+
   //! Network Client
   sl.registerLazySingleton<NetworkClient>(() => NetworkClient());
-  
+
   // Future API service integration (when real API is available)
   // sl.registerLazySingleton<ApiService>(() => ApiService(sl<NetworkClient>()));
 
   //! Features - Dashboard
   // Bloc
-  sl.registerFactory(() => DashboardBloc(
+  sl.registerFactory(
+    () => DashboardBloc(
       getDashboardSummary: sl(),
       refreshDashboard: sl(),
     ),
@@ -68,24 +69,25 @@ Future<void> init() async {
   sl.registerLazySingleton(() => CreateTransaction(sl()));
   sl.registerLazySingleton(() => update_usecase.UpdateTransaction(sl()));
   sl.registerLazySingleton(() => delete_usecase.DeleteTransaction(sl()));
-  
+
   // Bloc
   sl.registerLazySingleton(() => TransactionsBloc(
-    cacheManager: sl(),
-    transactionRepository: sl<TransactionRepository>(),
-  ));
-  
+        cacheManager: sl(),
+        transactionRepository: sl<TransactionRepository>(),
+      ));
+
   //! Features - Transaction Form
   // Bloc
-  sl.registerFactory(() => TransactionFormBloc(transactionsBloc: sl<TransactionsBloc>()));
-  
+  sl.registerFactory(
+      () => TransactionFormBloc(transactionsBloc: sl<TransactionsBloc>()));
+
   //! Features - Analytics
   // Use cases
   sl.registerLazySingleton(() => GetAnalytics(sl()));
-  
+
   // Bloc
   sl.registerFactory(() => AnalyticsBloc(transactionsBloc: sl()));
-  
+
   //! Features - Categories
   // Bloc
   sl.registerFactory(() => CategoryBloc());
@@ -118,11 +120,11 @@ Future<void> init() async {
   //! API Integration - Data Sources
   // Register MockApiService (initialization will happen on first use)
   sl.registerLazySingleton<MockApiService>(() => MockApiService());
-  
+
   sl.registerLazySingleton<RemoteDataSource>(
     () => RemoteDataSourceImpl(sl<MockApiService>()),
   );
-  
+
   // Initialize LocalDataSource after Hive is ready
   final localDataSource = LocalDataSourceImpl();
   await localDataSource.initialize();

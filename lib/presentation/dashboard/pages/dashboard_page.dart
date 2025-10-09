@@ -31,7 +31,6 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -44,78 +43,88 @@ class _DashboardPageState extends State<DashboardPage> {
           }
         },
         child: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: const SystemUiOverlayStyle(
-          statusBarColor: Colors.transparent,
-          statusBarIconBrightness: Brightness.dark,
-          statusBarBrightness: Brightness.light,
-          systemNavigationBarColor: AppColors.background,
-          systemNavigationBarIconBrightness: Brightness.dark,
-        ),
-        child: Scaffold(
-          backgroundColor: AppColors.background,
-          extendBodyBehindAppBar: true,
-          body: Stack(
-            children: [
-              BlocBuilder<DashboardBloc, DashboardState>(
-                builder: (context, state) {
-                  // Show full skeleton loader for initial loading
-                  if (state is DashboardInitial || state is DashboardLoading) {
-                    return const DashboardSkeletonLoader();
-                  }
-                  
-                  // Show error state
-                  if (state is DashboardError) {
-                    return Center(
-                      child: _buildErrorCard(state.message, () {
-                        context.read<DashboardBloc>().add(const RetryLoadDashboard());
-                      }),
-                    );
-                  }
-                  
-                  return RefreshIndicator(
-                    onRefresh: () async {
-                      final completer = Completer<void>();
-                      context.read<DashboardBloc>().add(const RefreshDashboardData());
-                      
-                      // Listen for state changes to complete refresh
-                      final subscription = context.read<DashboardBloc>().stream.listen((newState) {
-                        if (newState is DashboardLoaded || newState is DashboardError) {
+          value: const SystemUiOverlayStyle(
+            statusBarColor: Colors.transparent,
+            statusBarIconBrightness: Brightness.dark,
+            statusBarBrightness: Brightness.light,
+            systemNavigationBarColor: AppColors.background,
+            systemNavigationBarIconBrightness: Brightness.dark,
+          ),
+          child: Scaffold(
+            backgroundColor: AppColors.background,
+            extendBodyBehindAppBar: true,
+            body: Stack(
+              children: [
+                BlocBuilder<DashboardBloc, DashboardState>(
+                  builder: (context, state) {
+                    // Show full skeleton loader for initial loading
+                    if (state is DashboardInitial ||
+                        state is DashboardLoading) {
+                      return const DashboardSkeletonLoader();
+                    }
+
+                    // Show error state
+                    if (state is DashboardError) {
+                      return Center(
+                        child: _buildErrorCard(state.message, () {
+                          context
+                              .read<DashboardBloc>()
+                              .add(const RetryLoadDashboard());
+                        }),
+                      );
+                    }
+
+                    return RefreshIndicator(
+                      onRefresh: () async {
+                        final completer = Completer<void>();
+                        context
+                            .read<DashboardBloc>()
+                            .add(const RefreshDashboardData());
+
+                        // Listen for state changes to complete refresh
+                        final subscription = context
+                            .read<DashboardBloc>()
+                            .stream
+                            .listen((newState) {
+                          if (newState is DashboardLoaded ||
+                              newState is DashboardError) {
+                            if (!completer.isCompleted) {
+                              completer.complete();
+                            }
+                          }
+                        });
+
+                        // Timeout after reasonable time
+                        Timer(AppConstants.refreshDelay * 2, () {
                           if (!completer.isCompleted) {
                             completer.complete();
                           }
-                        }
-                      });
-                      
-                      // Timeout after reasonable time
-                      Timer(AppConstants.refreshDelay * 2, () {
-                        if (!completer.isCompleted) {
-                          completer.complete();
-                        }
+                          subscription.cancel();
+                        });
+
+                        await completer.future;
                         subscription.cancel();
-                      });
-                      
-                      await completer.future;
-                      subscription.cancel();
-                    },
-                    displacement: 40.0, // Adjust position to work with header
-                    strokeWidth: 2.5,
-                    backgroundColor: AppColors.surface,
-                    color: AppColors.primary,
-                    child: CustomScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(), // Ensure scroll works even with short content
-                      slivers: [
-                        _buildHeader(),
-                        _buildContent(state, context),
-                      ],
-                    ),
-                  );
-                },
-              ),
-              // Custom Speed Dial FAB with backdrop
-              _buildSpeedDialWithBackdrop(),
-            ],
+                      },
+                      displacement: 40.0, // Adjust position to work with header
+                      strokeWidth: 2.5,
+                      backgroundColor: AppColors.surface,
+                      color: AppColors.primary,
+                      child: CustomScrollView(
+                        physics:
+                            const AlwaysScrollableScrollPhysics(), // Ensure scroll works even with short content
+                        slivers: [
+                          _buildHeader(),
+                          _buildContent(state, context),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+                // Custom Speed Dial FAB with backdrop
+                _buildSpeedDialWithBackdrop(),
+              ],
+            ),
           ),
-        ),
         ),
       ),
     );
@@ -157,7 +166,9 @@ class _DashboardPageState extends State<DashboardPage> {
           } else if (state is DashboardLoaded) {
             return GestureDetector(
               onTap: () {
-                context.read<DashboardBloc>().add(const ToggleBalanceVisibility());
+                context
+                    .read<DashboardBloc>()
+                    .add(const ToggleBalanceVisibility());
               },
               child: BalanceCard(
                 balance: state.summary.totalBalance,
@@ -183,72 +194,68 @@ class _DashboardPageState extends State<DashboardPage> {
 
   Widget _buildSpendingChart(DashboardState state, BuildContext context) {
     return BlocBuilder<DashboardBloc, DashboardState>(
-        builder: (context, state) {
-          if (state is DashboardLoaded) {
-            return SpendingPieChart(
-              categories: state.summary.categoryExpenses,
-              selectedCategory: state.selectedCategoryFilter,
-              onCategorySelected: (categoryId) {
-                context.read<DashboardBloc>().add(
-                  SelectTransactionFilter(categoryId: categoryId),
-                );
-              },
-            );
-          } else if (state is DashboardLoading) {
-            return DashboardSkeletonLoaders.spendingChart();
-          } else if (state is DashboardError) {
-            return _buildErrorMessage(state.message);
-          }
-          return SizedBox(
-            height: Spacing.pieChartHeight,
-            child: Center(
-              child: Text(
-                'No spending data available',
-                style: AppTypography.bodyMedium.copyWith(
-                  color: AppColors.textSecondary,
-                ),
+      builder: (context, state) {
+        if (state is DashboardLoaded) {
+          return SpendingPieChart(
+            categories: state.summary.categoryExpenses,
+            selectedCategory: state.selectedCategoryFilter,
+            onCategorySelected: (categoryId) {
+              context.read<DashboardBloc>().add(
+                    SelectTransactionFilter(categoryId: categoryId),
+                  );
+            },
+          );
+        } else if (state is DashboardLoading) {
+          return DashboardSkeletonLoaders.spendingChart();
+        } else if (state is DashboardError) {
+          return _buildErrorMessage(state.message);
+        }
+        return SizedBox(
+          height: Spacing.pieChartHeight,
+          child: Center(
+            child: Text(
+              'No spending data available',
+              style: AppTypography.bodyMedium.copyWith(
+                color: AppColors.textSecondary,
               ),
             ),
-          );
-        },
-      );
+          ),
+        );
+      },
+    );
   }
 
   Widget _buildTransactionsSection(DashboardState state) {
     return BlocBuilder<DashboardBloc, DashboardState>(
-        builder: (context, state) {
-          final isLoading = state is DashboardLoading;
-          final transactions = state is DashboardLoaded 
-              ? state.filteredTransactions.cast<Transaction>() 
-              : <Transaction>[];
-          
-          return TransactionsList(
-            transactions: transactions,
-            isLoading: isLoading,
-            maxItems: AppConstants.maxRecentTransactions, // Limit for dashboard
-            enableLazyLoading: false, // Disable for dashboard - use on full page
-            onEdit: (transactionId) {
-              _showEditTransaction(context, transactionId);
-            },
-            onDelete: (transactionId) {
-              _showDeleteConfirmation(context, transactionId);
-            },
-            onTransactionTap: (transaction) {
-              // Show transaction details as modal
-              _showTransactionDetails(context, transaction);
-            },
-            onViewAll: () {
-              // Navigate to transactions tab using go_router
-              context.goToTransactions();
-            },
-          );
-        },
-      );
+      builder: (context, state) {
+        final isLoading = state is DashboardLoading;
+        final transactions = state is DashboardLoaded
+            ? state.filteredTransactions.cast<Transaction>()
+            : <Transaction>[];
+
+        return TransactionsList(
+          transactions: transactions,
+          isLoading: isLoading,
+          maxItems: AppConstants.maxRecentTransactions, // Limit for dashboard
+          enableLazyLoading: false, // Disable for dashboard - use on full page
+          onEdit: (transactionId) {
+            _showEditTransaction(context, transactionId);
+          },
+          onDelete: (transactionId) {
+            _showDeleteConfirmation(context, transactionId);
+          },
+          onTransactionTap: (transaction) {
+            // Show transaction details as modal
+            _showTransactionDetails(context, transaction);
+          },
+          onViewAll: () {
+            // Navigate to transactions tab using go_router
+            context.goToTransactions();
+          },
+        );
+      },
+    );
   }
-
-
-
-
 
   Widget _buildErrorCard(String message, VoidCallback onRetry) {
     return GlassMorphicContainer(
@@ -264,13 +271,15 @@ class _DashboardPageState extends State<DashboardPage> {
           const SizedBox(height: Spacing.space16),
           Text(
             'Oops! Something went wrong',
-            style: AppTypography.titleLarge.copyWith(color: AppColors.textPrimary),
+            style:
+                AppTypography.titleLarge.copyWith(color: AppColors.textPrimary),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: Spacing.space8),
           Text(
             message,
-            style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+            style: AppTypography.bodyMedium
+                .copyWith(color: AppColors.textSecondary),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: Spacing.space24),
@@ -295,15 +304,14 @@ class _DashboardPageState extends State<DashboardPage> {
           const SizedBox(height: Spacing.space8),
           Text(
             message,
-            style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+            style: AppTypography.bodyMedium
+                .copyWith(color: AppColors.textSecondary),
             textAlign: TextAlign.center,
           ),
         ],
       ),
     );
   }
-
-
 
   Widget _buildSpeedDialWithBackdrop() {
     return Stack(
@@ -321,13 +329,15 @@ class _DashboardPageState extends State<DashboardPage> {
                 icon: Icons.add,
                 label: 'Add Income',
                 backgroundColor: AppColors.success,
-                onPressed: () => _navigateToAddTransaction(TransactionType.income),
+                onPressed: () =>
+                    _navigateToAddTransaction(TransactionType.income),
               ),
               SpeedDialAction(
                 icon: Icons.remove,
                 label: 'Add Expense',
                 backgroundColor: AppColors.error,
-                onPressed: () => _navigateToAddTransaction(TransactionType.expense),
+                onPressed: () =>
+                    _navigateToAddTransaction(TransactionType.expense),
               ),
             ],
           ),
@@ -341,7 +351,7 @@ class _DashboardPageState extends State<DashboardPage> {
     context.goToAddTransaction(sourcePage: 'dashboard');
   }
 
-  void _showEditTransaction(BuildContext context, String transactionId){
+  void _showEditTransaction(BuildContext context, String transactionId) {
     // For now, navigate to edit screen without transaction data using go_router
     context.goToEditTransaction(
       transactionId: transactionId,
@@ -354,7 +364,8 @@ class _DashboardPageState extends State<DashboardPage> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Transaction'),
-        content: const Text('Are you sure you want to delete this transaction?'),
+        content:
+            const Text('Are you sure you want to delete this transaction?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -415,23 +426,24 @@ class _ParallaxHeaderDelegate extends SliverPersistentHeaderDelegate {
   }
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
     final progress = shrinkOffset / (expandedHeight - collapsedHeight);
     final clampedProgress = progress.clamp(0.0, 1.0);
     final statusBarHeight = MediaQuery.of(context).padding.top;
-    
+
     return Stack(
       fit: StackFit.expand,
       children: [
         // Background with parallax effect
         _buildParallaxBackground(shrinkOffset),
-        
+
         // Content with fade and slide animations
         _buildHeaderContent(context, clampedProgress, statusBarHeight),
-        
+
         // Collapsed app bar with app name
         _buildCollapsedAppBar(context, clampedProgress, statusBarHeight),
-        
+
         // Gradient overlay for better text contrast
         _buildGradientOverlay(clampedProgress),
       ],
@@ -440,15 +452,18 @@ class _ParallaxHeaderDelegate extends SliverPersistentHeaderDelegate {
 
   Widget _buildParallaxBackground(double shrinkOffset) {
     // Enhanced parallax offset with smoother curve
-    final progress = (shrinkOffset / (expandedHeight - collapsedHeight)).clamp(0.0, 1.0);
+    final progress =
+        (shrinkOffset / (expandedHeight - collapsedHeight)).clamp(0.0, 1.0);
     final parallaxOffset = shrinkOffset * 0.3; // Reduced for smoother effect
     final scaleProgress = 1.0 - (progress * 0.1); // Subtle scaling effect
-    
+
     return Positioned(
       top: -parallaxOffset,
       left: 0,
       right: 0,
-      height: expandedHeight + parallaxOffset + 50, // Extra height for better coverage
+      height: expandedHeight +
+          parallaxOffset +
+          50, // Extra height for better coverage
       child: Transform.scale(
         scale: scaleProgress,
         alignment: Alignment.topCenter,
@@ -458,8 +473,10 @@ class _ParallaxHeaderDelegate extends SliverPersistentHeaderDelegate {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                AppColors.primary.withValues(alpha: 0.15 * (1.0 - progress * 0.5)),
-                AppColors.secondary.withValues(alpha: 0.08 * (1.0 - progress * 0.3)),
+                AppColors.primary
+                    .withValues(alpha: 0.15 * (1.0 - progress * 0.5)),
+                AppColors.secondary
+                    .withValues(alpha: 0.08 * (1.0 - progress * 0.3)),
                 AppColors.background,
               ],
               stops: const [0.0, 0.4, 1.0],
@@ -473,18 +490,19 @@ class _ParallaxHeaderDelegate extends SliverPersistentHeaderDelegate {
     );
   }
 
-  Widget _buildHeaderContent(BuildContext context, double progress, double statusBarHeight) {
+  Widget _buildHeaderContent(
+      BuildContext context, double progress, double statusBarHeight) {
     // Enhanced animation curves for smoother transitions - fade out earlier to prevent overflow
     final titleOpacity = (1.0 - progress * 2.0).clamp(0.0, 1.0);
     final subtitleOpacity = (1.0 - progress * 2.5).clamp(0.0, 1.0);
     final translateY = progress * 10; // Reduced translation
     final scaleTransform = 1.0 - (progress * 0.03); // Subtle scale effect
-    
+
     // Hide content completely when almost collapsed to prevent overflow
     if (progress > 0.8) {
       return const SizedBox.shrink();
     }
-    
+
     return Positioned(
       left: Spacing.space16,
       right: Spacing.space16,
@@ -494,85 +512,89 @@ class _ParallaxHeaderDelegate extends SliverPersistentHeaderDelegate {
         child: Transform.translate(
           offset: Offset(0, translateY),
           child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Flexible(
-              flex: 2,
-              child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Flexible(
+                flex: 2,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    AnimatedOpacity(
+                      opacity: titleOpacity,
+                      duration: const Duration(milliseconds: 150),
+                      child: Text(
+                        'FinTracker',
+                        style: AppTypography.titleLarge.copyWith(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.5,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    AnimatedOpacity(
+                      opacity: subtitleOpacity,
+                      duration: const Duration(milliseconds: 200),
+                      child: Text(
+                        _getGreeting(),
+                        style: AppTypography.headlineMedium.copyWith(
+                          color: AppColors.textPrimary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                    ),
+                    AnimatedOpacity(
+                      opacity: subtitleOpacity,
+                      duration: const Duration(milliseconds: 250),
+                      child: Text(
+                        'Track your expenses smartly',
+                        style: AppTypography.bodyLarge.copyWith(
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.w400,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Row(
                 mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  AnimatedOpacity(
-                    opacity: titleOpacity,
-                    duration: const Duration(milliseconds: 150),
-                    child: Text(
-                      'FinTracker',
-                      style: AppTypography.titleLarge.copyWith(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.5,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                    ),
+                  BlocBuilder<DashboardBloc, DashboardState>(
+                    builder: (context, state) {
+                      int notificationCount = 0;
+                      if (state is DashboardLoaded) {
+                        // Calculate notification count based on recent transactions (last 3 days for better visibility)
+                        notificationCount = state.filteredTransactions
+                            .where((t) =>
+                                DateTime.now().difference(t.date).inDays <= 3)
+                            .length;
+
+                        // For demo purposes, ensure there's always at least 1 notification
+                        if (notificationCount == 0 &&
+                            state.filteredTransactions.isNotEmpty) {
+                          notificationCount =
+                              state.filteredTransactions.length.clamp(1, 5);
+                        }
+                      }
+                      return _buildNotificationBadge(
+                          context: context, count: notificationCount);
+                    },
                   ),
-                  const SizedBox(height: 4),
-                  AnimatedOpacity(
-                    opacity: subtitleOpacity,
-                    duration: const Duration(milliseconds: 200),
-                    child: Text(
-                      _getGreeting(),
-                      style: AppTypography.headlineMedium.copyWith(
-                        color: AppColors.textPrimary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                    ),
-                  ),
-                  AnimatedOpacity(
-                    opacity: subtitleOpacity,
-                    duration: const Duration(milliseconds: 250),
-                    child: Text(
-                      'Track your expenses smartly',
-                      style: AppTypography.bodyLarge.copyWith(
-                        color: AppColors.textSecondary,
-                        fontWeight: FontWeight.w400,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                    ),
-                  ),
+                  const SizedBox(width: 16),
+                  _buildProfileAvatar(context),
                 ],
               ),
-            ),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                BlocBuilder<DashboardBloc, DashboardState>(
-                  builder: (context, state) {
-                    int notificationCount = 0;
-                    if (state is DashboardLoaded) {
-                      // Calculate notification count based on recent transactions (last 3 days for better visibility)
-                      notificationCount = state.filteredTransactions
-                          .where((t) => DateTime.now().difference(t.date).inDays <= 3)
-                          .length;
-                      
-                      // For demo purposes, ensure there's always at least 1 notification
-                      if (notificationCount == 0 && state.filteredTransactions.isNotEmpty) {
-                        notificationCount = state.filteredTransactions.length.clamp(1, 5);
-                      }
-                    }
-                    return _buildNotificationBadge(context: context, count: notificationCount);
-                  },
-                ),
-                const SizedBox(width: 16),
-                _buildProfileAvatar(context),
-              ],
-            ),
-          ],
-        ),
+            ],
+          ),
         ),
       ),
     );
@@ -601,9 +623,11 @@ class _ParallaxHeaderDelegate extends SliverPersistentHeaderDelegate {
     );
   }
 
-  Widget _buildCollapsedAppBar(BuildContext context, double progress, double statusBarHeight) {
-    final collapsedOpacity = (progress - 0.5).clamp(0.0, 1.0) * 2.0; // Start showing at 50% collapse
-    
+  Widget _buildCollapsedAppBar(
+      BuildContext context, double progress, double statusBarHeight) {
+    final collapsedOpacity =
+        (progress - 0.5).clamp(0.0, 1.0) * 2.0; // Start showing at 50% collapse
+
     return Positioned(
       top: 0,
       left: 0,
@@ -653,7 +677,8 @@ class _ParallaxHeaderDelegate extends SliverPersistentHeaderDelegate {
                       children: [
                         Transform.scale(
                           scale: 0.85,
-                          child: _buildNotificationBadge(context: context, count: 3),
+                          child: _buildNotificationBadge(
+                              context: context, count: 3),
                         ),
                         const SizedBox(width: 8),
                         Transform.scale(
@@ -672,10 +697,11 @@ class _ParallaxHeaderDelegate extends SliverPersistentHeaderDelegate {
     );
   }
 
-  Widget _buildNotificationBadge({required BuildContext context, int count = 0}) {
+  Widget _buildNotificationBadge(
+      {required BuildContext context, int count = 0}) {
     // Force notification badge for demo (remove this in production)
     int displayCount = count > 0 ? count : 3;
-    
+
     return GestureDetector(
       onTap: () {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -710,44 +736,48 @@ class _ParallaxHeaderDelegate extends SliverPersistentHeaderDelegate {
               ],
             ),
             child: Icon(
-              displayCount > 0 ? Icons.notifications_active : Icons.notifications_outlined,
-              color: displayCount > 0 ? AppColors.primary : AppColors.textSecondary,
+              displayCount > 0
+                  ? Icons.notifications_active
+                  : Icons.notifications_outlined,
+              color: displayCount > 0
+                  ? AppColors.primary
+                  : AppColors.textSecondary,
               size: 24,
             ),
           ),
-        if (displayCount > 0)
-          Positioned(
-            right: -2,
-            top: -2,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.elasticOut,
-              width: 20,
-              height: 20,
-              decoration: BoxDecoration(
-                color: AppColors.error,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppColors.surface, width: 2),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.error.withValues(alpha: 0.3),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Center(
-                child: Text(
-                  displayCount > 99 ? '99+' : displayCount.toString(),
-                  style: AppTypography.labelSmall.copyWith(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
+          if (displayCount > 0)
+            Positioned(
+              right: -2,
+              top: -2,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.elasticOut,
+                width: 20,
+                height: 20,
+                decoration: BoxDecoration(
+                  color: AppColors.error,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: AppColors.surface, width: 2),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.error.withValues(alpha: 0.3),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Center(
+                  child: Text(
+                    displayCount > 99 ? '99+' : displayCount.toString(),
+                    style: AppTypography.labelSmall.copyWith(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
         ],
       ),
     );
@@ -833,9 +863,9 @@ class _ParallaxHeaderDelegate extends SliverPersistentHeaderDelegate {
 /// Custom painter for header background pattern
 class _HeaderPatternPainter extends CustomPainter {
   final double opacity;
-  
+
   const _HeaderPatternPainter({this.opacity = 1.0});
-  
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
@@ -853,7 +883,7 @@ class _HeaderPatternPainter extends CustomPainter {
       final angle = (i * 2 * 3.14159) / 3;
       final x = centerX + radius * 0.7 * (i * 0.3) * math.cos(angle);
       final y = centerY + radius * 0.5 * (i * 0.2) * math.sin(angle);
-      
+
       path.addOval(Rect.fromCircle(
         center: Offset(x, y),
         radius: 80 - (i * 20),
@@ -874,7 +904,8 @@ class _SpeedDialOverlayWrapper extends StatefulWidget {
   const _SpeedDialOverlayWrapper({required this.child});
 
   @override
-  State<_SpeedDialOverlayWrapper> createState() => _SpeedDialOverlayWrapperState();
+  State<_SpeedDialOverlayWrapper> createState() =>
+      _SpeedDialOverlayWrapperState();
 }
 
 class _SpeedDialOverlayWrapperState extends State<_SpeedDialOverlayWrapper> {

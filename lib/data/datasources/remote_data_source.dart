@@ -1,4 +1,3 @@
-
 import '../models/transaction_model.dart';
 import '../models/category_model.dart';
 import '../models/analytics_model.dart';
@@ -36,7 +35,8 @@ class PaginatedTransactionsResponse {
 
   PaginatedResponse<Transaction> toEntity() {
     return PaginatedResponse<Transaction>(
-      data: data.map((transactionModel) => transactionModel.toEntity()).toList(),
+      data:
+          data.map((transactionModel) => transactionModel.toEntity()).toList(),
       meta: meta,
     );
   }
@@ -88,7 +88,8 @@ class RemoteDataSourceImpl implements RemoteDataSource {
       type: type,
     );
 
-    final paginatedResponse = PaginatedTransactionsResponse.fromJson(response.data!);
+    final paginatedResponse =
+        PaginatedTransactionsResponse.fromJson(response.data!);
     return paginatedResponse.toEntity();
   }
 
@@ -105,7 +106,8 @@ class RemoteDataSourceImpl implements RemoteDataSource {
   Future<Transaction> updateTransaction(Transaction transaction) async {
     final transactionModel = TransactionModel.fromEntity(transaction);
 
-    final response = await _apiService.updateTransaction(transaction.id, transactionModel);
+    final response =
+        await _apiService.updateTransaction(transaction.id, transactionModel);
     final updatedModel = TransactionModel.fromJson(response.data!);
     return updatedModel.toEntity();
   }
@@ -119,7 +121,9 @@ class RemoteDataSourceImpl implements RemoteDataSource {
   Future<List<Category>> getCategories() async {
     final response = await _apiService.getCategories();
     final categoriesResponse = CategoriesResponse.fromJson(response.data!);
-    return categoriesResponse.categories.map((model) => model.toEntity()).toList();
+    return categoriesResponse.categories
+        .map((model) => model.toEntity())
+        .toList();
   }
 
   @override
@@ -133,7 +137,8 @@ class RemoteDataSourceImpl implements RemoteDataSource {
   @override
   Future<Category> updateCategory(Category category) async {
     final categoryModel = CategoryModel.fromEntity(category);
-    final response = await _apiService.updateCategory(category.id, categoryModel);
+    final response =
+        await _apiService.updateCategory(category.id, categoryModel);
     final updatedModel = CategoryModel.fromJson(response.data!);
     return updatedModel.toEntity();
   }
@@ -150,7 +155,7 @@ class RemoteDataSourceImpl implements RemoteDataSource {
   }) async {
     final response = await _apiService.getAnalytics();
     final analyticsModel = AnalyticsDataModel.fromJson(response.data!);
-    
+
     return analyticsModel;
   }
 }

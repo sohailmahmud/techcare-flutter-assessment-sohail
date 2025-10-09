@@ -98,7 +98,7 @@ void main() {
         expect(category.name, 'Food & Dining');
         expect(category.isIncome, isFalse);
         expect(category.budget, 500.0);
-        
+
         // All fields are final, so they cannot be reassigned
         // This test just verifies the immutable nature exists
       });
@@ -151,7 +151,7 @@ void main() {
     group('toString', () {
       test('returns readable string representation', () {
         final string = category.toString();
-        
+
         expect(string, contains('Category'));
         expect(string, contains('cat1'));
         expect(string, contains('Food & Dining'));

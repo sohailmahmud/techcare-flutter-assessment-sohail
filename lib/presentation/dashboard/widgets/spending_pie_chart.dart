@@ -56,7 +56,7 @@ class _SpendingPieChartState extends State<SpendingPieChart>
     setState(() {
       _touchedIndex = -1;
     });
-    
+
     // Reset animation and replay
     _animationController.reset();
     _animationController.forward();
@@ -65,7 +65,7 @@ class _SpendingPieChartState extends State<SpendingPieChart>
   @override
   void didUpdateWidget(SpendingPieChart oldWidget) {
     super.didUpdateWidget(oldWidget);
-    
+
     // Reset and replay animation when selected category changes
     if (oldWidget.selectedCategory != widget.selectedCategory) {
       _resetChartAnimation();
@@ -127,10 +127,7 @@ class _SpendingPieChartState extends State<SpendingPieChart>
             ],
           ),
           const SizedBox(height: 24),
-          if (widget.categories.isEmpty)
-            _buildEmptyState()
-          else
-            _buildChart(),
+          if (widget.categories.isEmpty) _buildEmptyState() else _buildChart(),
         ],
       ),
     );
@@ -163,7 +160,8 @@ class _SpendingPieChartState extends State<SpendingPieChart>
                           if (touchedIndex != -1) {
                             _touchedIndex = touchedIndex;
                             final category = widget.categories[touchedIndex];
-                            widget.onCategorySelected?.call(category.categoryId);
+                            widget.onCategorySelected
+                                ?.call(category.categoryId);
                           }
                         });
                       },
@@ -198,12 +196,16 @@ class _SpendingPieChartState extends State<SpendingPieChart>
       final isTouched = index == _touchedIndex;
       final isSelected = widget.selectedCategory == category.categoryId;
       final opacity = widget.selectedCategory == null || isSelected ? 1.0 : 0.3;
-      
+
       return PieChartSectionData(
         color: _getCategoryColor(index).withValues(alpha: opacity),
         value: category.percentage * _animation.value,
         title: isTouched ? '${category.percentage.toStringAsFixed(1)}%' : '',
-        radius: isTouched ? Spacing.pieChartTouchedRadius : (isSelected ? Spacing.pieChartSelectedRadius : Spacing.pieChartNormalRadius),
+        radius: isTouched
+            ? Spacing.pieChartTouchedRadius
+            : (isSelected
+                ? Spacing.pieChartSelectedRadius
+                : Spacing.pieChartNormalRadius),
         titleStyle: AppTypography.labelSmall.copyWith(
           fontWeight: FontWeight.bold,
           color: Colors.white,
@@ -219,7 +221,7 @@ class _SpendingPieChartState extends State<SpendingPieChart>
       final category = entry.value;
       final isSelected = widget.selectedCategory == category.categoryId;
       final opacity = widget.selectedCategory == null || isSelected ? 1.0 : 0.5;
-      
+
       return Padding(
         padding: const EdgeInsets.only(bottom: 8),
         child: GestureDetector(
@@ -248,7 +250,8 @@ class _SpendingPieChartState extends State<SpendingPieChart>
                         category.categoryName,
                         style: AppTypography.labelMedium.copyWith(
                           color: AppColors.textPrimary,
-                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                          fontWeight:
+                              isSelected ? FontWeight.w600 : FontWeight.normal,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,

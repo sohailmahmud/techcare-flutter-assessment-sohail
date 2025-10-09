@@ -78,7 +78,7 @@ void main() {
         category: 'cat1',
         type: TransactionType.expense,
       );
-      
+
       when(() => mockRepository.getTransactions(customQuery))
           .thenAnswer((_) async => Right(mockResponse));
 
@@ -98,7 +98,7 @@ void main() {
         startDate: DateTime(2024, 1, 1),
         endDate: DateTime(2024, 1, 31),
       );
-      
+
       when(() => mockRepository.getTransactions(searchQuery))
           .thenAnswer((_) async => Right(mockResponse));
 

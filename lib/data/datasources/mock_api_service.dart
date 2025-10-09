@@ -10,31 +10,32 @@ import 'asset_data_source.dart';
 class MockApiService {
   final AssetDataSource _assetDataSource = AssetDataSource();
   final math.Random _random = math.Random();
-  
+
   // In-memory storage for CRUD operations
   List<TransactionModel> _transactions = [];
   List<CategoryModel> _categories = [];
   AnalyticsDataModel? _analytics;
-  
+
   bool _isInitialized = false;
 
   /// Initialize service with JSON data loading
   Future<void> initialize() async {
     if (_isInitialized) return;
-    
+
     try {
       Logger.d('MockApiService: Starting initialization');
       // Load data from assets
       final transactionsResponse = await _assetDataSource.getTransactions();
       final categoriesResponse = await _assetDataSource.getCategories();
       final analyticsResponse = await _assetDataSource.getAnalytics();
-      
+
       _transactions = transactionsResponse.data;
       _categories = categoriesResponse.categories;
       _analytics = analyticsResponse.analytics;
-      
+
       _isInitialized = true;
-      Logger.i('MockApiService initialized with ${_transactions.length} transactions and ${_categories.length} categories');
+      Logger.i(
+          'MockApiService initialized with ${_transactions.length} transactions and ${_categories.length} categories');
     } catch (e) {
       Logger.e('Failed to initialize MockApiService', error: e);
       rethrow;
@@ -68,21 +69,19 @@ class MockApiService {
 
     // Apply filters
     if (category != null && category.isNotEmpty) {
-      filteredTransactions = filteredTransactions
-          .where((t) => t.category.id == category)
-          .toList();
+      filteredTransactions =
+          filteredTransactions.where((t) => t.category.id == category).toList();
     }
 
     if (type != null && type.isNotEmpty) {
-      filteredTransactions = filteredTransactions
-          .where((t) => t.typeString == type)
-          .toList();
+      filteredTransactions =
+          filteredTransactions.where((t) => t.typeString == type).toList();
     }
 
     if (search != null && search.isNotEmpty) {
       final searchLower = search.toLowerCase();
       filteredTransactions = filteredTransactions
-          .where((t) => 
+          .where((t) =>
               t.title.toLowerCase().contains(searchLower) ||
               (t.description?.toLowerCase().contains(searchLower) ?? false) ||
               t.category.name.toLowerCase().contains(searchLower))
@@ -97,7 +96,7 @@ class MockApiService {
     final totalPages = (totalItems / limit).ceil();
     final startIndex = (page - 1) * limit;
     final endIndex = math.min(startIndex + limit, totalItems);
-    
+
     final paginatedTransactions = startIndex < filteredTransactions.length
         ? filteredTransactions.sublist(startIndex, endIndex)
         : <TransactionModel>[];
@@ -166,7 +165,8 @@ class MockApiService {
   }
 
   /// Create transaction
-  Future<Response<Map<String, dynamic>>> createTransaction(TransactionModel transaction) async {
+  Future<Response<Map<String, dynamic>>> createTransaction(
+      TransactionModel transaction) async {
     await initialize();
     await _simulateDelay();
     _simulateNetworkError();
@@ -200,7 +200,8 @@ class MockApiService {
   }
 
   /// Update transaction
-  Future<Response<Map<String, dynamic>>> updateTransaction(String id, TransactionModel transaction) async {
+  Future<Response<Map<String, dynamic>>> updateTransaction(
+      String id, TransactionModel transaction) async {
     await initialize();
     await _simulateDelay();
     _simulateNetworkError();
@@ -308,7 +309,8 @@ class MockApiService {
   }
 
   /// Create category
-  Future<Response<Map<String, dynamic>>> createCategory(CategoryModel category) async {
+  Future<Response<Map<String, dynamic>>> createCategory(
+      CategoryModel category) async {
     await initialize();
     await _simulateDelay();
     _simulateNetworkError();
@@ -338,7 +340,8 @@ class MockApiService {
   }
 
   /// Update category
-  Future<Response<Map<String, dynamic>>> updateCategory(String id, CategoryModel category) async {
+  Future<Response<Map<String, dynamic>>> updateCategory(
+      String id, CategoryModel category) async {
     await initialize();
     await _simulateDelay();
     _simulateNetworkError();
@@ -419,11 +422,13 @@ class MockApiService {
       await _simulateDelay();
       _simulateNetworkError();
 
-      Logger.d('MockApiService: Processing ${_transactions.length} transactions');
+      Logger.d(
+          'MockApiService: Processing ${_transactions.length} transactions');
 
       // If no transactions loaded, return empty but valid response
       if (_transactions.isEmpty) {
-        Logger.w('MockApiService: No transactions found, returning empty response');
+        Logger.w(
+            'MockApiService: No transactions found, returning empty response');
         final response = {
           'success': true,
           'data': {
@@ -448,20 +453,23 @@ class MockApiService {
       final currentMonth = DateTime(now.year, now.month, 1);
       final currentMonthTransactions = _transactions.where((t) {
         final transactionDate = t.date;
-        return transactionDate.isAfter(currentMonth.subtract(const Duration(days: 1)));
+        return transactionDate
+            .isAfter(currentMonth.subtract(const Duration(days: 1)));
       }).toList();
 
-      Logger.d('MockApiService: Found ${currentMonthTransactions.length} transactions for current month');
+      Logger.d(
+          'MockApiService: Found ${currentMonthTransactions.length} transactions for current month');
 
       final totalIncome = currentMonthTransactions
           .where((t) => t.typeString == 'income')
           .fold<double>(0.0, (sum, t) => sum + t.amount);
-      
+
       final totalExpenses = currentMonthTransactions
           .where((t) => t.typeString == 'expense')
           .fold<double>(0.0, (sum, t) => sum + t.amount);
 
-      Logger.d('MockApiService: Total income: $totalIncome, Total expenses: $totalExpenses');
+      Logger.d(
+          'MockApiService: Total income: $totalIncome, Total expenses: $totalExpenses');
 
       // Calculate category expenses
       final categoryExpenseMap = <String, Map<String, dynamic>>{};
@@ -487,7 +495,8 @@ class MockApiService {
       // Calculate percentages and create category expenses list
       final categoryExpenses = categoryExpenseMap.values.map((category) {
         final amount = category['amount'] as double;
-        final percentage = totalExpenses > 0 ? (amount / totalExpenses) * 100 : 0.0;
+        final percentage =
+            totalExpenses > 0 ? (amount / totalExpenses) * 100 : 0.0;
         return {
           'categoryId': category['categoryId'],
           'categoryName': category['categoryName'],
@@ -500,24 +509,24 @@ class MockApiService {
       // Get recent transactions (limit to 10) - sorted by date descending (newest first)
       final sortedTransactions = List<TransactionModel>.from(_transactions);
       sortedTransactions.sort((a, b) => b.date.compareTo(a.date));
-      
+
       final recentTransactions = sortedTransactions
           .take(10)
           .map((t) => {
-            'id': t.id,
-            'title': t.title,
-            'amount': t.amount,
-            'type': t.typeString,
-            'category': {
-              'id': t.category.id,
-              'name': t.category.name,
-              'icon': t.category.icon,
-              'color': t.category.color,
-              'budget': t.category.budget,
-            },
-            'date': t.date.toIso8601String(),
-            'description': t.description,
-          })
+                'id': t.id,
+                'title': t.title,
+                'amount': t.amount,
+                'type': t.typeString,
+                'category': {
+                  'id': t.category.id,
+                  'name': t.category.name,
+                  'icon': t.category.icon,
+                  'color': t.category.color,
+                  'budget': t.category.budget,
+                },
+                'date': t.date.toIso8601String(),
+                'description': t.description,
+              })
           .toList();
 
       final response = {
@@ -533,7 +542,8 @@ class MockApiService {
         }
       };
 
-      Logger.i('MockApiService: Returning dashboard summary with ${categoryExpenses.length} categories and ${recentTransactions.length} recent transactions');
+      Logger.i(
+          'MockApiService: Returning dashboard summary with ${categoryExpenses.length} categories and ${recentTransactions.length} recent transactions');
 
       return Response<Map<String, dynamic>>(
         data: response,
@@ -541,7 +551,8 @@ class MockApiService {
         requestOptions: RequestOptions(path: '/api/dashboard/summary'),
       );
     } catch (e, stackTrace) {
-      Logger.e('MockApiService: Error in getDashboardSummary', error: e, stackTrace: stackTrace);
+      Logger.e('MockApiService: Error in getDashboardSummary',
+          error: e, stackTrace: stackTrace);
       rethrow;
     }
   }

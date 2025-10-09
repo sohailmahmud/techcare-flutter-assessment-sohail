@@ -87,7 +87,7 @@ class _SummaryStatisticsCardsState extends State<SummaryStatisticsCards>
             index: 0,
             title: 'Total Income',
             amount: widget.statistics.totalIncome,
-            change: 0.0, 
+            change: 0.0,
             color: AppColors.income,
             icon: Icons.trending_up_rounded,
           ),
@@ -98,7 +98,7 @@ class _SummaryStatisticsCardsState extends State<SummaryStatisticsCards>
             index: 1,
             title: 'Total Expenses',
             amount: widget.statistics.totalExpenses,
-            change: 0.0, 
+            change: 0.0,
             color: AppColors.expense,
             icon: Icons.trending_down_rounded,
           ),
@@ -109,10 +109,12 @@ class _SummaryStatisticsCardsState extends State<SummaryStatisticsCards>
             index: 2,
             title: 'Net Balance',
             amount: widget.statistics.netAmount,
-            change: 0.0, 
-            color: widget.statistics.netAmount >= 0 ? AppColors.income : AppColors.expense,
-            icon: widget.statistics.netAmount >= 0 
-                ? Icons.account_balance_wallet_rounded 
+            change: 0.0,
+            color: widget.statistics.netAmount >= 0
+                ? AppColors.income
+                : AppColors.expense,
+            icon: widget.statistics.netAmount >= 0
+                ? Icons.account_balance_wallet_rounded
                 : Icons.warning_rounded,
           ),
         ),
@@ -195,7 +197,7 @@ class _SummaryStatisticsCardsState extends State<SummaryStatisticsCards>
   Widget _buildChangeIndicator(double change, Color baseColor) {
     final isPositive = change >= 0;
     final displayChange = change.abs();
-    
+
     if (displayChange < 0.01) {
       return Container(
         padding: const EdgeInsets.symmetric(
@@ -222,14 +224,17 @@ class _SummaryStatisticsCardsState extends State<SummaryStatisticsCards>
         vertical: Spacing.space4,
       ),
       decoration: BoxDecoration(
-        color: (isPositive ? AppColors.income : AppColors.expense).withValues(alpha: 0.1),
+        color: (isPositive ? AppColors.income : AppColors.expense)
+            .withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            isPositive ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded,
+            isPositive
+                ? Icons.arrow_upward_rounded
+                : Icons.arrow_downward_rounded,
             size: 12,
             color: isPositive ? AppColors.income : AppColors.expense,
           ),
@@ -269,7 +274,7 @@ class AnimatedNumberCounter extends StatelessWidget {
       builder: (context, child) {
         final animatedValue = value * animation.value;
         return Text(
-          showCurrency 
+          showCurrency
               ? CurrencyFormatter.formatCompact(animatedValue)
               : animatedValue.toStringAsFixed(0),
           style: style,
@@ -305,7 +310,7 @@ class ResponsiveSummaryStats extends StatelessWidget {
                     child: _buildCompactStatCard(
                       title: 'Income',
                       amount: statistics.totalIncome,
-                      change: 0.0, 
+                      change: 0.0,
                       color: AppColors.income,
                       icon: Icons.trending_up_rounded,
                     ),
@@ -327,9 +332,11 @@ class ResponsiveSummaryStats extends StatelessWidget {
                 title: 'Net Balance',
                 amount: statistics.netAmount,
                 change: 0.0,
-                color: statistics.netAmount >= 0 ? AppColors.income : AppColors.expense,
-                icon: statistics.netAmount >= 0 
-                    ? Icons.account_balance_wallet_rounded 
+                color: statistics.netAmount >= 0
+                    ? AppColors.income
+                    : AppColors.expense,
+                icon: statistics.netAmount >= 0
+                    ? Icons.account_balance_wallet_rounded
                     : Icons.warning_rounded,
               ),
             ],
@@ -393,7 +400,7 @@ class ResponsiveSummaryStats extends StatelessWidget {
   Widget _buildChangeText(double change) {
     final isPositive = change >= 0;
     final displayChange = change.abs();
-    
+
     if (displayChange < 0.01) {
       return Text(
         'No change',

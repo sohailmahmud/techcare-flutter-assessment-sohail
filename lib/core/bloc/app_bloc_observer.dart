@@ -22,8 +22,7 @@ class AppBlocObserver extends BlocObserver {
     if (bloc is Bloc) {
       super.onTransition(bloc, transition);
     }
-    Logger.d(
-        'BLoC Transition: ${bloc.runtimeType}\n'
+    Logger.d('BLoC Transition: ${bloc.runtimeType}\n'
         '  Event: ${transition.event.runtimeType}\n'
         '  Current: ${transition.currentState.runtimeType}\n'
         '  Next: ${transition.nextState.runtimeType}');

@@ -85,13 +85,15 @@ void main() {
       await usecase(customTransactionId);
 
       // Assert
-      verify(() => mockRepository.deleteTransaction(customTransactionId)).called(1);
+      verify(() => mockRepository.deleteTransaction(customTransactionId))
+          .called(1);
     });
 
     test('should handle empty transaction ID', () async {
       // Arrange
       const emptyId = '';
-      const validationFailure = ValidationFailure('Transaction ID cannot be empty');
+      const validationFailure =
+          ValidationFailure('Transaction ID cannot be empty');
       when(() => mockRepository.deleteTransaction(emptyId))
           .thenAnswer((_) async => const Left(validationFailure));
 

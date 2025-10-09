@@ -33,7 +33,7 @@ enum HiveSyncOperation {
   delete,
 }
 
-/// Sync status enum  
+/// Sync status enum
 @HiveType(typeId: HiveTypeIds.syncStatus)
 enum HiveSyncStatus {
   @HiveField(0)
@@ -209,8 +209,8 @@ class HiveTransaction extends HiveObject {
       id: json['id'] ?? '',
       title: json['title'] ?? '',
       amount: (json['amount'] as num?)?.toDouble() ?? 0.0,
-      type: json['type'] == 'income' 
-          ? HiveTransactionType.income 
+      type: json['type'] == 'income'
+          ? HiveTransactionType.income
           : HiveTransactionType.expense,
       categoryId: json['categoryId'] ?? json['category']?['id'] ?? '',
       date: DateTime.tryParse(json['date'] ?? '') ?? DateTime.now(),
@@ -228,7 +228,8 @@ class HiveTransaction extends HiveObject {
   }
 
   @override
-  String toString() => 'HiveTransaction(id: $id, title: $title, amount: $amount)';
+  String toString() =>
+      'HiveTransaction(id: $id, title: $title, amount: $amount)';
 }
 
 /// Hive model for categories
@@ -431,19 +432,20 @@ class HiveSyncQueueItem extends HiveObject {
   bool get shouldRetry {
     if (status != HiveSyncStatus.failed) return false;
     if (retryCount >= 5) return false; // Max 5 retries
-    
+
     final lastAttempt = lastAttemptAt;
     if (lastAttempt == null) return true;
-    
+
     // Exponential backoff: 1min, 2min, 4min, 8min, 16min
     final backoffMinutes = (1 << retryCount);
     final nextRetry = lastAttempt.add(Duration(minutes: backoffMinutes));
-    
+
     return DateTime.now().isAfter(nextRetry);
   }
 
   @override
-  String toString() => 'HiveSyncQueueItem(id: $id, entityType: $entityType, operation: $operation)';
+  String toString() =>
+      'HiveSyncQueueItem(id: $id, entityType: $entityType, operation: $operation)';
 }
 
 /// Hive box names

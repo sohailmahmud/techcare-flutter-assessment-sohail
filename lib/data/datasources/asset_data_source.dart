@@ -15,14 +15,17 @@ class AssetDataSource {
     try {
       Logger.d('AssetDataSource: Loading transactions from $_transactionsPath');
       final jsonString = await rootBundle.loadString(_transactionsPath);
-      Logger.d('AssetDataSource: Loaded transactions JSON, length: ${jsonString.length}');
+      Logger.d(
+          'AssetDataSource: Loaded transactions JSON, length: ${jsonString.length}');
       final jsonData = json.decode(jsonString) as Map<String, dynamic>;
       Logger.d('AssetDataSource: Decoded JSON, keys: ${jsonData.keys}');
       final response = PaginatedTransactionsResponse.fromJson(jsonData);
-      Logger.d('AssetDataSource: Created response with ${response.data.length} transactions');
+      Logger.d(
+          'AssetDataSource: Created response with ${response.data.length} transactions');
       return response;
     } catch (e, stackTrace) {
-      Logger.e('AssetDataSource: Failed to load transactions', error: e, stackTrace: stackTrace);
+      Logger.e('AssetDataSource: Failed to load transactions',
+          error: e, stackTrace: stackTrace);
       throw Exception('Failed to load transactions: $e');
     }
   }
@@ -31,14 +34,17 @@ class AssetDataSource {
     try {
       Logger.d('AssetDataSource: Loading categories from $_categoriesPath');
       final jsonString = await rootBundle.loadString(_categoriesPath);
-      Logger.d('AssetDataSource: Loaded categories JSON, length: ${jsonString.length}');
+      Logger.d(
+          'AssetDataSource: Loaded categories JSON, length: ${jsonString.length}');
       final jsonData = json.decode(jsonString) as Map<String, dynamic>;
       Logger.d('AssetDataSource: Decoded JSON, keys: ${jsonData.keys}');
       final response = CategoriesResponse.fromJson(jsonData);
-      Logger.d('AssetDataSource: Created response with ${response.categories.length} categories');
+      Logger.d(
+          'AssetDataSource: Created response with ${response.categories.length} categories');
       return response;
     } catch (e, stackTrace) {
-      Logger.e('AssetDataSource: Failed to load categories', error: e, stackTrace: stackTrace);
+      Logger.e('AssetDataSource: Failed to load categories',
+          error: e, stackTrace: stackTrace);
       throw Exception('Failed to load categories: $e');
     }
   }
@@ -47,14 +53,16 @@ class AssetDataSource {
     try {
       Logger.d('AssetDataSource: Loading analytics from $_analyticsPath');
       final jsonString = await rootBundle.loadString(_analyticsPath);
-      Logger.d('AssetDataSource: Loaded analytics JSON, length: ${jsonString.length}');
+      Logger.d(
+          'AssetDataSource: Loaded analytics JSON, length: ${jsonString.length}');
       final jsonData = json.decode(jsonString) as Map<String, dynamic>;
       Logger.d('AssetDataSource: Decoded JSON, keys: ${jsonData.keys}');
       final response = AnalyticsResponse.fromJson(jsonData);
       Logger.d('AssetDataSource: Created analytics response');
       return response;
     } catch (e, stackTrace) {
-      Logger.e('AssetDataSource: Failed to load analytics', error: e, stackTrace: stackTrace);
+      Logger.e('AssetDataSource: Failed to load analytics',
+          error: e, stackTrace: stackTrace);
       throw Exception('Failed to load analytics: $e');
     }
   }

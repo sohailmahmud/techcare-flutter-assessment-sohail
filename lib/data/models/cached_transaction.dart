@@ -87,14 +87,15 @@ class CachedTransaction extends HiveObject {
   /// Convert to domain entity
   Transaction toTransaction() {
     // Find the category by ID, with fallback
-    final category = AppCategories.findById(categoryId) ?? Category(
-      id: categoryId,
-      name: categoryName,
-      icon: Icons.category,
-      color: Colors.grey,
-      isIncome: type == 0,
-    );
-    
+    final category = AppCategories.findById(categoryId) ??
+        Category(
+          id: categoryId,
+          name: categoryName,
+          icon: Icons.category,
+          color: Colors.grey,
+          isIncome: type == 0,
+        );
+
     return Transaction(
       id: id,
       title: title,
@@ -143,6 +144,6 @@ class CachedTransaction extends HiveObject {
   @override
   String toString() {
     return 'CachedTransaction(id: $id, title: $title, amount: $amount, '
-           'type: $type, cached: $cachedAt, expires: $expiresAt)';
+        'type: $type, cached: $cachedAt, expires: $expiresAt)';
   }
 }

@@ -69,7 +69,8 @@ class ApiResponseHandler {
       case 422:
         return ValidationFailure(errorMessage, code: errorCode);
       case 429:
-        return const NetworkFailure('Too many requests. Please try again later.');
+        return const NetworkFailure(
+            'Too many requests. Please try again later.');
       case 500:
       case 502:
       case 503:

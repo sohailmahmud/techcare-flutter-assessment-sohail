@@ -28,10 +28,10 @@ class HiveKeyValue extends HiveObject {
   /// Check if the cached data is still valid
   bool isValid({Duration? maxAge}) {
     if (timestamp == null) return false;
-    
+
     final age = DateTime.now().millisecondsSinceEpoch - timestamp!;
     final maxAgeMs = (maxAge ?? const Duration(minutes: 5)).inMilliseconds;
-    
+
     return age <= maxAgeMs;
   }
 

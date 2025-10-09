@@ -20,7 +20,7 @@ class CategoryModel {
     this.budget,
   });
 
-  factory CategoryModel.fromJson(Map<String, dynamic> json) => 
+  factory CategoryModel.fromJson(Map<String, dynamic> json) =>
       _$CategoryModelFromJson(json);
 
   Map<String, dynamic> toJson() => _$CategoryModelToJson(this);
@@ -91,7 +91,7 @@ class CategoriesResponse {
 
   const CategoriesResponse({required this.categories});
 
-  factory CategoriesResponse.fromJson(Map<String, dynamic> json) => 
+  factory CategoriesResponse.fromJson(Map<String, dynamic> json) =>
       _$CategoriesResponseFromJson(json);
 
   Map<String, dynamic> toJson() => _$CategoriesResponseToJson(this);

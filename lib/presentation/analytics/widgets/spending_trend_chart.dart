@@ -85,9 +85,7 @@ class _SpendingTrendChartState extends State<SpendingTrendChart>
                 minHeight: 180,
                 maxHeight: 220,
               ),
-              child: widget.isLoading
-                  ? _buildLoadingState()
-                  : _buildChart(),
+              child: widget.isLoading ? _buildLoadingState() : _buildChart(),
             ),
           ),
         ],
@@ -204,7 +202,8 @@ class _SpendingTrendChartState extends State<SpendingTrendChart>
   }
 
   Widget _buildChart() {
-    if (widget.trendData.incomePoints.isEmpty && widget.trendData.expensePoints.isEmpty) {
+    if (widget.trendData.incomePoints.isEmpty &&
+        widget.trendData.expensePoints.isEmpty) {
       return _buildEmptyState();
     }
 
@@ -252,15 +251,18 @@ class _SpendingTrendChartState extends State<SpendingTrendChart>
 
   LineChartData _buildLineChartData() {
     final maxY = _getMaxY();
-    
+
     return LineChartData(
       gridData: _buildGridData(),
       titlesData: _buildTitlesData(),
       borderData: _buildBorderData(),
       minX: 0,
-      maxX: (widget.trendData.incomePoints.length.compareTo(widget.trendData.expensePoints.length) > 0 
-          ? widget.trendData.incomePoints.length 
-          : widget.trendData.expensePoints.length - 1).toDouble(),
+      maxX: (widget.trendData.incomePoints.length
+                      .compareTo(widget.trendData.expensePoints.length) >
+                  0
+              ? widget.trendData.incomePoints.length
+              : widget.trendData.expensePoints.length - 1)
+          .toDouble(),
       minY: 0,
       maxY: maxY,
       lineBarsData: [
@@ -275,7 +277,7 @@ class _SpendingTrendChartState extends State<SpendingTrendChart>
   FlGridData _buildGridData() {
     final maxY = _getMaxY();
     final interval = maxY > 0 ? maxY / 4 : 1.0; // Ensure interval is never zero
-    
+
     return FlGridData(
       show: true,
       drawVerticalLine: false,
@@ -306,7 +308,9 @@ class _SpendingTrendChartState extends State<SpendingTrendChart>
       leftTitles: AxisTitles(
         sideTitles: SideTitles(
           showTitles: true,
-          interval: _getMaxY() > 0 ? _getMaxY() / 4 : 1.0, // Ensure interval is never zero
+          interval: _getMaxY() > 0
+              ? _getMaxY() / 4
+              : 1.0, // Ensure interval is never zero
           getTitlesWidget: _buildLeftTitleWidgets,
           reservedSize: 50,
         ),
@@ -315,16 +319,18 @@ class _SpendingTrendChartState extends State<SpendingTrendChart>
   }
 
   Widget _buildBottomTitleWidgets(double value, TitleMeta meta) {
-    final maxIndex = widget.trendData.incomePoints.length.compareTo(widget.trendData.expensePoints.length) > 0 
-        ? widget.trendData.incomePoints.length 
+    final maxIndex = widget.trendData.incomePoints.length
+                .compareTo(widget.trendData.expensePoints.length) >
+            0
+        ? widget.trendData.incomePoints.length
         : widget.trendData.expensePoints.length;
-    
+
     if (value < 0 || value >= maxIndex) {
       return Container();
     }
 
     // Use income points as primary reference for labels, fallback to expense points
-    final dataPoint = value.toInt() < widget.trendData.incomePoints.length 
+    final dataPoint = value.toInt() < widget.trendData.incomePoints.length
         ? widget.trendData.incomePoints[value.toInt()]
         : widget.trendData.expensePoints[value.toInt()];
     final monthName = _getMonthAbbreviation(dataPoint.date.month);
@@ -435,7 +441,9 @@ class _SpendingTrendChartState extends State<SpendingTrendChart>
   }
 
   List<FlSpot> _buildSpots({required bool isIncome}) {
-    final dataPoints = isIncome ? widget.trendData.incomePoints : widget.trendData.expensePoints;
+    final dataPoints = isIncome
+        ? widget.trendData.incomePoints
+        : widget.trendData.expensePoints;
     return dataPoints.asMap().entries.map((entry) {
       final index = entry.key.toDouble();
       final dataPoint = entry.value;
@@ -450,13 +458,15 @@ class _SpendingTrendChartState extends State<SpendingTrendChart>
         // Handle touch interactions for future enhancements
       },
       touchTooltipData: LineTouchTooltipData(
-        getTooltipColor: (touchedSpot) => AppColors.textPrimary.withValues(alpha: 0.8),
+        getTooltipColor: (touchedSpot) =>
+            AppColors.textPrimary.withValues(alpha: 0.8),
         tooltipRoundedRadius: 8,
         tooltipPadding: const EdgeInsets.all(8),
         tooltipMargin: 8,
         getTooltipItems: _buildTooltipItems,
       ),
-      getTouchedSpotIndicator: (LineChartBarData barData, List<int> spotIndexes) {
+      getTouchedSpotIndicator:
+          (LineChartBarData barData, List<int> spotIndexes) {
         return spotIndexes.map((spotIndex) {
           return TouchedSpotIndicatorData(
             FlLine(
@@ -486,12 +496,13 @@ class _SpendingTrendChartState extends State<SpendingTrendChart>
         fontWeight: FontWeight.bold,
         fontSize: 12,
       );
-      
-      final dataPoint = touchedSpot.barIndex == 0 && touchedSpot.spotIndex < widget.trendData.incomePoints.length
+
+      final dataPoint = touchedSpot.barIndex == 0 &&
+              touchedSpot.spotIndex < widget.trendData.incomePoints.length
           ? widget.trendData.incomePoints[touchedSpot.spotIndex]
           : widget.trendData.expensePoints[touchedSpot.spotIndex];
       final monthName = _getMonthName(dataPoint.date.month);
-      
+
       if (touchedSpot.barIndex == 0) {
         // Income line
         return LineTooltipItem(
@@ -509,34 +520,61 @@ class _SpendingTrendChartState extends State<SpendingTrendChart>
   }
 
   double _getMaxY() {
-    if (widget.trendData.incomePoints.isEmpty && widget.trendData.expensePoints.isEmpty) return 100;
-    
+    if (widget.trendData.incomePoints.isEmpty &&
+        widget.trendData.expensePoints.isEmpty) return 100;
+
     double maxValue = 0;
-    
+
     // Check income points
     for (final dataPoint in widget.trendData.incomePoints) {
       if (dataPoint.value > maxValue) maxValue = dataPoint.value;
     }
-    
+
     // Check expense points
     for (final dataPoint in widget.trendData.expensePoints) {
       if (dataPoint.value > maxValue) maxValue = dataPoint.value;
     }
-    
+
     // Ensure minimum value and add 20% padding to the top
     final result = maxValue * 1.2;
-    return result > 0 ? result : 100; // Return minimum 100 if result is 0 or negative
+    return result > 0
+        ? result
+        : 100; // Return minimum 100 if result is 0 or negative
   }
 
   String _getMonthAbbreviation(int month) {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
+    ];
     return months[month - 1];
   }
 
   String _getMonthName(int month) {
-    const months = ['January', 'February', 'March', 'April', 'May', 'June',
-                   'July', 'August', 'September', 'October', 'November', 'December'];
+    const months = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December'
+    ];
     return months[month - 1];
   }
 }

@@ -22,7 +22,7 @@ class CategorySelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasError = errorText != null;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -62,7 +62,7 @@ class CategorySelector extends StatelessWidget {
             ),
           ),
         ),
-        
+
         // Error Message
         if (hasError) ...[
           const SizedBox(height: Spacing.space8),
@@ -98,7 +98,7 @@ class CategorySelector extends StatelessWidget {
         itemBuilder: (context, index) {
           final category = categories[index];
           final isSelected = selectedCategory?.id == category.id;
-          
+
           return Padding(
             padding: EdgeInsets.only(
               right: index < categories.length - 1 ? Spacing.space12 : 0,
@@ -143,9 +143,7 @@ class CategorySelector extends StatelessWidget {
                       ),
                       child: Icon(
                         category.icon,
-                        color: isSelected
-                            ? Colors.white
-                            : category.color,
+                        color: isSelected ? Colors.white : category.color,
                         size: 24,
                       ),
                     ),
@@ -156,9 +154,8 @@ class CategorySelector extends StatelessWidget {
                         color: isSelected
                             ? category.color
                             : AppColors.textSecondary,
-                        fontWeight: isSelected
-                            ? FontWeight.w600
-                            : FontWeight.w500,
+                        fontWeight:
+                            isSelected ? FontWeight.w600 : FontWeight.w500,
                       ),
                       textAlign: TextAlign.center,
                       maxLines: 2,
@@ -193,7 +190,7 @@ class HorizontalCategorySelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasError = errorText != null;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -223,12 +220,13 @@ class HorizontalCategorySelector extends StatelessWidget {
               Expanded(
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: Spacing.space16),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: Spacing.space16),
                   itemCount: categories.length,
                   itemBuilder: (context, index) {
                     final category = categories[index];
                     final isSelected = selectedCategory?.id == category.id;
-                    
+
                     return Padding(
                       padding: const EdgeInsets.only(right: Spacing.space12),
                       child: GestureDetector(
@@ -240,7 +238,8 @@ class HorizontalCategorySelector extends StatelessWidget {
                             color: isSelected
                                 ? category.color.withValues(alpha: 0.15)
                                 : Colors.transparent,
-                            borderRadius: BorderRadius.circular(Spacing.radiusM),
+                            borderRadius:
+                                BorderRadius.circular(Spacing.radiusM),
                             border: Border.all(
                               color: isSelected
                                   ? category.color
@@ -257,7 +256,8 @@ class HorizontalCategorySelector extends StatelessWidget {
                                   color: isSelected
                                       ? category.color
                                       : category.color.withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(Spacing.radiusS),
+                                  borderRadius:
+                                      BorderRadius.circular(Spacing.radiusS),
                                 ),
                                 child: Icon(
                                   category.icon,
@@ -293,7 +293,7 @@ class HorizontalCategorySelector extends StatelessWidget {
             ],
           ),
         ),
-        
+
         // Error Message
         if (hasError) ...[
           const SizedBox(height: Spacing.space8),

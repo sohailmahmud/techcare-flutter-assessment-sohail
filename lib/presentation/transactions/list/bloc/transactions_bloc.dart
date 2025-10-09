@@ -93,7 +93,8 @@ class TransactionLoaded extends TransactionsState {
   });
 
   @override
-  List<Object?> get props => [transactions, hasMore, currentPage, currentFilters, searchQuery];
+  List<Object?> get props =>
+      [transactions, hasMore, currentPage, currentFilters, searchQuery];
 
   TransactionLoaded copyWith({
     List<tx.Transaction>? transactions,
@@ -167,52 +168,55 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
       _onLoadTransactions,
       transformer: EventTransformers.sequential(),
     );
-    
+
     // Add transaction with drop new strategy to prevent duplicate submissions
     on<AddTransaction>(
       _onAddTransaction,
       transformer: EventTransformers.droppable(),
     );
-    
+
     // Update transaction with drop new strategy
     on<UpdateTransaction>(
       _onUpdateTransaction,
       transformer: EventTransformers.droppable(),
     );
-    
+
     // Delete transaction with drop new strategy
     on<DeleteTransaction>(
       _onDeleteTransaction,
       transformer: EventTransformers.droppable(),
     );
-    
+
     // Refresh with restartable strategy
     on<RefreshTransactions>(
       _onRefreshTransactions,
       transformer: EventTransformers.restartable(),
     );
-    
+
     // Search with debounce to prevent excessive API calls
     on<SearchTransactions>(
       _onSearchTransactions,
-      transformer: EventTransformers.debounce(const Duration(milliseconds: 300)),
+      transformer:
+          EventTransformers.debounce(const Duration(milliseconds: 300)),
     );
-    
+
     // Filter with throttle to prevent excessive filtering
     on<FilterTransactions>(
       _onFilterTransactions,
-      transformer: EventTransformers.throttle(const Duration(milliseconds: 150)),
+      transformer:
+          EventTransformers.throttle(const Duration(milliseconds: 150)),
     );
 
     add(const LoadTransactions());
   }
 
-  Future<void> _onLoadTransactions(LoadTransactions event, Emitter<TransactionsState> emit) async {
+  Future<void> _onLoadTransactions(
+      LoadTransactions event, Emitter<TransactionsState> emit) async {
     try {
       if (event.page == 1) emit(const TransactionLoading());
       _currentPage = event.page;
       _currentFilters = event.filters;
-      
+
       final query = TransactionQuery(
         page: event.page,
         limit: _pageSize,
@@ -220,24 +224,26 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
         type: _parseTransactionType(event.filters?['type']),
         searchQuery: _currentSearchQuery,
       );
-      
+
       final result = await transactionRepository.getTransactions(query);
       result.fold(
         (failure) {
-          Logger.e('Error loading transactions from repository', error: failure.message);
+          Logger.e('Error loading transactions from repository',
+              error: failure.message);
           emit(TransactionError(error: failure.message));
         },
         (paginatedResponse) {
           final transactions = paginatedResponse.data;
           final hasMore = paginatedResponse.meta.hasMore;
-          
+
           if (event.page == 1) {
             _allTransactions = transactions;
           } else {
             _allTransactions.addAll(transactions);
             // For infinite scroll, combine with existing transactions
             if (state is TransactionLoaded) {
-              final existingTransactions = (state as TransactionLoaded).transactions;
+              final existingTransactions =
+                  (state as TransactionLoaded).transactions;
               emit(TransactionLoaded(
                 transactions: [...existingTransactions, ...transactions],
                 hasMore: hasMore,
@@ -264,15 +270,18 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
     }
   }
 
-  Future<void> _onAddTransaction(AddTransaction event, Emitter<TransactionsState> emit) async {
+  Future<void> _onAddTransaction(
+      AddTransaction event, Emitter<TransactionsState> emit) async {
     try {
       emit(const TransactionOperationInProgress('Adding transaction'));
-      
-      final result = await transactionRepository.createTransaction(event.transaction);
+
+      final result =
+          await transactionRepository.createTransaction(event.transaction);
       result.fold(
         (failure) {
           Logger.e('Error adding transaction', error: failure.message);
-          emit(TransactionError(error: 'Failed to add transaction: ${failure.message}'));
+          emit(TransactionError(
+              error: 'Failed to add transaction: ${failure.message}'));
         },
         (createdTransaction) {
           emit(TransactionOperationSuccess(
@@ -280,7 +289,7 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
             transactions: [createdTransaction],
             hasMore: false,
           ));
-          
+
           // Reload all transactions to get fresh data without duplication
           Future.delayed(const Duration(milliseconds: 500), () {
             if (!isClosed) {
@@ -295,15 +304,18 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
     }
   }
 
-  Future<void> _onUpdateTransaction(UpdateTransaction event, Emitter<TransactionsState> emit) async {
+  Future<void> _onUpdateTransaction(
+      UpdateTransaction event, Emitter<TransactionsState> emit) async {
     try {
       emit(const TransactionOperationInProgress('Updating transaction'));
-      
-      final result = await transactionRepository.updateTransaction(event.transaction);
+
+      final result =
+          await transactionRepository.updateTransaction(event.transaction);
       result.fold(
         (failure) {
           Logger.e('Error updating transaction', error: failure.message);
-          emit(TransactionError(error: 'Failed to update transaction: ${failure.message}'));
+          emit(TransactionError(
+              error: 'Failed to update transaction: ${failure.message}'));
         },
         (updatedTransaction) {
           emit(TransactionOperationSuccess(
@@ -315,7 +327,8 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
           // Auto-transition back to loaded state
           Future.delayed(const Duration(milliseconds: 500), () {
             if (!isClosed) {
-              add(LoadTransactions(page: _currentPage, filters: _currentFilters));
+              add(LoadTransactions(
+                  page: _currentPage, filters: _currentFilters));
             }
           });
         },
@@ -326,15 +339,17 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
     }
   }
 
-  Future<void> _onDeleteTransaction(DeleteTransaction event, Emitter<TransactionsState> emit) async {
+  Future<void> _onDeleteTransaction(
+      DeleteTransaction event, Emitter<TransactionsState> emit) async {
     try {
       emit(const TransactionOperationInProgress('Deleting transaction'));
-      
+
       final result = await transactionRepository.deleteTransaction(event.id);
       result.fold(
         (failure) {
           Logger.e('Error deleting transaction', error: failure.message);
-          emit(TransactionError(error: 'Failed to delete transaction: ${failure.message}'));
+          emit(TransactionError(
+              error: 'Failed to delete transaction: ${failure.message}'));
         },
         (_) {
           emit(const TransactionOperationSuccess(
@@ -346,7 +361,8 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
           // Auto-transition back to loaded state
           Future.delayed(const Duration(milliseconds: 500), () {
             if (!isClosed) {
-              add(LoadTransactions(page: _currentPage, filters: _currentFilters));
+              add(LoadTransactions(
+                  page: _currentPage, filters: _currentFilters));
             }
           });
         },
@@ -357,7 +373,8 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
     }
   }
 
-  Future<void> _onRefreshTransactions(RefreshTransactions event, Emitter<TransactionsState> emit) async {
+  Future<void> _onRefreshTransactions(
+      RefreshTransactions event, Emitter<TransactionsState> emit) async {
     try {
       // Clear repository cache and reload
       await transactionRepository.clearCache();
@@ -369,7 +386,8 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
     }
   }
 
-  Future<void> _onSearchTransactions(SearchTransactions event, Emitter<TransactionsState> emit) async {
+  Future<void> _onSearchTransactions(
+      SearchTransactions event, Emitter<TransactionsState> emit) async {
     try {
       emit(const TransactionLoading());
       _currentSearchQuery = event.query.isEmpty ? null : event.query;
@@ -384,17 +402,18 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
         startDate: _currentFilters?['startDate'],
         endDate: _currentFilters?['endDate'],
       );
-      
+
       final result = await transactionRepository.getTransactions(query);
-      
+
       result.fold(
         (failure) {
           Logger.e('Error searching transactions', error: failure.message);
-          emit(TransactionError(error: 'Failed to search transactions: ${failure.message}'));
+          emit(TransactionError(
+              error: 'Failed to search transactions: ${failure.message}'));
         },
         (paginatedResponse) {
           _allTransactions = paginatedResponse.data;
-          
+
           emit(TransactionLoaded(
             transactions: paginatedResponse.data,
             hasMore: paginatedResponse.meta.hasMore,
@@ -410,7 +429,8 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
     }
   }
 
-  Future<void> _onFilterTransactions(FilterTransactions event, Emitter<TransactionsState> emit) async {
+  Future<void> _onFilterTransactions(
+      FilterTransactions event, Emitter<TransactionsState> emit) async {
     try {
       emit(const TransactionLoading());
       _currentFilters = event.filters;
@@ -425,17 +445,18 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
         startDate: _currentFilters?['startDate'],
         endDate: _currentFilters?['endDate'],
       );
-      
+
       final result = await transactionRepository.getTransactions(query);
-      
+
       result.fold(
         (failure) {
           Logger.e('Error filtering transactions', error: failure.message);
-          emit(TransactionError(error: 'Failed to filter transactions: ${failure.message}'));
+          emit(TransactionError(
+              error: 'Failed to filter transactions: ${failure.message}'));
         },
         (paginatedResponse) {
           _allTransactions = paginatedResponse.data;
-          
+
           emit(TransactionLoaded(
             transactions: paginatedResponse.data,
             hasMore: paginatedResponse.meta.hasMore,

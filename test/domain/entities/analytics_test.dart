@@ -43,7 +43,7 @@ void main() {
       test('should create copy with modified start date', () {
         final newStartDate = DateTime(2024, 1, 10);
         final copied = dateRange.copyWith(startDate: newStartDate);
-        
+
         expect(copied.startDate, equals(newStartDate));
         expect(copied.endDate, equals(endDate));
       });
@@ -51,14 +51,14 @@ void main() {
       test('should create copy with modified end date', () {
         final newEndDate = DateTime(2024, 1, 25);
         final copied = dateRange.copyWith(endDate: newEndDate);
-        
+
         expect(copied.startDate, equals(startDate));
         expect(copied.endDate, equals(newEndDate));
       });
 
       test('should preserve original values when no parameters provided', () {
         final copied = dateRange.copyWith();
-        
+
         expect(copied.startDate, equals(dateRange.startDate));
         expect(copied.endDate, equals(dateRange.endDate));
       });
@@ -68,14 +68,15 @@ void main() {
       test('should return "Today" for same day as today', () {
         final today = DateTime.now();
         final todayRange = DateRange(startDate: today, endDate: today);
-        
+
         expect(todayRange.description, equals('Today'));
       });
 
       test('should return formatted date for single day range', () {
         final singleDay = DateTime(2024, 3, 15);
-        final singleDayRange = DateRange(startDate: singleDay, endDate: singleDay);
-        
+        final singleDayRange =
+            DateRange(startDate: singleDay, endDate: singleDay);
+
         expect(singleDayRange.description, equals('15/3/2024'));
       });
 
@@ -84,7 +85,7 @@ void main() {
           startDate: DateTime(2024, 1, 15),
           endDate: DateTime(2024, 1, 20),
         );
-        
+
         expect(multiDayRange.description, equals('15/1/2024 - 20/1/2024'));
       });
     });
@@ -92,8 +93,9 @@ void main() {
     group('dayCount property', () {
       test('should calculate correct day count for single day', () {
         final singleDay = DateTime(2024, 1, 15);
-        final singleDayRange = DateRange(startDate: singleDay, endDate: singleDay);
-        
+        final singleDayRange =
+            DateRange(startDate: singleDay, endDate: singleDay);
+
         expect(singleDayRange.dayCount, equals(1));
       });
 
@@ -106,7 +108,7 @@ void main() {
           startDate: DateTime(2024, 1, 30),
           endDate: DateTime(2024, 2, 2),
         );
-        
+
         expect(monthBoundaryRange.dayCount, equals(4)); // Jan 30, 31, Feb 1, 2
       });
     });
@@ -114,20 +116,23 @@ void main() {
     group('contains method', () {
       test('should return true for dates within range', () {
         expect(dateRange.contains(DateTime(2024, 1, 15)), isTrue); // Start date
-        expect(dateRange.contains(DateTime(2024, 1, 17)), isTrue); // Middle date
+        expect(
+            dateRange.contains(DateTime(2024, 1, 17)), isTrue); // Middle date
         expect(dateRange.contains(DateTime(2024, 1, 20)), isTrue); // End date
       });
 
       test('should return false for dates outside range', () {
-        expect(dateRange.contains(DateTime(2024, 1, 14)), isFalse); // Before start
+        expect(
+            dateRange.contains(DateTime(2024, 1, 14)), isFalse); // Before start
         expect(dateRange.contains(DateTime(2024, 1, 21)), isFalse); // After end
-        expect(dateRange.contains(DateTime(2023, 12, 31)), isFalse); // Way before
+        expect(
+            dateRange.contains(DateTime(2023, 12, 31)), isFalse); // Way before
       });
 
       test('should ignore time components when checking containment', () {
         final morningTime = DateTime(2024, 1, 17, 9, 30);
         final eveningTime = DateTime(2024, 1, 17, 23, 45);
-        
+
         expect(dateRange.contains(morningTime), isTrue);
         expect(dateRange.contains(eveningTime), isTrue);
       });
@@ -139,7 +144,7 @@ void main() {
           startDate: DateTime(2024, 1, 15),
           endDate: DateTime(2024, 1, 20),
         );
-        
+
         expect(dateRange, equals(anotherRange));
         expect(dateRange.hashCode, equals(anotherRange.hashCode));
       });
@@ -149,7 +154,7 @@ void main() {
           startDate: DateTime(2024, 1, 16), // Different start date
           endDate: DateTime(2024, 1, 20),
         );
-        
+
         expect(dateRange, isNot(equals(differentRange)));
       });
 
@@ -165,7 +170,7 @@ void main() {
           startDate: DateTime(2024, 2, 28),
           endDate: DateTime(2024, 3, 1),
         );
-        
+
         expect(leapYearRange.dayCount, equals(3)); // Feb 28, 29, Mar 1
         expect(leapYearRange.contains(DateTime(2024, 2, 29)), isTrue);
       });
@@ -175,7 +180,7 @@ void main() {
           startDate: DateTime(2023, 12, 30),
           endDate: DateTime(2024, 1, 2),
         );
-        
+
         expect(yearBoundaryRange.dayCount, equals(4)); // Dec 30, 31, Jan 1, 2
         expect(yearBoundaryRange.contains(DateTime(2024, 1, 1)), isTrue);
       });
@@ -185,8 +190,9 @@ void main() {
           startDate: DateTime(2024, 1, 15, 10, 30),
           endDate: DateTime(2024, 1, 17, 10, 30),
         );
-        
-        expect(sameTimeRange.dayCount, equals(3)); // Should count days, not time
+
+        expect(
+            sameTimeRange.dayCount, equals(3)); // Should count days, not time
         expect(sameTimeRange.contains(DateTime(2024, 1, 16, 15, 45)), isTrue);
       });
     });
@@ -199,7 +205,7 @@ void main() {
         startDate: DateTime(2024, 1, 1),
         endDate: DateTime(2024, 1, 31),
       );
-      
+
       expect(customPeriod.displayName, equals('Custom'));
       expect(dateRange.dayCount, equals(31));
       expect(dateRange.description, equals('1/1/2024 - 31/1/2024'));

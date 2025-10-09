@@ -14,9 +14,12 @@ void main() {
           ),
           bottomNavigationBar: NavigationBar(
             destinations: const [
-              NavigationDestination(icon: Icon(Icons.dashboard), label: 'Dashboard'),
-              NavigationDestination(icon: Icon(Icons.list), label: 'Transactions'),
-              NavigationDestination(icon: Icon(Icons.analytics), label: 'Analytics'),
+              NavigationDestination(
+                  icon: Icon(Icons.dashboard), label: 'Dashboard'),
+              NavigationDestination(
+                  icon: Icon(Icons.list), label: 'Transactions'),
+              NavigationDestination(
+                  icon: Icon(Icons.analytics), label: 'Analytics'),
             ],
           ),
         ),
