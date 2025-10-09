@@ -496,8 +496,11 @@ class MockApiService {
         };
       }).toList();
 
-      // Get recent transactions (limit to 10)
-      final recentTransactions = _transactions
+      // Get recent transactions (limit to 10) - sorted by date descending (newest first)
+      final sortedTransactions = List<TransactionModel>.from(_transactions);
+      sortedTransactions.sort((a, b) => b.date.compareTo(a.date));
+      
+      final recentTransactions = sortedTransactions
           .take(10)
           .map((t) => {
             'id': t.id,

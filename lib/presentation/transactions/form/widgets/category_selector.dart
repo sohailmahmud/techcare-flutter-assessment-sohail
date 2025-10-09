@@ -90,85 +90,87 @@ class CategorySelector extends StatelessWidget {
   }
 
   Widget _buildCategoryGrid() {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        childAspectRatio: 1.1,
-        crossAxisSpacing: Spacing.space12,
-        mainAxisSpacing: Spacing.space12,
-      ),
-      itemCount: categories.length,
-      itemBuilder: (context, index) {
-        final category = categories[index];
-        final isSelected = selectedCategory?.id == category.id;
-        
-        return GestureDetector(
-          onTap: () => onCategorySelected(category),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            decoration: BoxDecoration(
-              color: isSelected
-                  ? category.color.withValues(alpha: 0.15)
-                  : Colors.transparent,
-              borderRadius: BorderRadius.circular(Spacing.radiusM),
-              border: Border.all(
-                color: isSelected
-                    ? category.color
-                    : AppColors.border.withValues(alpha: 0.5),
-                width: isSelected ? 2.0 : 1.0,
-              ),
-              boxShadow: isSelected
-                  ? [
-                      BoxShadow(
-                        color: category.color.withValues(alpha: 0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
+    return SizedBox(
+      height: 120,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: categories.length,
+        itemBuilder: (context, index) {
+          final category = categories[index];
+          final isSelected = selectedCategory?.id == category.id;
+          
+          return Padding(
+            padding: EdgeInsets.only(
+              right: index < categories.length - 1 ? Spacing.space12 : 0,
+            ),
+            child: GestureDetector(
+              onTap: () => onCategorySelected(category),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: 100,
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? category.color.withValues(alpha: 0.15)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(Spacing.radiusM),
+                  border: Border.all(
+                    color: isSelected
+                        ? category.color
+                        : AppColors.border.withValues(alpha: 0.5),
+                    width: isSelected ? 2.0 : 1.0,
+                  ),
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: category.color.withValues(alpha: 0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ]
+                      : null,
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? category.color
+                            : category.color.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(Spacing.radiusS),
                       ),
-                    ]
-                  : null,
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? category.color
-                        : category.color.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(Spacing.radiusS),
-                  ),
-                  child: Icon(
-                    category.icon,
-                    color: isSelected
-                        ? Colors.white
-                        : category.color,
-                    size: 24,
-                  ),
+                      child: Icon(
+                        category.icon,
+                        color: isSelected
+                            ? Colors.white
+                            : category.color,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(height: Spacing.space8),
+                    Text(
+                      category.name,
+                      style: AppTypography.bodySmall.copyWith(
+                        color: isSelected
+                            ? category.color
+                            : AppColors.textSecondary,
+                        fontWeight: isSelected
+                            ? FontWeight.w600
+                            : FontWeight.w500,
+                      ),
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
-                const SizedBox(height: Spacing.space8),
-                Text(
-                  category.name,
-                  style: AppTypography.bodySmall.copyWith(
-                    color: isSelected
-                        ? category.color
-                        : AppColors.textSecondary,
-                    fontWeight: isSelected
-                        ? FontWeight.w600
-                        : FontWeight.w500,
-                  ),
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }

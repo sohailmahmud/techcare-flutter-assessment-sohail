@@ -6,6 +6,7 @@ import '../../../../core/theme/spacing.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/skeleton_loader.dart';
 import '../../../../domain/entities/transaction.dart' as tx;
+import '../../../../domain/entities/transaction.dart';
 import '../bloc/transactions_bloc.dart';
 
 class TransactionsListView extends StatefulWidget {
@@ -205,24 +206,27 @@ class _TransactionsListViewState extends State<TransactionsListView> {
         child: GestureDetector(
           onTap: () => widget.onTransactionTap?.call(transaction),
           child: Container(
-            padding: const EdgeInsets.all(Spacing.space16),
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: AppColors.surface,
               borderRadius: BorderRadius.circular(Spacing.radiusM),
-              border: Border.all(color: AppColors.border),
+              border: Border.all(
+                color: AppColors.border.withValues(alpha: 0.3),
+                width: 1,
+              ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withAlpha(12),
-                  blurRadius: 4,
-                  offset: const Offset(0, 1),
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
                 ),
               ],
             ),
             child: Row(
               children: [
                 // Transaction icon
-                _buildTransactionIcon(transaction),
-                const SizedBox(width: Spacing.space12),
+                _buildTransactionIcon(transaction, transaction.isIncome),
+                const SizedBox(width: 16),
                 
                 // Transaction details
                 Expanded(
@@ -231,99 +235,71 @@ class _TransactionsListViewState extends State<TransactionsListView> {
                     children: [
                       Text(
                         transaction.title,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        style: AppTypography.bodyLarge.copyWith(
+                          color: AppColors.textPrimary,
                           fontWeight: FontWeight.w600,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      if (transaction.notes != null) ...[
-                        const SizedBox(height: 2),
-                        Text(
-                          transaction.notes!,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurface.withAlpha(153),
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 2),
                       Row(
                         children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: Spacing.space8,
-                              vertical: 2,
+                          Text(
+                            transaction.categoryName,
+                            style: AppTypography.bodySmall.copyWith(
+                              color: AppColors.textSecondary,
                             ),
-                            decoration: BoxDecoration(
-                              color: _getCategoryColor(transaction.categoryName).withAlpha(51),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              transaction.categoryName,
-                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                color: _getCategoryColor(transaction.categoryName),
-                                fontWeight: FontWeight.w600,
+                          ),
+                          if (transaction.notes?.isNotEmpty == true) ...[
+                            Text(
+                              ' • ',
+                              style: AppTypography.bodySmall.copyWith(
+                                color: AppColors.textSecondary,
                               ),
                             ),
-                          ),
-                          const SizedBox(width: Spacing.space8),
-                          Text(
-                            DateFormatter.formatDisplay(transaction.date),
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurface.withAlpha(128),
+                            Flexible(
+                              child: Text(
+                                transaction.notes!,
+                                style: AppTypography.bodySmall.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
-                          ),
+                          ],
                         ],
                       ),
                     ],
                   ),
                 ),
-                
-                // Amount
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Hero(
-                      tag: 'transaction_amount_${transaction.id}_${widget.heroTagPrefix}',
-                      child: Material(
-                        color: Colors.transparent,
-                        child: Text(
-                          CurrencyFormatter.format(transaction.amount.abs()),
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: transaction.isIncome 
-                                ? Colors.green[600]
-                                : Colors.red[600],
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: Spacing.space4,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: transaction.isIncome 
-                            ? Colors.green.withAlpha(51)
-                            : Colors.red.withAlpha(51),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
+              const SizedBox(width: 16),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Hero(
+                    tag: 'transaction_amount_${transaction.id}_${widget.heroTagPrefix}',
+                    child: Material(
+                      color: Colors.transparent,
                       child: Text(
-                        transaction.isIncome ? 'Income' : 'Expense',
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: transaction.isIncome 
-                              ? Colors.green[700]
-                              : Colors.red[700],
-                          fontWeight: FontWeight.w600,
+                        '${transaction.isIncome ? '+' : '-'}${CurrencyFormatter.format(transaction.amount)}',
+                        style: AppTypography.bodyLarge.copyWith(
+                          color: transaction.isIncome ? AppColors.success : AppColors.error,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    DateFormatter.formatTime(transaction.date),
+                    style: AppTypography.labelSmall.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
               ],
             ),
           ),
@@ -332,94 +308,27 @@ class _TransactionsListViewState extends State<TransactionsListView> {
     );
   }
 
-  Widget _buildTransactionIcon(tx.Transaction transaction) {
-    IconData iconData;
-    Color iconColor;
-
-    // Map categories to icons and colors based on JSON mock data
-    switch (transaction.categoryName.toLowerCase()) {
-      case 'food & dining':
-      case 'food':
-        iconData = Icons.restaurant_rounded;
-        iconColor = const Color(0xFFFF6B6B); // #FF6B6B from JSON
-        break;
-      case 'transportation':
-      case 'transport':
-        iconData = Icons.directions_car_rounded;
-        iconColor = const Color(0xFF4ECDC4); // #4ECDC4 from JSON
-        break;
-      case 'shopping':
-        iconData = Icons.shopping_bag_rounded;
-        iconColor = const Color(0xFFFFD93D); // #FFD93D from JSON
-        break;
-      case 'bills & utilities':
-      case 'bills':
-        iconData = Icons.receipt_rounded;
-        iconColor = const Color(0xFFF38181); // #F38181 from JSON
-        break;
-      case 'entertainment':
-        iconData = Icons.movie_rounded;
-        iconColor = const Color(0xFF95E1D3); // #95E1D3 from JSON
-        break;
-      case 'health & fitness':
-      case 'health':
-        iconData = Icons.fitness_center_rounded;
-        iconColor = const Color(0xFF9C27B0); // #9C27B0 from JSON
-        break;
-      case 'education':
-        iconData = Icons.school_rounded;
-        iconColor = const Color(0xFFFF9800); // #FF9800 from JSON
-        break;
-      case 'salary':
-        iconData = Icons.payments_rounded;
-        iconColor = const Color(0xFF00C853); // #00C853 from JSON
-        break;
-      case 'freelance':
-        iconData = Icons.work_rounded;
-        iconColor = const Color(0xFF00C853); // #00C853 from JSON
-        break;
-      case 'investment':
-        iconData = Icons.trending_up_rounded;
-        iconColor = const Color(0xFF00C853); // #00C853 from JSON
-        break;
-      default:
-        iconData = transaction.isIncome 
-            ? Icons.arrow_downward_rounded
-            : Icons.arrow_upward_rounded;
-        iconColor = transaction.isIncome ? const Color(0xFF00C853) : const Color(0xFFF38181);
-    }
-
+  Widget _buildTransactionIcon(Transaction transaction, bool isIncome) {
     return Container(
       width: Spacing.transactionIconSize,
       height: Spacing.transactionIconSize,
       decoration: BoxDecoration(
-        color: iconColor.withAlpha(25),
-        borderRadius: BorderRadius.circular(Spacing.radiusM),
+        color: isIncome
+            ? AppColors.success.withValues(alpha: 0.1)
+            : AppColors.error.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(Spacing.transactionIconSize / 2),
       ),
       child: Icon(
-        iconData,
-        color: iconColor,
-        size: 24,
+        _getTransactionIcon(transaction.categoryId),
+        color: isIncome ? AppColors.success : AppColors.error,
+        size: Spacing.transactionIconSize / 2,
       ),
     );
   }
 
-  Color _getCategoryColor(String category) {
-    // Same color mapping as icon
-    switch (category.toLowerCase()) {
-      case 'food': return Colors.orange;
-      case 'transport': return Colors.blue;
-      case 'shopping': return Colors.purple;
-      case 'bills': return Colors.red;
-      case 'entertainment': return Colors.pink;
-      case 'health': return Colors.green;
-      case 'salary': return Colors.indigo;
-      case 'freelance': return Colors.teal;
-      case 'investment': return Colors.amber;
-      case 'education': return Colors.deepPurple;
-      default: return Theme.of(context).colorScheme.primary;
-    }
-  }
+
+
+
 
   Widget _buildSwipeBackground({required bool isLeft}) {
     return Container(
@@ -567,6 +476,44 @@ class _TransactionsListViewState extends State<TransactionsListView> {
         ),
       ),
     );
+  }
+  
+  IconData _getTransactionIcon(String categoryId) {
+    // Map category IDs to icons based on the JSON mock data structure
+    switch (categoryId.toLowerCase()) {
+      case 'cat_001': // Food & Dining
+      case 'food':
+        return Icons.restaurant;
+      case 'cat_002': // Transportation  
+      case 'transport':
+        return Icons.directions_car;
+      case 'cat_003': // Shopping
+      case 'shopping':
+        return Icons.shopping_bag;
+      case 'cat_004': // Entertainment
+      case 'entertainment':
+        return Icons.movie;
+      case 'cat_005': // Bills & Utilities
+      case 'utilities':
+        return Icons.receipt;
+      case 'cat_006': // Health & Fitness
+      case 'healthcare':
+        return Icons.fitness_center;
+      case 'cat_007': // Education
+      case 'education':
+        return Icons.school;
+      case 'cat_income': // Salary
+      case 'salary':
+        return Icons.payments;
+      case 'cat_freelance': // Freelance
+      case 'freelance':
+        return Icons.work;
+      case 'cat_investment': // Investment
+      case 'investment':
+        return Icons.trending_up;
+      default:
+        return Icons.account_balance_wallet;
+    }
   }
 }
 

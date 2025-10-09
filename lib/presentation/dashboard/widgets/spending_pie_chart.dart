@@ -35,7 +35,7 @@ class _SpendingPieChartState extends State<SpendingPieChart>
   void initState() {
     super.initState();
     _animationController = AnimationController(
-      duration: AppConstants.refreshDelay,
+      duration: AppConstants.chartAnimation,
       vsync: this,
     );
     _animation = CurvedAnimation(

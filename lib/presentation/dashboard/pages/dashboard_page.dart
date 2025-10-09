@@ -13,6 +13,7 @@ import '../../../core/widgets/speed_dial_fab.dart';
 import '../../../core/utils/page_transitions.dart';
 import '../../../injection_container.dart' as di;
 import '../../transactions/list/pages/transactions_page.dart';
+import '../../transactions/list/bloc/transactions_bloc.dart';
 import '../bloc/dashboard_bloc.dart';
 import '../bloc/dashboard_event.dart';
 import '../bloc/dashboard_state.dart';
@@ -36,7 +37,15 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => di.sl<DashboardBloc>()..add(const LoadDashboard()),
-      child: AnnotatedRegion<SystemUiOverlayStyle>(
+      child: BlocListener<TransactionsBloc, TransactionsState>(
+        listener: (context, state) {
+          // Refresh dashboard when transactions are added/updated/deleted
+          if (state is TransactionOperationSuccess) {
+            debugPrint('🔄 Dashboard: Transaction operation success, refreshing dashboard');
+            context.read<DashboardBloc>().add(const RefreshDashboardData());
+          }
+        },
+        child: AnnotatedRegion<SystemUiOverlayStyle>(
         value: const SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
           statusBarIconBrightness: Brightness.dark,
@@ -111,6 +120,7 @@ class _DashboardPageState extends State<DashboardPage> {
               _buildSpeedDialWithBackdrop(),
             ],
           ),
+        ),
         ),
       ),
     );

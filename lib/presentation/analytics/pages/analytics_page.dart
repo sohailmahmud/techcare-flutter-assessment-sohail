@@ -5,6 +5,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/spacing.dart';
 import '../../../injection_container.dart' as di;
+import '../../transactions/list/bloc/transactions_bloc.dart';
 import '../bloc/analytics_bloc.dart';
 import '../../../domain/entities/analytics.dart';
 import '../widgets/period_selector.dart';
@@ -45,7 +46,15 @@ class _AnalyticsPageState extends State<AnalyticsPage>
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => di.sl<AnalyticsBloc>()..add(const LoadAnalytics()),
-      child: AnnotatedRegion<SystemUiOverlayStyle>(
+      child: BlocListener<TransactionsBloc, TransactionsState>(
+        listener: (context, state) {
+          // Refresh analytics when transactions are added/updated/deleted
+          if (state is TransactionOperationSuccess) {
+            debugPrint('🔄 Analytics: Transaction operation success, refreshing analytics');
+            context.read<AnalyticsBloc>().add(const RefreshAnalytics());
+          }
+        },
+        child: AnnotatedRegion<SystemUiOverlayStyle>(
         value: const SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
           statusBarIconBrightness: Brightness.dark,
@@ -69,6 +78,7 @@ class _AnalyticsPageState extends State<AnalyticsPage>
               );
             },
           ),
+        ),
         ),
       ),
     );

@@ -14,6 +14,7 @@ import '../widgets/category_selector.dart';
 import '../widgets/transaction_details_form.dart';
 
 class AddEditTransactionScreen extends StatefulWidget {
+  static const routeName = '/add-edit-transaction';
   final Transaction? transaction; // null for add, non-null for edit
 
   const AddEditTransactionScreen({
@@ -104,9 +105,19 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen>
 
   @override
   Widget build(BuildContext context) {
+    // Get route arguments for transaction type if provided
+    final routeArgs = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    final transactionType = routeArgs?['type'] as TransactionType?;
+    
     return BlocProvider(
-      create: (context) => di.sl<TransactionFormBloc>()
-        ..add(InitializeForm(transaction: widget.transaction)),
+      create: (context) {
+        final bloc = di.sl<TransactionFormBloc>();
+        bloc.add(InitializeForm(transaction: widget.transaction));
+        if (transactionType != null) {
+          bloc.add(TransactionTypeChanged(transactionType));
+        }
+        return bloc;
+      },
       child: BlocListener<TransactionFormBloc, TransactionFormBlocState>(
         listener: (context, state) {
           if (state is TransactionFormReady && state.isSuccessful) {

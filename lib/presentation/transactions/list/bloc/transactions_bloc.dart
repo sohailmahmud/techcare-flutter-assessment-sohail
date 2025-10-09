@@ -275,17 +275,14 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
           emit(TransactionError(error: 'Failed to add transaction: ${failure.message}'));
         },
         (createdTransaction) {
-          // Update local list optimistically
-          _allTransactions = [createdTransaction, ..._allTransactions];
-          
           emit(TransactionOperationSuccess(
             message: 'Transaction added successfully',
             transactions: [createdTransaction],
-            hasMore: _allTransactions.length > _pageSize,
+            hasMore: false,
           ));
           
-          // Auto-transition back to loaded state
-          Future.delayed(const Duration(milliseconds: 1000), () {
+          // Reload all transactions to get fresh data without duplication
+          Future.delayed(const Duration(milliseconds: 500), () {
             if (!isClosed) {
               add(const LoadTransactions(page: 1));
             }
@@ -309,20 +306,14 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
           emit(TransactionError(error: 'Failed to update transaction: ${failure.message}'));
         },
         (updatedTransaction) {
-          // Update local list optimistically
-          final index = _allTransactions.indexWhere((t) => t.id == event.id);
-          if (index != -1) {
-            _allTransactions[index] = updatedTransaction;
-          }
-          
           emit(TransactionOperationSuccess(
             message: 'Transaction updated successfully',
             transactions: [updatedTransaction],
-            hasMore: _allTransactions.length > _currentPage * _pageSize,
+            hasMore: false,
           ));
 
           // Auto-transition back to loaded state
-          Future.delayed(const Duration(milliseconds: 1000), () {
+          Future.delayed(const Duration(milliseconds: 500), () {
             if (!isClosed) {
               add(LoadTransactions(page: _currentPage, filters: _currentFilters));
             }
@@ -346,9 +337,6 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
           emit(TransactionError(error: 'Failed to delete transaction: ${failure.message}'));
         },
         (_) {
-          // Remove from local list optimistically
-          _allTransactions.removeWhere((t) => t.id == event.id);
-          
           emit(const TransactionOperationSuccess(
             message: 'Transaction deleted successfully',
             transactions: [],
@@ -356,7 +344,7 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
           ));
 
           // Auto-transition back to loaded state
-          Future.delayed(const Duration(milliseconds: 1000), () {
+          Future.delayed(const Duration(milliseconds: 500), () {
             if (!isClosed) {
               add(LoadTransactions(page: _currentPage, filters: _currentFilters));
             }
