@@ -14,8 +14,8 @@ void main() {
     testWidgets('Add Transaction Screen renders correctly', (WidgetTester tester) async {
       // Create the screen
       await tester.pumpWidget(
-        MaterialApp(
-          home: const AddEditTransactionScreen(),
+        const MaterialApp(
+          home: AddEditTransactionScreen(),
         ),
       );
 
@@ -32,8 +32,8 @@ void main() {
 
     testWidgets('Transaction Type Selector works', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: const AddEditTransactionScreen(),
+        const MaterialApp(
+          home: AddEditTransactionScreen(),
         ),
       );
 
@@ -49,8 +49,8 @@ void main() {
 
     testWidgets('Category Selector displays categories', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: const AddEditTransactionScreen(),
+        const MaterialApp(
+          home: AddEditTransactionScreen(),
         ),
       );
 
