@@ -5,7 +5,7 @@ import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/spacing.dart';
 import '../../../core/utils/formatters.dart';
 import '../bloc/analytics_bloc.dart';
-import '../../../data/models/analytics_models.dart';
+import '../../../domain/entities/analytics.dart';
 
 class PeriodSelector extends StatefulWidget {
   final TimePeriod selectedPeriod;
@@ -29,10 +29,12 @@ class _PeriodSelectorState extends State<PeriodSelector>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _slideAnimation;
+  late TimePeriod _selectedPeriod;
 
   @override
   void initState() {
     super.initState();
+    _selectedPeriod = widget.selectedPeriod;
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
@@ -45,6 +47,16 @@ class _PeriodSelectorState extends State<PeriodSelector>
       curve: Curves.easeInOut,
     ));
     _animationController.forward();
+  }
+
+  @override
+  void didUpdateWidget(PeriodSelector oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.selectedPeriod != oldWidget.selectedPeriod) {
+      setState(() {
+        _selectedPeriod = widget.selectedPeriod;
+      });
+    }
   }
 
   @override
@@ -84,7 +96,7 @@ class _PeriodSelectorState extends State<PeriodSelector>
           children: [
             Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.date_range_rounded,
                   color: AppColors.primary,
                   size: 20,
@@ -134,47 +146,69 @@ class _PeriodSelectorState extends State<PeriodSelector>
       spacing: Spacing.space8,
       runSpacing: Spacing.space8,
       children: TimePeriod.values.map((period) {
-        final isSelected = widget.selectedPeriod == period;
+        final isSelected = _selectedPeriod == period;
         return _buildPeriodChip(period, isSelected);
       }).toList(),
     );
   }
 
   Widget _buildPeriodChip(TimePeriod period, bool isSelected) {
-    return GestureDetector(
-      onTap: () => _onPeriodTap(period),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(
-          horizontal: Spacing.space16,
-          vertical: Spacing.space8,
-        ),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : AppColors.background,
+    return AnimatedContainer(
+      key: ValueKey('period_chip_${period.name}'),
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeInOut,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _onPeriodTap(period),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.border,
-            width: 1,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (period == TimePeriod.custom)
-              Icon(
-                Icons.calendar_today_rounded,
-                size: 16,
-                color: isSelected ? Colors.white : AppColors.textSecondary,
-              ),
-            if (period == TimePeriod.custom) const SizedBox(width: Spacing.space4),
-            Text(
-              period.displayName,
-              style: AppTypography.labelMedium.copyWith(
-                color: isSelected ? Colors.white : AppColors.textSecondary,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-              ),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeInOut,
+            padding: const EdgeInsets.symmetric(
+              horizontal: Spacing.space16,
+              vertical: Spacing.space8,
             ),
-          ],
+            decoration: BoxDecoration(
+              color: isSelected ? AppColors.primary : AppColors.background,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: isSelected ? AppColors.primary : AppColors.border,
+                width: 1,
+              ),
+              boxShadow: isSelected ? [
+                BoxShadow(
+                  color: AppColors.primary.withOpacity(0.2),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ] : null,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (period == TimePeriod.custom)
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 200),
+                    child: Icon(
+                      Icons.calendar_today_rounded,
+                      key: ValueKey('calendar_icon_$isSelected'),
+                      size: 16,
+                      color: isSelected ? Colors.white : AppColors.textSecondary,
+                    ),
+                  ),
+                if (period == TimePeriod.custom) const SizedBox(width: Spacing.space4),
+                AnimatedDefaultTextStyle(
+                  duration: const Duration(milliseconds: 200),
+                  style: AppTypography.labelMedium.copyWith(
+                    color: isSelected ? Colors.white : AppColors.textSecondary,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                  ),
+                  child: Text(period.displayName),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -184,19 +218,33 @@ class _PeriodSelectorState extends State<PeriodSelector>
     if (period == TimePeriod.custom) {
       _showCustomDatePicker();
     } else {
+      setState(() {
+        _selectedPeriod = period;
+      });
       widget.onPeriodChanged(period);
       context.read<AnalyticsBloc>().add(ChangePeriod(period));
     }
   }
 
   Future<void> _showCustomDatePicker() async {
+    final now = DateTime.now();
+    final startDate = widget.dateRange.startDate.isBefore(DateTime(2020)) 
+        ? DateTime(2020) 
+        : (widget.dateRange.startDate.isAfter(now) ? now : widget.dateRange.startDate);
+    final endDate = widget.dateRange.endDate.isAfter(now) 
+        ? now 
+        : widget.dateRange.endDate;
+    
+    // Ensure startDate is not after endDate
+    final safeStartDate = startDate.isAfter(endDate) ? endDate : startDate;
+    
     final DateTimeRange? picked = await showDateRangePicker(
       context: context,
       firstDate: DateTime(2020),
-      lastDate: DateTime.now(),
+      lastDate: now,
       initialDateRange: DateTimeRange(
-        start: widget.dateRange.startDate,
-        end: widget.dateRange.endDate,
+        start: safeStartDate,
+        end: endDate,
       ),
       builder: (context, child) {
         return Theme(
@@ -219,12 +267,18 @@ class _PeriodSelectorState extends State<PeriodSelector>
         endDate: picked.end,
       );
       
+      setState(() {
+        _selectedPeriod = TimePeriod.custom;
+      });
+      
       widget.onPeriodChanged(TimePeriod.custom);
       widget.onCustomRangeChanged?.call(customRange);
       
-      context.read<AnalyticsBloc>().add(
-        ChangePeriod(TimePeriod.custom, customRange: customRange),
-      );
+      if (mounted) {
+        context.read<AnalyticsBloc>().add(
+          ChangePeriod(TimePeriod.custom, customRange: customRange),
+        );
+      }
     }
   }
 

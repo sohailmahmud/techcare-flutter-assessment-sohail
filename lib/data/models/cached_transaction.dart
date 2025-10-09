@@ -1,10 +1,12 @@
 import 'package:hive_ce/hive.dart';
+import 'package:flutter/material.dart';
 import '../../domain/entities/transaction.dart';
+import '../../domain/entities/category.dart';
 
 part 'cached_transaction.g.dart';
 
 /// Hive-compatible cached transaction model
-@HiveType(typeId: 0)
+@HiveType(typeId: 8)
 class CachedTransaction extends HiveObject {
   @HiveField(0)
   String id;
@@ -76,7 +78,7 @@ class CachedTransaction extends HiveObject {
       categoryName: transaction.categoryName,
       date: transaction.date,
       notes: transaction.notes,
-      createdAt: transaction.createdAt,
+      createdAt: transaction.createdAt ?? now,
       cachedAt: now,
       expiresAt: ttl != null ? now.add(ttl) : null,
     );
@@ -84,15 +86,23 @@ class CachedTransaction extends HiveObject {
 
   /// Convert to domain entity
   Transaction toTransaction() {
+    // Find the category by ID, with fallback
+    final category = AppCategories.findById(categoryId) ?? Category(
+      id: categoryId,
+      name: categoryName,
+      icon: Icons.category,
+      color: Colors.grey,
+      isIncome: type == 0,
+    );
+    
     return Transaction(
       id: id,
       title: title,
       amount: amount,
       type: type == 0 ? TransactionType.income : TransactionType.expense,
-      categoryId: categoryId,
-      categoryName: categoryName,
+      category: category,
       date: date,
-      notes: notes,
+      description: notes,
       createdAt: createdAt,
     );
   }

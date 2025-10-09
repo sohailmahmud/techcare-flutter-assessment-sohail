@@ -3,10 +3,10 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/spacing.dart';
 import '../../../core/utils/formatters.dart';
-import '../../../data/models/analytics_models.dart';
+import '../../../domain/entities/analytics.dart';
 
 class SummaryStatisticsCards extends StatefulWidget {
-  final SummaryStatistics statistics;
+  final AnalyticsData statistics;
 
   const SummaryStatisticsCards({
     super.key,
@@ -87,7 +87,7 @@ class _SummaryStatisticsCardsState extends State<SummaryStatisticsCards>
             index: 0,
             title: 'Total Income',
             amount: widget.statistics.totalIncome,
-            change: widget.statistics.incomeChange,
+            change: 0.0, // TODO: Calculate change from previous period
             color: AppColors.income,
             icon: Icons.trending_up_rounded,
           ),
@@ -98,7 +98,7 @@ class _SummaryStatisticsCardsState extends State<SummaryStatisticsCards>
             index: 1,
             title: 'Total Expenses',
             amount: widget.statistics.totalExpenses,
-            change: widget.statistics.expenseChange,
+            change: 0.0, // TODO: Calculate change from previous period
             color: AppColors.expense,
             icon: Icons.trending_down_rounded,
           ),
@@ -108,10 +108,10 @@ class _SummaryStatisticsCardsState extends State<SummaryStatisticsCards>
           child: _buildStatCard(
             index: 2,
             title: 'Net Balance',
-            amount: widget.statistics.netBalance,
-            change: widget.statistics.balanceChange,
-            color: widget.statistics.netBalance >= 0 ? AppColors.income : AppColors.expense,
-            icon: widget.statistics.netBalance >= 0 
+            amount: widget.statistics.netAmount,
+            change: 0.0, // TODO: Calculate change from previous period
+            color: widget.statistics.netAmount >= 0 ? AppColors.income : AppColors.expense,
+            icon: widget.statistics.netAmount >= 0 
                 ? Icons.account_balance_wallet_rounded 
                 : Icons.warning_rounded,
           ),
@@ -281,7 +281,7 @@ class AnimatedNumberCounter extends StatelessWidget {
 
 /// Responsive summary stats for mobile/desktop
 class ResponsiveSummaryStats extends StatelessWidget {
-  final SummaryStatistics statistics;
+  final AnalyticsData statistics;
 
   const ResponsiveSummaryStats({
     super.key,
@@ -305,7 +305,7 @@ class ResponsiveSummaryStats extends StatelessWidget {
                     child: _buildCompactStatCard(
                       title: 'Income',
                       amount: statistics.totalIncome,
-                      change: statistics.incomeChange,
+                      change: 0.0, // TODO: Calculate change from previous period
                       color: AppColors.income,
                       icon: Icons.trending_up_rounded,
                     ),
@@ -315,7 +315,7 @@ class ResponsiveSummaryStats extends StatelessWidget {
                     child: _buildCompactStatCard(
                       title: 'Expenses',
                       amount: statistics.totalExpenses,
-                      change: statistics.expenseChange,
+                      change: 0.0, // TODO: Calculate change from previous period
                       color: AppColors.expense,
                       icon: Icons.trending_down_rounded,
                     ),
@@ -325,10 +325,10 @@ class ResponsiveSummaryStats extends StatelessWidget {
               const SizedBox(height: Spacing.space8),
               _buildCompactStatCard(
                 title: 'Net Balance',
-                amount: statistics.netBalance,
-                change: statistics.balanceChange,
-                color: statistics.netBalance >= 0 ? AppColors.income : AppColors.expense,
-                icon: statistics.netBalance >= 0 
+                amount: statistics.netAmount,
+                change: 0.0, // TODO: Calculate change from previous period
+                color: statistics.netAmount >= 0 ? AppColors.income : AppColors.expense,
+                icon: statistics.netAmount >= 0 
                     ? Icons.account_balance_wallet_rounded 
                     : Icons.warning_rounded,
               ),

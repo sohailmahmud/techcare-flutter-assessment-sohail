@@ -4,10 +4,13 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/spacing.dart';
 import '../../../core/utils/formatters.dart';
-import '../../../data/models/analytics_models.dart';
+import '../../../domain/entities/analytics.dart';
+
+
+enum BudgetStatus { underBudget, approaching, exceeded }
 
 class BudgetProgressIndicators extends StatefulWidget {
-  final List<BudgetProgress> budgetData;
+  final List<BudgetComparison> budgetData;
   final bool isLoading;
 
   const BudgetProgressIndicators({
@@ -127,7 +130,7 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
             color: AppColors.warning.withOpacity(0.1),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(
+          child: const Icon(
             Icons.track_changes_rounded,
             color: AppColors.warning,
             size: 20,
@@ -163,7 +166,7 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
     if (widget.budgetData.isEmpty) return const SizedBox.shrink();
 
     final overBudgetCount = widget.budgetData.where((b) => b.isOverBudget).length;
-    final approachingCount = widget.budgetData.where((b) => b.status == BudgetStatus.approaching).length;
+    final approachingCount = widget.budgetData.where((b) => _getBudgetStatus(b) == BudgetStatus.approaching).length;
 
     Color statusColor;
     String statusText;
@@ -216,7 +219,7 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(
+            const CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
               strokeWidth: 3,
             ),
@@ -242,7 +245,7 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            const Icon(
               Icons.track_changes_rounded,
               size: 48,
               color: AppColors.textTertiary,
@@ -340,8 +343,8 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
     );
   }
 
-  Widget _buildBudgetCard(BudgetProgress budget, Animation<double>? animation) {
-    final statusColor = _getStatusColor(budget.status);
+  Widget _buildBudgetCard(BudgetComparison budget, Animation<double>? animation) {
+    final statusColor = _getStatusColor(_getBudgetStatus(budget));
     
     Widget card = Container(
       padding: const EdgeInsets.all(Spacing.space16),
@@ -363,19 +366,19 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
                 width: 24,
                 height: 24,
                 decoration: BoxDecoration(
-                  color: budget.category.color.withOpacity(0.1),
+                  color: _getCategoryColor(budget.categoryName).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Icon(
-                  budget.category.icon,
-                  color: budget.category.color,
+                  _getCategoryIcon(budget.categoryName),
+                  color: _getCategoryColor(budget.categoryName),
                   size: 14,
                 ),
               ),
               const SizedBox(width: Spacing.space8),
               Expanded(
                 child: Text(
-                  budget.category.name,
+                  budget.categoryName,
                   style: AppTypography.labelMedium.copyWith(
                     fontWeight: FontWeight.w600,
                     color: AppColors.textPrimary,
@@ -417,7 +420,7 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
                       ),
                     ),
                     Text(
-                      budget.status.displayName.split(' ').first,
+                      _getBudgetStatus(budget) == BudgetStatus.underBudget ? 'Under' : _getBudgetStatus(budget) == BudgetStatus.approaching ? 'Approaching' : 'Over',
                       style: AppTypography.labelSmall.copyWith(
                         color: AppColors.textSecondary,
                         fontSize: 9,
@@ -433,7 +436,7 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
           Column(
             children: [
               Text(
-                CurrencyFormatter.formatCompact(budget.spentAmount),
+                CurrencyFormatter.formatCompact(budget.actualAmount),
                 style: AppTypography.bodyMedium.copyWith(
                   fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary,
@@ -505,6 +508,56 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
     }
   }
 
+  // Helper method to get BudgetStatus from BudgetComparison
+  BudgetStatus _getBudgetStatus(BudgetComparison budget) {
+    if (budget.isOverBudget) {
+      return BudgetStatus.exceeded;
+    } else if (budget.percentage >= 80) {
+      return BudgetStatus.approaching;
+    } else {
+      return BudgetStatus.underBudget;
+    }
+  }
+
+  // Helper method to get category color from category name based on JSON mock data
+  Color _getCategoryColor(String categoryName) {
+    // Map category names to colors based on the JSON mock data structure
+    final hash = categoryName.hashCode;
+    final colors = [
+      AppColors.primary,
+      AppColors.secondary,
+      Colors.deepPurple,
+      Colors.blue,
+      Colors.green,
+      Colors.orange,
+      Colors.purple,
+      Colors.teal,
+      Colors.red,
+      Colors.indigo,
+    ];
+    return colors[hash.abs() % colors.length];
+  }
+
+  // Helper method to get category icon from category name based on JSON mock data
+  IconData _getCategoryIcon(String categoryName) {
+    // Map category names to icons based on the JSON mock data structure
+    final name = categoryName.toLowerCase();
+    
+    // Direct mapping from JSON mock data categories
+    if (name.contains('food') || name.contains('dining')) return Icons.restaurant;
+    if (name.contains('transport')) return Icons.directions_car;
+    if (name.contains('shopping')) return Icons.shopping_bag;
+    if (name.contains('entertainment')) return Icons.movie;
+    if (name.contains('bills') || name.contains('utilities')) return Icons.receipt;
+    if (name.contains('health') || name.contains('fitness')) return Icons.fitness_center;
+    if (name.contains('education')) return Icons.school;
+    if (name.contains('salary')) return Icons.payments;
+    if (name.contains('freelance')) return Icons.work;
+    if (name.contains('investment')) return Icons.trending_up;
+    
+    return Icons.category; // default icon
+  }
+
   Color _getStatusColor(BudgetStatus status) {
     switch (status) {
       case BudgetStatus.underBudget:
@@ -519,7 +572,7 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
 
 /// Compact budget progress widget for smaller spaces
 class CompactBudgetProgress extends StatelessWidget {
-  final List<BudgetProgress> budgetData;
+  final List<BudgetComparison> budgetData;
   final int maxItems;
 
   const CompactBudgetProgress({
@@ -541,7 +594,7 @@ class CompactBudgetProgress extends StatelessWidget {
             color: AppColors.surface,
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: _getStatusColor(budget.status).withOpacity(0.2),
+              color: _getStatusColor(_getBudgetStatus(budget)).withOpacity(0.2),
             ),
           ),
           child: Row(
@@ -551,12 +604,12 @@ class CompactBudgetProgress extends StatelessWidget {
                 width: 32,
                 height: 32,
                 decoration: BoxDecoration(
-                  color: budget.category.color.withOpacity(0.1),
+                  color: _getCategoryColor(budget.categoryName).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
-                  budget.category.icon,
-                  color: budget.category.color,
+                  _getCategoryIcon(budget.categoryName),
+                  color: _getCategoryColor(budget.categoryName),
                   size: 16,
                 ),
               ),
@@ -567,7 +620,7 @@ class CompactBudgetProgress extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      budget.category.name,
+                      budget.categoryName,
                       style: AppTypography.bodySmall.copyWith(
                         fontWeight: FontWeight.w600,
                         color: AppColors.textPrimary,
@@ -578,7 +631,7 @@ class CompactBudgetProgress extends StatelessWidget {
                       value: budget.percentage / 100,
                       backgroundColor: AppColors.border,
                       valueColor: AlwaysStoppedAnimation<Color>(
-                        _getStatusColor(budget.status),
+                        _getStatusColor(_getBudgetStatus(budget)),
                       ),
                     ),
                   ],
@@ -590,7 +643,7 @@ class CompactBudgetProgress extends StatelessWidget {
                 '${budget.percentage.toInt()}%',
                 style: AppTypography.labelMedium.copyWith(
                   fontWeight: FontWeight.w700,
-                  color: _getStatusColor(budget.status),
+                  color: _getStatusColor(_getBudgetStatus(budget)),
                 ),
               ),
             ],
@@ -598,6 +651,56 @@ class CompactBudgetProgress extends StatelessWidget {
         );
       }).toList(),
     );
+  }
+
+  // Helper method to get BudgetStatus from BudgetComparison
+  BudgetStatus _getBudgetStatus(BudgetComparison budget) {
+    if (budget.isOverBudget) {
+      return BudgetStatus.exceeded;
+    } else if (budget.percentage >= 80) {
+      return BudgetStatus.approaching;
+    } else {
+      return BudgetStatus.underBudget;
+    }
+  }
+
+  // Helper method to get category color from category name based on JSON mock data
+  Color _getCategoryColor(String categoryName) {
+    // Map category names to colors based on the JSON mock data structure
+    final hash = categoryName.hashCode;
+    final colors = [
+      AppColors.primary,
+      AppColors.secondary,
+      Colors.deepPurple,
+      Colors.blue,
+      Colors.green,
+      Colors.orange,
+      Colors.purple,
+      Colors.teal,
+      Colors.red,
+      Colors.indigo,
+    ];
+    return colors[hash.abs() % colors.length];
+  }
+
+  // Helper method to get category icon from category name based on JSON mock data
+  IconData _getCategoryIcon(String categoryName) {
+    // Map category names to icons based on the JSON mock data structure
+    final name = categoryName.toLowerCase();
+    
+    // Direct mapping from JSON mock data categories
+    if (name.contains('food') || name.contains('dining')) return Icons.restaurant;
+    if (name.contains('transport')) return Icons.directions_car;
+    if (name.contains('shopping')) return Icons.shopping_bag;
+    if (name.contains('entertainment')) return Icons.movie;
+    if (name.contains('bills') || name.contains('utilities')) return Icons.receipt;
+    if (name.contains('health') || name.contains('fitness')) return Icons.fitness_center;
+    if (name.contains('education')) return Icons.school;
+    if (name.contains('salary')) return Icons.payments;
+    if (name.contains('freelance')) return Icons.work;
+    if (name.contains('investment')) return Icons.trending_up;
+    
+    return Icons.category; // default icon
   }
 
   Color _getStatusColor(BudgetStatus status) {

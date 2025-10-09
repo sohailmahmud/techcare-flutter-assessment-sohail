@@ -3,7 +3,7 @@ import 'package:hive_ce/hive.dart';
 part 'cache_metadata.g.dart';
 
 /// Cache metadata for tracking cache state and statistics
-@HiveType(typeId: 1)
+@HiveType(typeId: 7)
 class CacheMetadata extends HiveObject {
   @HiveField(0)
   String key;

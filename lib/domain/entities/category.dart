@@ -8,6 +8,7 @@ class Category extends Equatable {
   final IconData icon;
   final Color color;
   final bool isIncome;
+  final double? budget;
 
   const Category({
     required this.id,
@@ -15,10 +16,84 @@ class Category extends Equatable {
     required this.icon,
     required this.color,
     this.isIncome = false,
+    this.budget,
   });
 
+  // Helper methods for API integration
+  String get iconName => _getIconName(icon);
+  String get colorHex => '#${color.value.toRadixString(16).substring(2).toUpperCase()}';
+
+  static String _getIconName(IconData icon) {
+    // Map common icons to string names for API
+    final iconMap = {
+      Icons.restaurant: 'restaurant',
+      Icons.directions_car: 'directions_car',
+      Icons.shopping_bag: 'shopping_bag',
+      Icons.receipt: 'receipt',
+      Icons.movie: 'movie',
+      Icons.payments: 'payments',
+      Icons.work: 'work',
+      Icons.home: 'home',
+      Icons.local_hospital: 'local_hospital',
+      Icons.school: 'school',
+    };
+    return iconMap[icon] ?? 'category';
+  }
+
+  static IconData _getIconFromName(String iconName) {
+    // Map string names back to IconData
+    switch (iconName) {
+      case 'restaurant':
+        return Icons.restaurant;
+      case 'directions_car':
+        return Icons.directions_car;
+      case 'shopping_bag':
+        return Icons.shopping_bag;
+      case 'receipt':
+        return Icons.receipt;
+      case 'movie':
+        return Icons.movie;
+      case 'payments':
+        return Icons.payments;
+      case 'work':
+        return Icons.work;
+      case 'home':
+        return Icons.home;
+      case 'local_hospital':
+        return Icons.local_hospital;
+      case 'school':
+        return Icons.school;
+      default:
+        return Icons.category;
+    }
+  }
+
+  static Color _getColorFromHex(String hexColor) {
+    // Convert hex string to Color
+    final hex = hexColor.replaceAll('#', '');
+    return Color(int.parse('FF$hex', radix: 16));
+  }
+
+  factory Category.fromApiData({
+    required String id,
+    required String name,
+    required String iconName,
+    required String colorHex,
+    bool isIncome = false,
+    double? budget,
+  }) {
+    return Category(
+      id: id,
+      name: name,
+      icon: _getIconFromName(iconName),
+      color: _getColorFromHex(colorHex),
+      isIncome: isIncome,
+      budget: budget,
+    );
+  }
+
   @override
-  List<Object?> get props => [id, name, icon, color, isIncome];
+  List<Object?> get props => [id, name, icon, color, isIncome, budget];
 }
 
 /// Predefined categories for the application

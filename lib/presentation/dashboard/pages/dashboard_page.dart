@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
@@ -17,6 +19,9 @@ import '../widgets/balance_card.dart';
 import '../widgets/spending_pie_chart.dart';
 import '../../../domain/entities/transaction.dart';
 import '../widgets/transactions_list.dart';
+import '../../transactions/form/bloc/transaction_form_bloc.dart';
+import '../../transactions/form/pages/add_edit_transaction_screen.dart';
+import '../../transactions/list/bloc/transactions_bloc.dart';
 
 /// Dashboard page showing user's financial overview with BLoC state management
 class DashboardPage extends StatefulWidget {
@@ -32,10 +37,18 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => di.sl<DashboardBloc>()..add(const LoadDashboard()),
-      child: Scaffold(
-        backgroundColor: AppColors.background,
-        body: SafeArea(
-          child: BlocBuilder<DashboardBloc, DashboardState>(
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.dark,
+          statusBarBrightness: Brightness.light,
+          systemNavigationBarColor: AppColors.background,
+          systemNavigationBarIconBrightness: Brightness.dark,
+        ),
+        child: Scaffold(
+          backgroundColor: AppColors.background,
+          extendBodyBehindAppBar: true,
+          body: BlocBuilder<DashboardBloc, DashboardState>(
             builder: (context, state) {
               // Show full skeleton loader for initial loading
               if (state is DashboardInitial || state is DashboardLoading) {
@@ -47,10 +60,35 @@ class _DashboardPageState extends State<DashboardPage> {
               
               return RefreshIndicator(
                 onRefresh: () async {
+                  final completer = Completer<void>();
                   context.read<DashboardBloc>().add(const RefreshDashboardData());
-                  await Future.delayed(AppConstants.refreshDelay);
+                  
+                  // Listen for state changes to complete refresh
+                  final subscription = context.read<DashboardBloc>().stream.listen((newState) {
+                    if (newState is DashboardLoaded || newState is DashboardError) {
+                      if (!completer.isCompleted) {
+                        completer.complete();
+                      }
+                    }
+                  });
+                  
+                  // Timeout after reasonable time
+                  Timer(AppConstants.refreshDelay * 2, () {
+                    if (!completer.isCompleted) {
+                      completer.complete();
+                    }
+                    subscription.cancel();
+                  });
+                  
+                  await completer.future;
+                  subscription.cancel();
                 },
+                displacement: 40.0, // Adjust position to work with header
+                strokeWidth: 2.5,
+                backgroundColor: AppColors.surface,
+                color: AppColors.primary,
                 child: CustomScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(), // Ensure scroll works even with short content
                   slivers: [
                     _buildHeader(),
                     _buildContent(state, context),
@@ -59,19 +97,20 @@ class _DashboardPageState extends State<DashboardPage> {
               );
             },
           ),
+          floatingActionButton: _buildSpeedDialFAB(),
         ),
-        floatingActionButton: _buildSpeedDialFAB(),
       ),
     );
   }
 
   Widget _buildHeader() {
+    final statusBarHeight = MediaQuery.of(context).padding.top;
     return SliverPersistentHeader(
       pinned: true,
       floating: false,
       delegate: _ParallaxHeaderDelegate(
-        expandedHeight: Spacing.headerExpandedHeight,
-        collapsedHeight: Spacing.headerCollapsedHeight,
+        expandedHeight: Spacing.headerExpandedHeight + statusBarHeight,
+        collapsedHeight: kToolbarHeight + statusBarHeight,
       ),
     );
   }
@@ -168,16 +207,15 @@ class _DashboardPageState extends State<DashboardPage> {
           return TransactionsList(
             transactions: transactions,
             isLoading: isLoading,
+            maxItems: AppConstants.maxRecentTransactions, // Limit for dashboard
+            enableLazyLoading: false, // Disable for dashboard - use on full page
             onEdit: (transactionId) {
-              // Navigate to edit transaction
               _showEditTransaction(context, transactionId);
             },
             onDelete: (transactionId) {
-              // Handle delete transaction
               _showDeleteConfirmation(context, transactionId);
             },
             onViewAll: () {
-              // Navigate to transactions page
               Navigator.pushNamed(context, '/transactions');
             },
           );
@@ -270,7 +308,12 @@ class _DashboardPageState extends State<DashboardPage> {
     // Navigate to add transaction screen with hero animation
     Navigator.of(context).push(
       AppPageTransitions.scaleTransition(
-        page: Container(), // This would be your actual add transaction page
+        page: BlocProvider(
+          create: (context) => TransactionFormBloc(
+            transactionsBloc: context.read<TransactionsBloc>(),
+          ),
+          child: const AddEditTransactionScreen(),
+        ),
         settings: RouteSettings(
           name: '/add-transaction',
           arguments: {'type': type},
@@ -345,6 +388,7 @@ class _ParallaxHeaderDelegate extends SliverPersistentHeaderDelegate {
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     final progress = shrinkOffset / (expandedHeight - collapsedHeight);
     final clampedProgress = progress.clamp(0.0, 1.0);
+    final statusBarHeight = MediaQuery.of(context).padding.top;
     
     return Stack(
       fit: StackFit.expand,
@@ -353,7 +397,10 @@ class _ParallaxHeaderDelegate extends SliverPersistentHeaderDelegate {
         _buildParallaxBackground(shrinkOffset),
         
         // Content with fade and slide animations
-        _buildHeaderContent(context, clampedProgress),
+        _buildHeaderContent(context, clampedProgress, statusBarHeight),
+        
+        // Collapsed app bar with app name
+        _buildCollapsedAppBar(context, clampedProgress, statusBarHeight),
         
         // Gradient overlay for better text contrast
         _buildGradientOverlay(clampedProgress),
@@ -371,7 +418,7 @@ class _ParallaxHeaderDelegate extends SliverPersistentHeaderDelegate {
       top: -parallaxOffset,
       left: 0,
       right: 0,
-      height: expandedHeight + parallaxOffset,
+      height: expandedHeight + parallaxOffset + 50, // Extra height for better coverage
       child: Transform.scale(
         scale: scaleProgress,
         alignment: Alignment.topCenter,
@@ -396,26 +443,34 @@ class _ParallaxHeaderDelegate extends SliverPersistentHeaderDelegate {
     );
   }
 
-  Widget _buildHeaderContent(BuildContext context, double progress) {
-    // Enhanced animation curves for smoother transitions
-    final titleOpacity = (1.0 - progress * 1.2).clamp(0.0, 1.0);
-    final subtitleOpacity = (1.0 - progress * 1.8).clamp(0.0, 1.0);
-    final translateY = progress * 15; // Reduced for smaller header
-    final scaleTransform = 1.0 - (progress * 0.05); // Subtle scale effect
+  Widget _buildHeaderContent(BuildContext context, double progress, double statusBarHeight) {
+    // Enhanced animation curves for smoother transitions - fade out earlier to prevent overflow
+    final titleOpacity = (1.0 - progress * 2.0).clamp(0.0, 1.0);
+    final subtitleOpacity = (1.0 - progress * 2.5).clamp(0.0, 1.0);
+    final translateY = progress * 10; // Reduced translation
+    final scaleTransform = 1.0 - (progress * 0.03); // Subtle scale effect
+    
+    // Hide content completely when almost collapsed to prevent overflow
+    if (progress > 0.8) {
+      return const SizedBox.shrink();
+    }
     
     return Positioned(
       left: Spacing.space16,
       right: Spacing.space16,
-      bottom: Spacing.space12 + (progress * 8), // Adjusted for smaller header
+      top: statusBarHeight + 16, // Fixed position below status bar
       child: Transform.scale(
         scale: scaleTransform,
         child: Transform.translate(
           offset: Offset(0, translateY),
           child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
+            Flexible(
+              flex: 2,
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   AnimatedOpacity(
@@ -428,6 +483,8 @@ class _ParallaxHeaderDelegate extends SliverPersistentHeaderDelegate {
                         fontWeight: FontWeight.w800,
                         letterSpacing: -0.5,
                       ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -440,6 +497,8 @@ class _ParallaxHeaderDelegate extends SliverPersistentHeaderDelegate {
                         color: AppColors.textPrimary,
                         fontWeight: FontWeight.w600,
                       ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                     ),
                   ),
                   AnimatedOpacity(
@@ -451,12 +510,15 @@ class _ParallaxHeaderDelegate extends SliverPersistentHeaderDelegate {
                         color: AppColors.textSecondary,
                         fontWeight: FontWeight.w400,
                       ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                     ),
                   ),
                 ],
               ),
             ),
             Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 BlocBuilder<DashboardBloc, DashboardState>(
                   builder: (context, state) {
@@ -504,6 +566,77 @@ class _ParallaxHeaderDelegate extends SliverPersistentHeaderDelegate {
                 AppColors.background.withValues(alpha: 0.9),
               ],
               stops: const [0.0, 0.5, 1.0],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCollapsedAppBar(BuildContext context, double progress, double statusBarHeight) {
+    final collapsedOpacity = (progress - 0.5).clamp(0.0, 1.0) * 2.0; // Start showing at 50% collapse
+    
+    return Positioned(
+      top: 0,
+      left: 0,
+      right: 0,
+      height: statusBarHeight + kToolbarHeight,
+      child: AnimatedOpacity(
+        opacity: collapsedOpacity,
+        duration: const Duration(milliseconds: 200),
+        child: ClipRRect(
+          child: Container(
+            decoration: BoxDecoration(
+              color: AppColors.background.withValues(alpha: 0.9),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.08),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Padding(
+              padding: EdgeInsets.only(
+                top: statusBarHeight,
+                left: 16,
+                right: 16,
+              ),
+              child: SizedBox(
+                height: kToolbarHeight,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        'FinTracker',
+                        style: AppTypography.titleMedium.copyWith(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.5,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Transform.scale(
+                          scale: 0.85,
+                          child: _buildNotificationBadge(context: context, count: 3),
+                        ),
+                        const SizedBox(width: 8),
+                        Transform.scale(
+                          scale: 0.85,
+                          child: _buildProfileAvatar(context),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         ),
@@ -605,8 +738,8 @@ class _ParallaxHeaderDelegate extends SliverPersistentHeaderDelegate {
         );
       },
       child: Container(
-        width: Spacing.profileAvatarSize,
-        height: Spacing.profileAvatarSize,
+        width: 44,
+        height: 44,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(Spacing.radiusXL),
           border: Border.all(

@@ -25,8 +25,15 @@ class CacheFailure extends Failure {
 
 /// Failure related to validation
 class ValidationFailure extends Failure {
-  const ValidationFailure([String message = 'Validation error'])
-      : super(message);
+  final String? field;
+  
+  const ValidationFailure(
+    String message, {
+    this.field,
+  }) : super(message);
+
+  @override
+  List<Object> get props => [message, field ?? ''];
 }
 
 /// Failure related to authentication/authorization
@@ -40,3 +47,29 @@ class UnexpectedFailure extends Failure {
   const UnexpectedFailure([String message = 'An unexpected error occurred'])
       : super(message);
 }
+
+/// Failure for unknown errors
+class UnknownFailure extends Failure {
+  const UnknownFailure([String message = 'An unknown error occurred'])
+      : super(message);
+}
+
+/// Failure when resource is not found
+class NotFoundFailure extends Failure {
+  const NotFoundFailure([String message = 'Resource not found'])
+      : super(message);
+}
+
+/// Failure related to server errors
+class ServerFailure extends Failure {
+  const ServerFailure([String message = 'Server error occurred'])
+      : super(message);
+}
+
+/// Failure related to sync operations
+class SyncFailure extends Failure {
+  const SyncFailure([String message = 'Sync operation failed'])
+      : super(message);
+}
+
+

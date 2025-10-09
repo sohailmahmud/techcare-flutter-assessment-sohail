@@ -8,7 +8,7 @@ part of 'cached_transaction.dart';
 
 class CachedTransactionAdapter extends TypeAdapter<CachedTransaction> {
   @override
-  final typeId = 0;
+  final typeId = 8;
 
   @override
   CachedTransaction read(BinaryReader reader) {

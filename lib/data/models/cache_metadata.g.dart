@@ -8,7 +8,7 @@ part of 'cache_metadata.dart';
 
 class CacheMetadataAdapter extends TypeAdapter<CacheMetadata> {
   @override
-  final typeId = 1;
+  final typeId = 7;
 
   @override
   CacheMetadata read(BinaryReader reader) {

@@ -4,10 +4,10 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/spacing.dart';
 import '../../../core/utils/formatters.dart';
-import '../../../data/models/analytics_models.dart';
+import '../../../domain/entities/analytics.dart';
 
 class SpendingTrendChart extends StatefulWidget {
-  final List<TrendDataPoint> trendData;
+  final TrendData trendData;
   final bool isLoading;
 
   const SpendingTrendChart({
@@ -204,7 +204,7 @@ class _SpendingTrendChartState extends State<SpendingTrendChart>
   }
 
   Widget _buildChart() {
-    if (widget.trendData.isEmpty) {
+    if (widget.trendData.incomePoints.isEmpty && widget.trendData.expensePoints.isEmpty) {
       return _buildEmptyState();
     }
 
@@ -258,7 +258,9 @@ class _SpendingTrendChartState extends State<SpendingTrendChart>
       titlesData: _buildTitlesData(),
       borderData: _buildBorderData(),
       minX: 0,
-      maxX: (widget.trendData.length - 1).toDouble(),
+      maxX: (widget.trendData.incomePoints.length.compareTo(widget.trendData.expensePoints.length) > 0 
+          ? widget.trendData.incomePoints.length 
+          : widget.trendData.expensePoints.length - 1).toDouble(),
       minY: 0,
       maxY: maxY,
       lineBarsData: [
@@ -313,11 +315,18 @@ class _SpendingTrendChartState extends State<SpendingTrendChart>
   }
 
   Widget _buildBottomTitleWidgets(double value, TitleMeta meta) {
-    if (value < 0 || value >= widget.trendData.length) {
+    final maxIndex = widget.trendData.incomePoints.length.compareTo(widget.trendData.expensePoints.length) > 0 
+        ? widget.trendData.incomePoints.length 
+        : widget.trendData.expensePoints.length;
+    
+    if (value < 0 || value >= maxIndex) {
       return Container();
     }
 
-    final dataPoint = widget.trendData[value.toInt()];
+    // Use income points as primary reference for labels, fallback to expense points
+    final dataPoint = value.toInt() < widget.trendData.incomePoints.length 
+        ? widget.trendData.incomePoints[value.toInt()]
+        : widget.trendData.expensePoints[value.toInt()];
     final monthName = _getMonthAbbreviation(dataPoint.date.month);
 
     return SideTitleWidget(
@@ -426,11 +435,11 @@ class _SpendingTrendChartState extends State<SpendingTrendChart>
   }
 
   List<FlSpot> _buildSpots({required bool isIncome}) {
-    return widget.trendData.asMap().entries.map((entry) {
+    final dataPoints = isIncome ? widget.trendData.incomePoints : widget.trendData.expensePoints;
+    return dataPoints.asMap().entries.map((entry) {
       final index = entry.key.toDouble();
       final dataPoint = entry.value;
-      final value = isIncome ? dataPoint.income : dataPoint.expenses;
-      return FlSpot(index, value * _animation.value);
+      return FlSpot(index, dataPoint.value * _animation.value);
     }).toList();
   }
 
@@ -478,7 +487,9 @@ class _SpendingTrendChartState extends State<SpendingTrendChart>
         fontSize: 12,
       );
       
-      final dataPoint = widget.trendData[touchedSpot.spotIndex];
+      final dataPoint = touchedSpot.barIndex == 0 && touchedSpot.spotIndex < widget.trendData.incomePoints.length
+          ? widget.trendData.incomePoints[touchedSpot.spotIndex]
+          : widget.trendData.expensePoints[touchedSpot.spotIndex];
       final monthName = _getMonthName(dataPoint.date.month);
       
       if (touchedSpot.barIndex == 0) {
@@ -498,11 +509,18 @@ class _SpendingTrendChartState extends State<SpendingTrendChart>
   }
 
   double _getMaxY() {
-    if (widget.trendData.isEmpty) return 100;
+    if (widget.trendData.incomePoints.isEmpty && widget.trendData.expensePoints.isEmpty) return 100;
     
     double maxValue = 0;
-    for (final dataPoint in widget.trendData) {
-      maxValue = [maxValue, dataPoint.income, dataPoint.expenses].reduce((a, b) => a > b ? a : b);
+    
+    // Check income points
+    for (final dataPoint in widget.trendData.incomePoints) {
+      if (dataPoint.value > maxValue) maxValue = dataPoint.value;
+    }
+    
+    // Check expense points
+    for (final dataPoint in widget.trendData.expensePoints) {
+      if (dataPoint.value > maxValue) maxValue = dataPoint.value;
     }
     
     // Ensure minimum value and add 20% padding to the top

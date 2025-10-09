@@ -1,0 +1,291 @@
+{
+  "data": [
+    {
+      "id": "txn_001",
+      "title": "Salary",
+      "amount": 85000.00,
+      "type": "income",
+      "category": {
+        "id": "cat_income",
+        "name": "Salary",
+        "icon": "payments",
+        "color": "#00C853"
+      },
+      "date": "2025-10-01T00:00:00Z",
+      "description": "Monthly salary deposit"
+    },
+    {
+      "id": "txn_002",
+      "title": "Grocery Shopping",
+      "amount": 2500.00,
+      "type": "expense",
+      "category": {
+        "id": "cat_001",
+        "name": "Food & Dining",
+        "icon": "restaurant",
+        "color": "#FF6B6B"
+      },
+      "date": "2025-10-01T10:30:00Z",
+      "description": "Weekly groceries from Shwapno"
+    },
+    {
+      "id": "txn_003",
+      "title": "Uber Ride",
+      "amount": 350.00,
+      "type": "expense",
+      "category": {
+        "id": "cat_002",
+        "name": "Transportation",
+        "icon": "directions_car",
+        "color": "#4ECDC4"
+      },
+      "date": "2025-10-01T14:15:00Z",
+      "description": "Ride to office"
+    },
+    {
+      "id": "txn_004",
+      "title": "Netflix Subscription",
+      "amount": 800.00,
+      "type": "expense",
+      "category": {
+        "id": "cat_004",
+        "name": "Entertainment",
+        "icon": "movie",
+        "color": "#95E1D3"
+      },
+      "date": "2025-09-30T08:00:00Z",
+      "description": "Monthly subscription"
+    },
+    {
+      "id": "txn_005",
+      "title": "Electricity Bill",
+      "amount": 3200.00,
+      "type": "expense",
+      "category": {
+        "id": "cat_005",
+        "name": "Bills & Utilities",
+        "icon": "receipt",
+        "color": "#F38181"
+      },
+      "date": "2025-09-28T16:45:00Z",
+      "description": "September electricity bill"
+    },
+    {
+      "id": "txn_006",
+      "title": "Online Shopping",
+      "amount": 4500.00,
+      "type": "expense",
+      "category": {
+        "id": "cat_003",
+        "name": "Shopping",
+        "icon": "shopping_bag",
+        "color": "#FFD93D"
+      },
+      "date": "2025-09-27T20:30:00Z",
+      "description": "Clothing from Daraz"
+    },
+    {
+      "id": "txn_007",
+      "title": "Restaurant Dinner",
+      "amount": 1800.00,
+      "type": "expense",
+      "category": {
+        "id": "cat_001",
+        "name": "Food & Dining",
+        "icon": "restaurant",
+        "color": "#FF6B6B"
+      },
+      "date": "2025-09-26T19:00:00Z",
+      "description": "Dinner at The Kabab Factory"
+    },
+    {
+      "id": "txn_008",
+      "title": "Freelance Project",
+      "amount": 15000.00,
+      "type": "income",
+      "category": {
+        "id": "cat_freelance",
+        "name": "Freelance",
+        "icon": "work",
+        "color": "#00C853"
+      },
+      "date": "2025-09-25T12:00:00Z",
+      "description": "Payment for mobile app project"
+    },
+    {
+      "id": "txn_009",
+      "title": "Internet Bill",
+      "amount": 1500.00,
+      "type": "expense",
+      "category": {
+        "id": "cat_005",
+        "name": "Bills & Utilities",
+        "icon": "receipt",
+        "color": "#F38181"
+      },
+      "date": "2025-09-24T11:00:00Z",
+      "description": "Monthly broadband bill"
+    },
+    {
+      "id": "txn_010",
+      "title": "Coffee Shop",
+      "amount": 450.00,
+      "type": "expense",
+      "category": {
+        "id": "cat_001",
+        "name": "Food & Dining",
+        "icon": "restaurant",
+        "color": "#FF6B6B"
+      },
+      "date": "2025-09-23T09:30:00Z",
+      "description": "Morning coffee at Barista"
+    },
+    {
+      "id": "txn_011",
+      "title": "Gas Station",
+      "amount": 2800.00,
+      "type": "expense",
+      "category": {
+        "id": "cat_002",
+        "name": "Transportation",
+        "icon": "directions_car",
+        "color": "#4ECDC4"
+      },
+      "date": "2025-09-22T18:20:00Z",
+      "description": "Fuel for car"
+    },
+    {
+      "id": "txn_012",
+      "title": "Gym Membership",
+      "amount": 3000.00,
+      "type": "expense",
+      "category": {
+        "id": "cat_006",
+        "name": "Health & Fitness",
+        "icon": "fitness_center",
+        "color": "#9C27B0"
+      },
+      "date": "2025-09-21T07:00:00Z",
+      "description": "Monthly gym subscription"
+    },
+    {
+      "id": "txn_013",
+      "title": "Investment Return",
+      "amount": 5500.00,
+      "type": "income",
+      "category": {
+        "id": "cat_investment",
+        "name": "Investment",
+        "icon": "trending_up",
+        "color": "#00C853"
+      },
+      "date": "2025-09-20T10:00:00Z",
+      "description": "Dividend from mutual funds"
+    },
+    {
+      "id": "txn_014",
+      "title": "Phone Bill",
+      "amount": 1200.00,
+      "type": "expense",
+      "category": {
+        "id": "cat_005",
+        "name": "Bills & Utilities",
+        "icon": "receipt",
+        "color": "#F38181"
+      },
+      "date": "2025-09-19T14:30:00Z",
+      "description": "Monthly mobile bill"
+    },
+    {
+      "id": "txn_015",
+      "title": "Book Purchase",
+      "amount": 800.00,
+      "type": "expense",
+      "category": {
+        "id": "cat_007",
+        "name": "Education",
+        "icon": "school",
+        "color": "#FF9800"
+      },
+      "date": "2025-09-18T16:00:00Z",
+      "description": "Programming books from Rokomari"
+    },
+    {
+      "id": "txn_016",
+      "title": "Medical Checkup",
+      "amount": 2500.00,
+      "type": "expense",
+      "category": {
+        "id": "cat_006",
+        "name": "Health & Fitness",
+        "icon": "fitness_center",
+        "color": "#9C27B0"
+      },
+      "date": "2025-09-17T11:00:00Z",
+      "description": "Routine health checkup"
+    },
+    {
+      "id": "txn_017",
+      "title": "Movie Tickets",
+      "amount": 600.00,
+      "type": "expense",
+      "category": {
+        "id": "cat_004",
+        "name": "Entertainment",
+        "icon": "movie",
+        "color": "#95E1D3"
+      },
+      "date": "2025-09-16T20:00:00Z",
+      "description": "Cinema tickets for weekend movie"
+    },
+    {
+      "id": "txn_018",
+      "title": "Clothing Shopping",
+      "amount": 3200.00,
+      "type": "expense",
+      "category": {
+        "id": "cat_003",
+        "name": "Shopping",
+        "icon": "shopping_bag",
+        "color": "#FFD93D"
+      },
+      "date": "2025-09-15T17:30:00Z",
+      "description": "New clothes for office"
+    },
+    {
+      "id": "txn_019",
+      "title": "Food Delivery",
+      "amount": 750.00,
+      "type": "expense",
+      "category": {
+        "id": "cat_001",
+        "name": "Food & Dining",
+        "icon": "restaurant",
+        "color": "#FF6B6B"
+      },
+      "date": "2025-09-14T21:00:00Z",
+      "description": "Dinner from Foodpanda"
+    },
+    {
+      "id": "txn_020",
+      "title": "Bonus Payment",
+      "amount": 25000.00,
+      "type": "income",
+      "category": {
+        "id": "cat_income",
+        "name": "Salary",
+        "icon": "payments",
+        "color": "#00C853"
+      },
+      "date": "2025-09-13T09:00:00Z",
+      "description": "Quarterly performance bonus"
+    }
+  ],
+  "meta": {
+    "currentPage": 1,
+    "totalPages": 1,
+    "totalItems": 20,
+    "itemsPerPage": 20,
+    "hasMore": false
+  }
+}

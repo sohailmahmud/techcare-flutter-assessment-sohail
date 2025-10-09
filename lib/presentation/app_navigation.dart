@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../core/theme/app_colors.dart';
 import 'analytics/pages/analytics_page.dart';
 import 'dashboard/pages/dashboard_page.dart';
-import 'transactions/pages/transactions_page.dart';
+import 'transactions/list/pages/transactions_page.dart';
 
 /// App navigation shell providing bottom navigation bar
 /// Provides navigation between Dashboard, Transactions, and Analytics screens

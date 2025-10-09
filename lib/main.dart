@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'core/theme/app_theme.dart';
+import 'core/bloc/app_bloc_observer.dart';
 import 'presentation/app_navigation.dart';
-import 'presentation/transactions/bloc/transactions_bloc.dart';
+import 'presentation/transactions/list/bloc/transactions_bloc.dart';
 import 'injection_container.dart' as di;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize dependency injection
   await di.init();
+  
+  // Set up BLoC observer for debugging and monitoring
+  Bloc.observer = AppBlocObserver();
+  
   runApp(const FinTrackApp());
 }
 

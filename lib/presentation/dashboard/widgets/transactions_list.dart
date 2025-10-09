@@ -554,23 +554,38 @@ class _TransactionsListState extends State<TransactionsList>
   }
 
   IconData _getTransactionIcon(String categoryId) {
+    // Map category IDs to icons based on the JSON mock data structure
     switch (categoryId.toLowerCase()) {
+      case 'cat_001': // Food & Dining
       case 'food':
         return Icons.restaurant;
+      case 'cat_002': // Transportation  
       case 'transport':
         return Icons.directions_car;
+      case 'cat_003': // Shopping
       case 'shopping':
         return Icons.shopping_bag;
+      case 'cat_004': // Entertainment
       case 'entertainment':
         return Icons.movie;
+      case 'cat_005': // Bills & Utilities
       case 'utilities':
-        return Icons.electrical_services;
+        return Icons.receipt;
+      case 'cat_006': // Health & Fitness
       case 'healthcare':
-        return Icons.local_hospital;
+        return Icons.fitness_center;
+      case 'cat_007': // Education
+      case 'education':
+        return Icons.school;
+      case 'cat_income': // Salary
       case 'salary':
-        return Icons.work;
+        return Icons.payments;
+      case 'cat_freelance': // Freelance
       case 'freelance':
-        return Icons.computer;
+        return Icons.work;
+      case 'cat_investment': // Investment
+      case 'investment':
+        return Icons.trending_up;
       default:
         return Icons.account_balance_wallet;
     }

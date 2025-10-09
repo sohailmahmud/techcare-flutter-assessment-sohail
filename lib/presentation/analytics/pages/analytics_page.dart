@@ -6,7 +6,7 @@ import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/spacing.dart';
 import '../../../injection_container.dart' as di;
 import '../bloc/analytics_bloc.dart';
-import '../../../data/models/analytics_models.dart';
+import '../../../domain/entities/analytics.dart';
 import '../widgets/period_selector.dart';
 import '../widgets/summary_statistics_cards.dart';
 import '../widgets/spending_trend_chart.dart';
@@ -271,7 +271,7 @@ class _AnalyticsPageState extends State<AnalyticsPage>
       children: [
         // Period Selector
         PeriodSelector(
-          selectedPeriod: data.timePeriod,
+          selectedPeriod: data.period,
           dateRange: data.dateRange,
           onPeriodChanged: (period) {
             context.read<AnalyticsBloc>().add(ChangePeriod(period));
@@ -286,7 +286,7 @@ class _AnalyticsPageState extends State<AnalyticsPage>
         const SizedBox(height: Spacing.space16), // Reduced spacing
         
         // Summary Statistics
-        ResponsiveSummaryStats(statistics: data.summary),
+        ResponsiveSummaryStats(statistics: data),
         
         const SizedBox(height: Spacing.space16), // Reduced spacing
         
@@ -319,7 +319,7 @@ class _AnalyticsPageState extends State<AnalyticsPage>
                     const SizedBox(width: Spacing.space16),
                     Expanded(
                       child: BudgetProgressIndicators(
-                        budgetData: data.budgetProgress,
+                        budgetData: data.budgetComparisons,
                         isLoading: false,
                       ),
                     ),
@@ -337,7 +337,7 @@ class _AnalyticsPageState extends State<AnalyticsPage>
                     ),
                   const SizedBox(height: Spacing.space16),
                   BudgetProgressIndicators(
-                      budgetData: data.budgetProgress,
+                      budgetData: data.budgetComparisons,
                       isLoading: false,
                     ),
                 ],
@@ -362,7 +362,6 @@ class _AnalyticsPageState extends State<AnalyticsPage>
     await _refreshController.forward();
     _refreshController.reset();
   }
-
 
 }
 

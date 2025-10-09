@@ -3,10 +3,10 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/spacing.dart';
 import '../../../core/utils/formatters.dart';
-import '../../../data/models/analytics_models.dart';
+import '../../../domain/entities/analytics.dart';
 
 class CategoryBreakdownChart extends StatefulWidget {
-  final List<CategorySpendingData> categoryData;
+  final List<CategoryBreakdown> categoryData;
   final bool isLoading;
   final VoidCallback? onTap;
 
@@ -220,7 +220,7 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart>
     );
   }
 
-  Widget _buildCategoryBar(CategorySpendingData data, int index) {
+  Widget _buildCategoryBar(CategoryBreakdown data, int index) {
     final animationDelay = index * 0.1;
     final barAnimation = Tween<double>(
       begin: 0.0,
@@ -252,12 +252,12 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart>
                       width: 32,
                       height: 32,
                       decoration: BoxDecoration(
-                        color: data.category.color.withOpacity(0.1),
+                        color: _getCategoryColor(data.categoryName).withOpacity(0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Icon(
-                        data.category.icon,
-                        color: data.category.color,
+                        _getCategoryIcon(data.categoryName),
+                        color: _getCategoryColor(data.categoryName),
                         size: 18,
                       ),
                     ),
@@ -267,7 +267,7 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            data.category.name,
+                            data.categoryName,
                             style: AppTypography.bodyMedium.copyWith(
                               fontWeight: FontWeight.w600,
                               color: AppColors.textPrimary,
@@ -296,7 +296,7 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart>
                         Text(
                           '${data.percentage.toStringAsFixed(1)}%',
                           style: AppTypography.labelSmall.copyWith(
-                            color: data.category.color,
+                            color: _getCategoryColor(data.categoryName),
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -319,8 +319,8 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart>
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            data.category.color.withOpacity(0.7),
-                            data.category.color,
+                            _getCategoryColor(data.categoryName).withOpacity(0.7),
+                            _getCategoryColor(data.categoryName),
                           ],
                         ),
                         borderRadius: BorderRadius.circular(3),
@@ -386,16 +386,16 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart>
                 Row(
                   children: [
                     Icon(
-                      topCategory.category.icon,
-                      color: topCategory.category.color,
+                      _getCategoryIcon(topCategory.categoryName),
+                      color: _getCategoryColor(topCategory.categoryName),
                       size: 16,
                     ),
                     const SizedBox(width: Spacing.space4),
                     Text(
-                      topCategory.category.name,
+                      topCategory.categoryName,
                       style: AppTypography.bodyMedium.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: topCategory.category.color,
+                        color: _getCategoryColor(topCategory.categoryName),
                       ),
                     ),
                   ],
@@ -408,7 +408,7 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart>
     );
   }
 
-  void _onCategoryTap(CategorySpendingData data) {
+  void _onCategoryTap(CategoryBreakdown data) {
     // Show detailed breakdown or navigate to category details
     showModalBottomSheet(
       context: context,
@@ -418,7 +418,7 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart>
     );
   }
 
-  Widget _buildCategoryDetailsSheet(CategorySpendingData data) {
+  Widget _buildCategoryDetailsSheet(CategoryBreakdown data) {
     return Container(
       padding: const EdgeInsets.all(Spacing.space24),
       decoration: const BoxDecoration(
@@ -448,12 +448,12 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart>
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: data.category.color.withOpacity(0.1),
+                  color: _getCategoryColor(data.categoryName).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
-                  data.category.icon,
-                  color: data.category.color,
+                  _getCategoryIcon(data.categoryName),
+                  color: _getCategoryColor(data.categoryName),
                   size: 24,
                 ),
               ),
@@ -463,7 +463,7 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      data.category.name,
+                      data.categoryName,
                       style: AppTypography.headlineSmall.copyWith(
                         fontWeight: FontWeight.w700,
                         color: AppColors.textPrimary,
@@ -495,7 +495,7 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart>
                 child: _buildStatItem(
                   'Percentage',
                   '${data.percentage.toStringAsFixed(1)}%',
-                  data.category.color,
+                  _getCategoryColor(data.categoryName),
                 ),
               ),
               Expanded(
@@ -533,5 +533,44 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart>
         ),
       ],
     );
+  }
+
+  // Helper method to get category color from name (for demo purposes)
+  Color _getCategoryColor(String categoryName) {
+    // Simple hash-based color generation for consistent colors
+    final hash = categoryName.hashCode;
+    final colors = [
+      AppColors.primary,
+      AppColors.secondary,
+      Colors.deepPurple,
+      Colors.blue,
+      Colors.green,
+      Colors.orange,
+      Colors.purple,
+      Colors.teal,
+      Colors.red,
+      Colors.indigo,
+    ];
+    return colors[hash.abs() % colors.length];
+  }
+
+  // Helper method to get category icon from category name based on JSON mock data
+  IconData _getCategoryIcon(String categoryName) {
+    // Map category names to icons based on the JSON mock data structure
+    final name = categoryName.toLowerCase();
+    
+    // Direct mapping from JSON mock data categories
+    if (name.contains('food') || name.contains('dining')) return Icons.restaurant;
+    if (name.contains('transport')) return Icons.directions_car;
+    if (name.contains('shopping')) return Icons.shopping_bag;
+    if (name.contains('entertainment')) return Icons.movie;
+    if (name.contains('bills') || name.contains('utilities')) return Icons.receipt;
+    if (name.contains('health') || name.contains('fitness')) return Icons.fitness_center;
+    if (name.contains('education')) return Icons.school;
+    if (name.contains('salary')) return Icons.payments;
+    if (name.contains('freelance')) return Icons.work;
+    if (name.contains('investment')) return Icons.trending_up;
+    
+    return Icons.category; // default icon
   }
 }

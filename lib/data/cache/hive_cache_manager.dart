@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:developer' as dev;
 import 'package:hive_ce_flutter/hive_flutter.dart';
-import '../../domain/entities/transaction.dart' as tx;
-import '../../domain/entities/transaction.dart';
-import '../../domain/entities/transaction_filter.dart' as filter;
+import '../../domain/entities/transaction.dart' hide TransactionType;
+import '../../domain/entities/transaction_filter.dart' as filter show TransactionFilter;
+import '../../domain/entities/transaction_filter.dart';
 import '../models/cached_transaction.dart';
 import '../models/cache_metadata.dart';
 
@@ -60,7 +60,7 @@ class HiveCacheManager {
 
   /// Cache transactions with smart invalidation
   Future<void> cacheTransactions(
-    List<tx.Transaction> transactions, {
+    List<Transaction> transactions, {
     filter.TransactionFilter? filter,
     Duration? ttl,
     bool forceClear = false,
@@ -101,7 +101,7 @@ class HiveCacheManager {
   }
 
   /// Get cached transactions with smart filtering
-  Future<List<tx.Transaction>> getCachedTransactions({
+  Future<List<Transaction>> getCachedTransactions({
     filter.TransactionFilter? filter,
     int? page,
     int? limit,
@@ -194,7 +194,7 @@ class HiveCacheManager {
   }
 
   /// Update single transaction in cache
-  Future<void> updateTransaction(tx.Transaction transaction) async {
+  Future<void> updateTransaction(Transaction transaction) async {
     await _ensureInitialized();
 
     try {
