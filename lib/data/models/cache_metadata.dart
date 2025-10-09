@@ -5,6 +5,7 @@ part 'cache_metadata.g.dart';
 /// Cache metadata for tracking cache state and statistics
 @HiveType(typeId: 7)
 class CacheMetadata extends HiveObject {
+  @override
   @HiveField(0)
   String key;
 

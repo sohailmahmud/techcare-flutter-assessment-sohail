@@ -1,6 +1,6 @@
 /// App-wide constants
 class AppConstants {
-   // Private constructor to prevent instantiation
+  // Private constructor to prevent instantiation
   const AppConstants._();
 
   // Animation Durations
@@ -24,7 +24,7 @@ class AppConstants {
 
   // Minimum screen width
   static const double minScreenWidth = 320;
-  
+
   // Notification constants
   static const int defaultNotificationCount = 3;
 

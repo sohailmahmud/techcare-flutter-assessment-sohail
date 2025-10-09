@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/router/navigation_extensions.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../domain/entities/category.dart';
 import '../../../../domain/entities/transaction.dart' as tx;
-import '../../form/pages/add_edit_transaction_screen.dart';
 import '../bloc/transactions_bloc.dart';
 
 /// Comprehensive Transaction Details Modal
@@ -23,11 +23,13 @@ import '../bloc/transactions_bloc.dart';
 class TransactionDetailsModal extends StatefulWidget {
   final tx.Transaction transaction;
   final String? heroTag;
+  final String? sourcePage;
 
   const TransactionDetailsModal({
     super.key,
     required this.transaction,
     this.heroTag,
+    this.sourcePage,
   });
 
   @override
@@ -529,19 +531,11 @@ class _TransactionDetailsModalState extends State<TransactionDetailsModal>
 
   void _editTransaction() {
     Navigator.of(context).pop(); // Close modal first
-    Navigator.of(context).push(
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => 
-            AddEditTransactionScreen(transaction: widget.transaction),
-        transitionDuration: const Duration(milliseconds: 400),
-        reverseTransitionDuration: const Duration(milliseconds: 300),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return FadeTransition(
-            opacity: animation,
-            child: child,
-          );
-        },
-      ),
+    // Use go_router navigation instead of Navigator.push
+    context.goToEditTransaction(
+      transactionId: widget.transaction.id,
+      transaction: widget.transaction,
+      sourcePage: widget.sourcePage,
     );
   }
 

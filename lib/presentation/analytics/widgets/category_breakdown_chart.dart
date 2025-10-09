@@ -67,7 +67,7 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.textSecondary.withOpacity(0.1),
+            color: AppColors.textSecondary.withValues(alpha: 0.1),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -94,10 +94,10 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart>
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: AppColors.expense.withOpacity(0.1),
+            color: AppColors.expense.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(
+          child: const Icon(
             Icons.pie_chart_rounded,
             color: AppColors.expense,
             size: 20,
@@ -127,7 +127,7 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart>
         if (widget.onTap != null)
           IconButton(
             onPressed: widget.onTap,
-            icon: Icon(
+            icon: const Icon(
               Icons.fullscreen_rounded,
               color: AppColors.textSecondary,
               size: 20,
@@ -144,7 +144,7 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(
+            const CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
               strokeWidth: 3,
             ),
@@ -168,7 +168,7 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            const Icon(
               Icons.pie_chart_outline_rounded,
               size: 48,
               color: AppColors.textTertiary,
@@ -252,7 +252,7 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart>
                       width: 32,
                       height: 32,
                       decoration: BoxDecoration(
-                        color: _getCategoryColor(data.categoryName).withOpacity(0.1),
+                        color: _getCategoryColor(data.categoryName).withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Icon(
@@ -319,7 +319,7 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart>
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            _getCategoryColor(data.categoryName).withOpacity(0.7),
+                            _getCategoryColor(data.categoryName).withValues(alpha: 0.7),
                             _getCategoryColor(data.categoryName),
                           ],
                         ),
@@ -448,7 +448,7 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart>
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: _getCategoryColor(data.categoryName).withOpacity(0.1),
+                  color: _getCategoryColor(data.categoryName).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(

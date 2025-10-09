@@ -64,36 +64,23 @@ class _TransactionsListViewState extends State<TransactionsListView> {
     }
   }
 
-  Map<String, List<tx.Transaction>> _groupTransactionsByDate(List<tx.Transaction> transactions) {
+  Map<String, List<tx.Transaction>> _groupTransactionsByDate(
+      List<tx.Transaction> transactions) {
     final Map<String, List<tx.Transaction>> grouped = {};
-    
+
     for (final transaction in transactions) {
-      final dateKey = _getDateKey(transaction.date);
+      final dateKey = DateFormatter.formatDateGrouping(transaction.date);
       if (grouped[dateKey] == null) {
         grouped[dateKey] = [];
       }
       grouped[dateKey]!.add(transaction);
     }
-    
+
     return grouped;
   }
 
-  String _getDateKey(DateTime date) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final yesterday = today.subtract(const Duration(days: 1));
-    final transactionDate = DateTime(date.year, date.month, date.day);
-    
-    if (transactionDate.isAtSameMomentAs(today)) {
-      return 'Today';
-    } else if (transactionDate.isAtSameMomentAs(yesterday)) {
-      return 'Yesterday';
-    } else {
-      return DateFormatter.formatDisplay(date);
-    }
-  }
-
-  int _getTotalItemCount(Map<String, List<tx.Transaction>> groupedTransactions) {
+  int _getTotalItemCount(
+      Map<String, List<tx.Transaction>> groupedTransactions) {
     int count = 0;
     for (final entry in groupedTransactions.entries) {
       count += 1; // Header
@@ -102,19 +89,20 @@ class _TransactionsListViewState extends State<TransactionsListView> {
     return count;
   }
 
-  Widget _buildGroupedTransactions(Map<String, List<tx.Transaction>> groupedTransactions, int globalIndex) {
+  Widget _buildGroupedTransactions(
+      Map<String, List<tx.Transaction>> groupedTransactions, int globalIndex) {
     int currentIndex = 0;
-    
+
     for (final entry in groupedTransactions.entries) {
       final dateKey = entry.key;
       final transactions = entry.value;
-      
+
       // Check if this is a header
       if (currentIndex == globalIndex) {
         return _buildDateHeader(dateKey, transactions);
       }
       currentIndex++;
-      
+
       // Check if this is a transaction within this group
       for (int i = 0; i < transactions.length; i++) {
         if (currentIndex == globalIndex) {
@@ -123,22 +111,24 @@ class _TransactionsListViewState extends State<TransactionsListView> {
         currentIndex++;
       }
     }
-    
+
     return const SizedBox.shrink();
   }
 
   Widget _buildDateHeader(String dateKey, List<tx.Transaction> transactions) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: Spacing.space16,
-        vertical: Spacing.space8,
+      padding: const EdgeInsets.only(
+        top: Spacing.space16,
+        bottom: Spacing.space8,
+        left: Spacing.space0,
+        right: Spacing.space16,
       ),
       child: Row(
         children: [
           Text(
             dateKey,
-            style: AppTypography.titleMedium.copyWith(
-              color: AppColors.textPrimary,
+            style: AppTypography.labelLarge.copyWith(
+              color: AppColors.textSecondary,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -154,7 +144,7 @@ class _TransactionsListViewState extends State<TransactionsListView> {
     }
 
     final groupedTransactions = _groupTransactionsByDate(widget.transactions);
-    
+
     return CustomScrollView(
       controller: _scrollController,
       physics: const AlwaysScrollableScrollPhysics(),
@@ -227,7 +217,7 @@ class _TransactionsListViewState extends State<TransactionsListView> {
                 // Transaction icon
                 _buildTransactionIcon(transaction, transaction.isIncome),
                 const SizedBox(width: 16),
-                
+
                 // Transaction details
                 Expanded(
                   child: Column(
@@ -274,32 +264,35 @@ class _TransactionsListViewState extends State<TransactionsListView> {
                     ],
                   ),
                 ),
-              const SizedBox(width: 16),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Hero(
-                    tag: 'transaction_amount_${transaction.id}_${widget.heroTagPrefix}',
-                    child: Material(
-                      color: Colors.transparent,
-                      child: Text(
-                        '${transaction.isIncome ? '+' : '-'}${CurrencyFormatter.format(transaction.amount)}',
-                        style: AppTypography.bodyLarge.copyWith(
-                          color: transaction.isIncome ? AppColors.success : AppColors.error,
-                          fontWeight: FontWeight.w700,
+                const SizedBox(width: 16),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Hero(
+                      tag:
+                          'transaction_amount_${transaction.id}_${widget.heroTagPrefix}',
+                      child: Material(
+                        color: Colors.transparent,
+                        child: Text(
+                          '${transaction.isIncome ? '+' : '-'}${CurrencyFormatter.format(transaction.amount)}',
+                          style: AppTypography.bodyLarge.copyWith(
+                            color: transaction.isIncome
+                                ? AppColors.success
+                                : AppColors.error,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    DateFormatter.formatTime(transaction.date),
-                    style: AppTypography.labelSmall.copyWith(
-                      color: AppColors.textSecondary,
+                    const SizedBox(height: 2),
+                    Text(
+                      DateFormatter.formatTime(transaction.date),
+                      style: AppTypography.labelSmall.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
               ],
             ),
           ),
@@ -325,10 +318,6 @@ class _TransactionsListViewState extends State<TransactionsListView> {
       ),
     );
   }
-
-
-
-
 
   Widget _buildSwipeBackground({required bool isLeft}) {
     return Container(
@@ -370,7 +359,8 @@ class _TransactionsListViewState extends State<TransactionsListView> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Transaction'),
-        content: Text('Are you sure you want to delete "${transaction.title}"?'),
+        content:
+            Text('Are you sure you want to delete "${transaction.title}"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -415,8 +405,8 @@ class _TransactionsListViewState extends State<TransactionsListView> {
           Text(
             'Loading more transactions...',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurface.withAlpha(153),
-            ),
+                  color: Theme.of(context).colorScheme.onSurface.withAlpha(153),
+                ),
           ),
         ],
       ),
@@ -447,21 +437,24 @@ class _TransactionsListViewState extends State<TransactionsListView> {
             Text(
               'No Transactions Found',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: Spacing.space8),
             Text(
               'Try adjusting your search or filters to find what you\'re looking for.',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withAlpha(153),
-              ),
+                    color:
+                        Theme.of(context).colorScheme.onSurface.withAlpha(153),
+                  ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: Spacing.space24),
             ElevatedButton.icon(
               onPressed: () {
-                context.read<TransactionsBloc>().add(const FilterTransactions({}));
+                context
+                    .read<TransactionsBloc>()
+                    .add(const FilterTransactions({}));
               },
               icon: const Icon(Icons.clear_all_rounded),
               label: const Text('Clear Filters'),
@@ -477,14 +470,14 @@ class _TransactionsListViewState extends State<TransactionsListView> {
       ),
     );
   }
-  
+
   IconData _getTransactionIcon(String categoryId) {
     // Map category IDs to icons based on the JSON mock data structure
     switch (categoryId.toLowerCase()) {
       case 'cat_001': // Food & Dining
       case 'food':
         return Icons.restaurant;
-      case 'cat_002': // Transportation  
+      case 'cat_002': // Transportation
       case 'transport':
         return Icons.directions_car;
       case 'cat_003': // Shopping
@@ -550,7 +543,7 @@ class TransactionListSkeleton extends StatelessWidget {
                   borderRadius: Spacing.radiusM,
                 ),
                 const SizedBox(width: Spacing.space12),
-                
+
                 // Content skeleton
                 Expanded(
                   child: Column(
@@ -582,7 +575,7 @@ class TransactionListSkeleton extends StatelessWidget {
                     ],
                   ),
                 ),
-                
+
                 // Amount skeleton
                 const Column(
                   crossAxisAlignment: CrossAxisAlignment.end,

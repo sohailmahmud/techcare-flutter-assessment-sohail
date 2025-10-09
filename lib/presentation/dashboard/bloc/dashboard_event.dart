@@ -26,7 +26,7 @@ class RetryLoadDashboard extends DashboardEvent {
 /// Select transaction filter
 class SelectTransactionFilter extends DashboardEvent {
   final String? categoryId;
-  
+
   const SelectTransactionFilter({this.categoryId});
 
   @override

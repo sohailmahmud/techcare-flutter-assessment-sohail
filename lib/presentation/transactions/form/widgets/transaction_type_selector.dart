@@ -16,7 +16,8 @@ class TransactionTypeSelector extends StatefulWidget {
   });
 
   @override
-  State<TransactionTypeSelector> createState() => _TransactionTypeSelectorState();
+  State<TransactionTypeSelector> createState() =>
+      _TransactionTypeSelectorState();
 }
 
 class _TransactionTypeSelectorState extends State<TransactionTypeSelector>
@@ -96,10 +97,12 @@ class _TransactionTypeSelectorState extends State<TransactionTypeSelector>
                             ? AppColors.expense
                             : Colors.transparent,
                         borderRadius: BorderRadius.circular(Spacing.radiusM),
-                        boxShadow: widget.selectedType == TransactionType.expense
+                        boxShadow: widget.selectedType ==
+                                TransactionType.expense
                             ? [
                                 BoxShadow(
-                                  color: AppColors.expense.withValues(alpha: 0.3),
+                                  color:
+                                      AppColors.expense.withValues(alpha: 0.3),
                                   blurRadius: 8,
                                   offset: const Offset(0, 2),
                                 ),
@@ -113,16 +116,19 @@ class _TransactionTypeSelectorState extends State<TransactionTypeSelector>
                             duration: const Duration(milliseconds: 200),
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: widget.selectedType == TransactionType.expense
+                              color: widget.selectedType ==
+                                      TransactionType.expense
                                   ? Colors.white.withValues(alpha: 0.2)
                                   : AppColors.expense.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(Spacing.radiusS),
+                              borderRadius:
+                                  BorderRadius.circular(Spacing.radiusS),
                             ),
                             child: Icon(
                               Icons.arrow_downward_rounded,
-                              color: widget.selectedType == TransactionType.expense
-                                  ? Colors.white
-                                  : AppColors.expense,
+                              color:
+                                  widget.selectedType == TransactionType.expense
+                                      ? Colors.white
+                                      : AppColors.expense,
                               size: 20,
                             ),
                           ),
@@ -130,9 +136,10 @@ class _TransactionTypeSelectorState extends State<TransactionTypeSelector>
                           Text(
                             'Expense',
                             style: AppTypography.titleMedium.copyWith(
-                              color: widget.selectedType == TransactionType.expense
-                                  ? Colors.white
-                                  : AppColors.textPrimary,
+                              color:
+                                  widget.selectedType == TransactionType.expense
+                                      ? Colors.white
+                                      : AppColors.textPrimary,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -160,7 +167,8 @@ class _TransactionTypeSelectorState extends State<TransactionTypeSelector>
                         boxShadow: widget.selectedType == TransactionType.income
                             ? [
                                 BoxShadow(
-                                  color: AppColors.income.withValues(alpha: 0.3),
+                                  color:
+                                      AppColors.income.withValues(alpha: 0.3),
                                   blurRadius: 8,
                                   offset: const Offset(0, 2),
                                 ),
@@ -174,16 +182,19 @@ class _TransactionTypeSelectorState extends State<TransactionTypeSelector>
                             duration: const Duration(milliseconds: 200),
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: widget.selectedType == TransactionType.income
-                                  ? Colors.white.withValues(alpha: 0.2)
-                                  : AppColors.income.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(Spacing.radiusS),
+                              color:
+                                  widget.selectedType == TransactionType.income
+                                      ? Colors.white.withValues(alpha: 0.2)
+                                      : AppColors.income.withValues(alpha: 0.1),
+                              borderRadius:
+                                  BorderRadius.circular(Spacing.radiusS),
                             ),
                             child: Icon(
                               Icons.arrow_upward_rounded,
-                              color: widget.selectedType == TransactionType.income
-                                  ? Colors.white
-                                  : AppColors.income,
+                              color:
+                                  widget.selectedType == TransactionType.income
+                                      ? Colors.white
+                                      : AppColors.income,
                               size: 20,
                             ),
                           ),
@@ -191,9 +202,10 @@ class _TransactionTypeSelectorState extends State<TransactionTypeSelector>
                           Text(
                             'Income',
                             style: AppTypography.titleMedium.copyWith(
-                              color: widget.selectedType == TransactionType.income
-                                  ? Colors.white
-                                  : AppColors.textPrimary,
+                              color:
+                                  widget.selectedType == TransactionType.income
+                                      ? Colors.white
+                                      : AppColors.textPrimary,
                               fontWeight: FontWeight.w600,
                             ),
                           ),

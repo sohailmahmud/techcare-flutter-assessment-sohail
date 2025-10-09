@@ -46,7 +46,8 @@ class DashboardLoaded extends DashboardState {
     return DashboardLoaded(
       summary: summary ?? this.summary,
       filteredTransactions: filteredTransactions ?? this.filteredTransactions,
-      selectedCategoryFilter: selectedCategoryFilter ?? this.selectedCategoryFilter,
+      selectedCategoryFilter:
+          selectedCategoryFilter ?? this.selectedCategoryFilter,
       isBalanceVisible: isBalanceVisible ?? this.isBalanceVisible,
       isRefreshing: isRefreshing ?? this.isRefreshing,
     );

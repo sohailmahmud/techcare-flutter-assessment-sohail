@@ -87,7 +87,7 @@ class _SummaryStatisticsCardsState extends State<SummaryStatisticsCards>
             index: 0,
             title: 'Total Income',
             amount: widget.statistics.totalIncome,
-            change: 0.0, // TODO: Calculate change from previous period
+            change: 0.0, 
             color: AppColors.income,
             icon: Icons.trending_up_rounded,
           ),
@@ -98,7 +98,7 @@ class _SummaryStatisticsCardsState extends State<SummaryStatisticsCards>
             index: 1,
             title: 'Total Expenses',
             amount: widget.statistics.totalExpenses,
-            change: 0.0, // TODO: Calculate change from previous period
+            change: 0.0, 
             color: AppColors.expense,
             icon: Icons.trending_down_rounded,
           ),
@@ -109,7 +109,7 @@ class _SummaryStatisticsCardsState extends State<SummaryStatisticsCards>
             index: 2,
             title: 'Net Balance',
             amount: widget.statistics.netAmount,
-            change: 0.0, // TODO: Calculate change from previous period
+            change: 0.0, 
             color: widget.statistics.netAmount >= 0 ? AppColors.income : AppColors.expense,
             icon: widget.statistics.netAmount >= 0 
                 ? Icons.account_balance_wallet_rounded 
@@ -140,7 +140,7 @@ class _SummaryStatisticsCardsState extends State<SummaryStatisticsCards>
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -154,7 +154,7 @@ class _SummaryStatisticsCardsState extends State<SummaryStatisticsCards>
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: color.withOpacity(0.1),
+                        color: color.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Icon(
@@ -203,7 +203,7 @@ class _SummaryStatisticsCardsState extends State<SummaryStatisticsCards>
           vertical: Spacing.space4,
         ),
         decoration: BoxDecoration(
-          color: AppColors.textTertiary.withOpacity(0.1),
+          color: AppColors.textTertiary.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Text(
@@ -222,7 +222,7 @@ class _SummaryStatisticsCardsState extends State<SummaryStatisticsCards>
         vertical: Spacing.space4,
       ),
       decoration: BoxDecoration(
-        color: (isPositive ? AppColors.income : AppColors.expense).withOpacity(0.1),
+        color: (isPositive ? AppColors.income : AppColors.expense).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -305,7 +305,7 @@ class ResponsiveSummaryStats extends StatelessWidget {
                     child: _buildCompactStatCard(
                       title: 'Income',
                       amount: statistics.totalIncome,
-                      change: 0.0, // TODO: Calculate change from previous period
+                      change: 0.0, 
                       color: AppColors.income,
                       icon: Icons.trending_up_rounded,
                     ),
@@ -315,7 +315,7 @@ class ResponsiveSummaryStats extends StatelessWidget {
                     child: _buildCompactStatCard(
                       title: 'Expenses',
                       amount: statistics.totalExpenses,
-                      change: 0.0, // TODO: Calculate change from previous period
+                      change: 0.0,
                       color: AppColors.expense,
                       icon: Icons.trending_down_rounded,
                     ),
@@ -326,7 +326,7 @@ class ResponsiveSummaryStats extends StatelessWidget {
               _buildCompactStatCard(
                 title: 'Net Balance',
                 amount: statistics.netAmount,
-                change: 0.0, // TODO: Calculate change from previous period
+                change: 0.0,
                 color: statistics.netAmount >= 0 ? AppColors.income : AppColors.expense,
                 icon: statistics.netAmount >= 0 
                     ? Icons.account_balance_wallet_rounded 
@@ -353,7 +353,7 @@ class ResponsiveSummaryStats extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),

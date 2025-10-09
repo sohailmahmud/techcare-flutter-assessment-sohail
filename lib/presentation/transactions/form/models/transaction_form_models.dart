@@ -96,7 +96,8 @@ class TransactionFormData extends Equatable {
       title: title ?? this.title,
       notes: clearNotes ? null : (notes ?? this.notes),
       type: type ?? this.type,
-      selectedCategory: clearCategory ? null : (selectedCategory ?? this.selectedCategory),
+      selectedCategory:
+          clearCategory ? null : (selectedCategory ?? this.selectedCategory),
       date: date ?? this.date,
       time: time ?? this.time,
     );
@@ -108,24 +109,29 @@ class TransactionFormData extends Equatable {
 
     // Amount validation
     if (amount.trim().isEmpty) {
-      errors[TransactionFormError.amountRequired] = TransactionFormError.amountRequired.message;
+      errors[TransactionFormError.amountRequired] =
+          TransactionFormError.amountRequired.message;
     } else {
       final amountValue = double.tryParse(amount.replaceAll(',', ''));
       if (amountValue == null || amountValue <= 0) {
-        errors[TransactionFormError.amountMustBePositive] = TransactionFormError.amountMustBePositive.message;
+        errors[TransactionFormError.amountMustBePositive] =
+            TransactionFormError.amountMustBePositive.message;
       }
     }
 
     // Title validation
     if (title.trim().isEmpty) {
-      errors[TransactionFormError.titleRequired] = TransactionFormError.titleRequired.message;
+      errors[TransactionFormError.titleRequired] =
+          TransactionFormError.titleRequired.message;
     } else if (title.length > 100) {
-      errors[TransactionFormError.titleTooLong] = TransactionFormError.titleTooLong.message;
+      errors[TransactionFormError.titleTooLong] =
+          TransactionFormError.titleTooLong.message;
     }
 
     // Category validation
     if (selectedCategory == null) {
-      errors[TransactionFormError.categoryRequired] = TransactionFormError.categoryRequired.message;
+      errors[TransactionFormError.categoryRequired] =
+          TransactionFormError.categoryRequired.message;
     }
 
     // Date validation
@@ -138,12 +144,14 @@ class TransactionFormData extends Equatable {
       time.minute,
     );
     if (combinedDateTime.isAfter(now)) {
-      errors[TransactionFormError.dateInFuture] = TransactionFormError.dateInFuture.message;
+      errors[TransactionFormError.dateInFuture] =
+          TransactionFormError.dateInFuture.message;
     }
 
     // Notes validation
     if (notes != null && notes!.length > 500) {
-      errors[TransactionFormError.notesTooLong] = TransactionFormError.notesTooLong.message;
+      errors[TransactionFormError.notesTooLong] =
+          TransactionFormError.notesTooLong.message;
     }
 
     return errors;
@@ -158,8 +166,10 @@ class TransactionFormData extends Equatable {
     }
 
     final amountValue = double.parse(amount.replaceAll(',', ''));
-    final finalAmount = type == TransactionType.expense ? -amountValue.abs() : amountValue.abs();
-    
+    final finalAmount = type == TransactionType.expense
+        ? -amountValue.abs()
+        : amountValue.abs();
+
     final combinedDateTime = DateTime(
       date.year,
       date.month,
@@ -194,15 +204,15 @@ class TransactionFormData extends Equatable {
 
   @override
   List<Object?> get props => [
-    id,
-    amount,
-    title,
-    notes,
-    type,
-    selectedCategory,
-    date,
-    time,
-  ];
+        id,
+        amount,
+        title,
+        notes,
+        type,
+        selectedCategory,
+        date,
+        time,
+      ];
 }
 
 /// Form submission state
@@ -250,14 +260,17 @@ class TransactionFormState extends Equatable {
       formData: formData ?? this.formData,
       errors: errors ?? this.errors,
       submissionStatus: submissionStatus ?? this.submissionStatus,
-      submissionError: clearSubmissionError ? null : (submissionError ?? this.submissionError),
+      submissionError: clearSubmissionError
+          ? null
+          : (submissionError ?? this.submissionError),
     );
   }
 
   // Convenience methods
   bool get isValid => errors.isEmpty && formData.isValid;
   bool get isSubmitting => submissionStatus == FormSubmissionStatus.inProgress;
-  bool get hasSubmissionError => submissionStatus == FormSubmissionStatus.failure;
+  bool get hasSubmissionError =>
+      submissionStatus == FormSubmissionStatus.failure;
   bool get isSuccessful => submissionStatus == FormSubmissionStatus.success;
 
   String? getFieldError(TransactionFormError error) {
@@ -266,9 +279,9 @@ class TransactionFormState extends Equatable {
 
   @override
   List<Object?> get props => [
-    formData,
-    errors,
-    submissionStatus,
-    submissionError,
-  ];
+        formData,
+        errors,
+        submissionStatus,
+        submissionError,
+      ];
 }

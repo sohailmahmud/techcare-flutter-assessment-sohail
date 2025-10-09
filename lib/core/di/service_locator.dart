@@ -36,19 +36,20 @@ Future<void> initializeDependencies() async {
 
   // Data sources
   serviceLocator.registerLazySingleton<MockApiService>(() => MockApiService());
-  
+
   // MockDashboardDataSource removed - functionality consolidated into MockApiService
-  
+
   serviceLocator.registerLazySingleton<RemoteDataSource>(
     () => RemoteDataSourceImpl(serviceLocator<MockApiService>()),
   );
-  
+
   serviceLocator.registerLazySingleton<LocalDataSource>(
     () => LocalDataSourceImpl(),
   );
 
   // Cache Manager
-  serviceLocator.registerLazySingleton<HiveCacheManager>(() => HiveCacheManager());
+  serviceLocator
+      .registerLazySingleton<HiveCacheManager>(() => HiveCacheManager());
 
   // Repositories
   serviceLocator.registerLazySingleton<TransactionRepository>(

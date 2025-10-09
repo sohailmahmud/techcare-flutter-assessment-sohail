@@ -125,7 +125,7 @@ class FailureHandler {
     }
 
     if (error is TypeError) {
-      return ValidationFailure(
+      return const ValidationFailure(
         'Type mismatch error occurred',
         code: 'TYPE_ERROR',
       );
@@ -330,30 +330,38 @@ class FailureHandler {
 /// User-friendly error messages
 class ErrorMessages {
   // Network errors
-  static const String noInternet = 'No internet connection. Please check your network and try again.';
-  static const String connectionTimeout = 'Connection timeout. Please try again.';
-  static const String serverUnavailable = 'Service is currently unavailable. Please try again later.';
-  
+  static const String noInternet =
+      'No internet connection. Please check your network and try again.';
+  static const String connectionTimeout =
+      'Connection timeout. Please try again.';
+  static const String serverUnavailable =
+      'Service is currently unavailable. Please try again later.';
+
   // Authentication errors
   static const String unauthorized = 'You need to sign in to continue.';
-  static const String sessionExpired = 'Your session has expired. Please sign in again.';
-  static const String accessDenied = 'You don\'t have permission to access this resource.';
-  
+  static const String sessionExpired =
+      'Your session has expired. Please sign in again.';
+  static const String accessDenied =
+      'You don\'t have permission to access this resource.';
+
   // Validation errors
   static const String invalidData = 'Please check your input and try again.';
   static const String requiredField = 'This field is required.';
   static const String invalidEmail = 'Please enter a valid email address.';
   static const String invalidAmount = 'Please enter a valid amount.';
-  
+
   // Data errors
   static const String notFound = 'The requested item was not found.';
   static const String duplicateData = 'This item already exists.';
-  static const String dataSyncFailed = 'Failed to sync data. Some changes may not be saved.';
-  
+  static const String dataSyncFailed =
+      'Failed to sync data. Some changes may not be saved.';
+
   // Generic errors
-  static const String unknownError = 'An unexpected error occurred. Please try again.';
-  static const String tryAgainLater = 'Something went wrong. Please try again later.';
-  
+  static const String unknownError =
+      'An unexpected error occurred. Please try again.';
+  static const String tryAgainLater =
+      'Something went wrong. Please try again later.';
+
   /// Get user-friendly message for failure
   static String getMessageForFailure(Failure failure) {
     if (failure is NetworkFailure) {
@@ -369,7 +377,7 @@ class ErrorMessages {
           return failure.message;
       }
     }
-    
+
     if (failure is ServerFailure) {
       switch (failure.statusCode) {
         case 500:
@@ -380,7 +388,7 @@ class ErrorMessages {
           return failure.message;
       }
     }
-    
+
     if (failure is AuthFailure) {
       switch (failure.code) {
         case 'UNAUTHORIZED':
@@ -391,36 +399,36 @@ class ErrorMessages {
           return failure.message;
       }
     }
-    
+
     if (failure is PermissionFailure) {
       return accessDenied;
     }
-    
+
     if (failure is ValidationFailure) {
-      return failure.fieldErrors?.isNotEmpty == true 
-          ? invalidData 
+      return failure.fieldErrors?.isNotEmpty == true
+          ? invalidData
           : failure.message;
     }
-    
+
     if (failure is NotFoundFailure) {
       return notFound;
     }
-    
+
     if (failure is ConflictFailure) {
       return duplicateData;
     }
-    
+
     if (failure is SyncFailure) {
       return dataSyncFailed;
     }
-    
+
     if (failure is RateLimitFailure) {
-      final retryText = failure.retryAfter != null 
+      final retryText = failure.retryAfter != null
           ? ' Please try again in ${failure.retryAfter!.inMinutes} minutes.'
           : ' Please try again later.';
       return 'Rate limit exceeded.$retryText';
     }
-    
+
     // Default to failure message or generic error
     return failure.message.isNotEmpty ? failure.message : unknownError;
   }

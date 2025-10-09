@@ -21,7 +21,7 @@ class SkeletonLoader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
-      baseColor: AppColors.surfaceVariant.withOpacity(0.3),
+      baseColor: AppColors.surfaceVariant.withValues(alpha: 0.3),
       highlightColor: AppColors.surface,
       period: const Duration(milliseconds: 1500),
       child: Container(
@@ -51,7 +51,7 @@ class DashboardSkeletonLoaders {
         borderRadius: BorderRadius.circular(Spacing.radiusL),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -119,7 +119,7 @@ class DashboardSkeletonLoaders {
         borderRadius: BorderRadius.circular(Spacing.radiusL),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -196,7 +196,7 @@ class DashboardSkeletonLoaders {
         borderRadius: BorderRadius.circular(Spacing.radiusM),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 4,
             offset: const Offset(0, 1),
           ),
@@ -277,10 +277,10 @@ class DashboardSkeletonLoader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.orange.withOpacity(0.2), // Very visible background
+      backgroundColor: Colors.orange.withValues(alpha: 0.2), // Very visible background
       body: SafeArea(
         child: Container(
-          color: Colors.blue.withOpacity(0.2), // Container background
+          color: Colors.blue.withValues(alpha: 0.2), // Container background
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(Spacing.space16),
             child: Column(
@@ -292,7 +292,7 @@ class DashboardSkeletonLoader extends StatelessWidget {
                   height: 100,
                   margin: const EdgeInsets.only(bottom: 16),
                   decoration: BoxDecoration(
-                    color: Colors.grey.withOpacity(0.8), // Very visible
+                    color: Colors.grey.withValues(alpha: 0.8), // Very visible
                     borderRadius: BorderRadius.circular(Spacing.radiusL),
                   ),
                   child: const Center(
@@ -317,7 +317,7 @@ class DashboardSkeletonLoader extends StatelessWidget {
                     borderRadius: BorderRadius.circular(Spacing.radiusL),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
+                        color: Colors.black.withValues(alpha: 0.05),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -372,7 +372,7 @@ class DashboardSkeletonLoader extends StatelessWidget {
                     borderRadius: BorderRadius.circular(Spacing.radiusL),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
+                        color: Colors.black.withValues(alpha: 0.05),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),

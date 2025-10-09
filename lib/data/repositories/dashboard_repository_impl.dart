@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import '../../core/errors/failures.dart';
+import '../../core/utils/logger.dart';
 import '../../domain/entities/dashboard_summary.dart';
 import '../../domain/entities/transaction.dart';
 import '../../domain/entities/category.dart';
@@ -18,28 +19,27 @@ class DashboardRepositoryImpl implements DashboardRepository {
   @override
   Future<Either<Failure, DashboardSummary>> getDashboardSummary() async {
     try {
-      print('🔄 DashboardRepo: Initializing API service');
+      Logger.d('DashboardRepo: Initializing API service');
       await apiService.initialize();
       
-      print('🔄 DashboardRepo: Calling API service getDashboardSummary');
+      Logger.d('DashboardRepo: Calling API service getDashboardSummary');
       final response = await apiService.getDashboardSummary();
       final responseData = response.data as Map<String, dynamic>;
       
-      print('🔄 DashboardRepo: Got response: ${responseData.keys}');
+      Logger.d('DashboardRepo: Got response: ${responseData.keys}');
       
       if (responseData['success'] == true) {
         final data = responseData['data'] as Map<String, dynamic>;
-        print('✅ DashboardRepo: Response data keys: ${data.keys}');
+        Logger.d('DashboardRepo: Response data keys: ${data.keys}');
         final summary = _mapToDashboardSummary(data);
-        print('✅ DashboardRepo: Successfully mapped to DashboardSummary');
+        Logger.d('DashboardRepo: Successfully mapped to DashboardSummary');
         return Right(summary);
       } else {
-        print('❌ DashboardRepo: API returned success=false');
+        Logger.w('DashboardRepo: API returned success=false');
         return const Left(ServerFailure('Dashboard API returned error'));
       }
     } catch (e, stackTrace) {
-      print('💥 DashboardRepo: Error occurred: $e');
-      print('💥 StackTrace: $stackTrace');
+      Logger.e('DashboardRepo: Error occurred', error: e, stackTrace: stackTrace);
       return Left(NetworkFailure('Failed to get dashboard summary: $e'));
     }
   }
@@ -160,7 +160,7 @@ class DashboardRepositoryImpl implements DashboardRepository {
       
       return Color(int.parse(hex, radix: 16));
     } catch (e) {
-      print('Failed to parse color: $colorHex, using default grey');
+      Logger.w('Failed to parse color: $colorHex, using default grey', error: e);
       return Colors.grey;
     }
   }

@@ -87,7 +87,7 @@ class TransactionRepositoryImpl implements TransactionRepository {
           final response = await _remoteDataSource.getTransactions(page: 1, limit: 1000);
           final transaction = response.data.firstWhere(
             (t) => t.id == id, 
-            orElse: () => throw ServerException('Transaction not found'),
+            orElse: () => throw const ServerException('Transaction not found'),
           );
           
           // Cache the transaction
@@ -387,7 +387,7 @@ class TransactionRepositoryImpl implements TransactionRepository {
       }
     }
     
-    return Left(UnknownFailure('Maximum retries exceeded'));
+    return const Left(UnknownFailure('Maximum retries exceeded'));
   }
 
   /// Check if a failure is retryable

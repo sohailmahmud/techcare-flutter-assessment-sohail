@@ -20,7 +20,7 @@ class DashboardSummary extends Equatable {
   });
 
   double get monthlySavings => monthlyIncome - monthlyExpense;
-  double get savingsRate => 
+  double get savingsRate =>
       monthlyIncome > 0 ? (monthlySavings / monthlyIncome) * 100 : 0;
 
   @override

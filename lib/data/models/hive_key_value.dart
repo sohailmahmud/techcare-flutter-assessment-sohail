@@ -5,6 +5,7 @@ part 'hive_key_value.g.dart';
 /// Simple key-value storage model for Hive
 @HiveType(typeId: 6)
 class HiveKeyValue extends HiveObject {
+  @override
   @HiveField(0)
   String key;
 

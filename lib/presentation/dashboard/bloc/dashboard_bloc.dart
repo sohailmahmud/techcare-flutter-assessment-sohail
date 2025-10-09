@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/usecases/usecase.dart';
 import '../../../domain/entities/transaction.dart';
@@ -30,23 +29,18 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     Emitter<DashboardState> emit,
   ) async {
     try {
-      debugPrint('🔄 DashboardBloc: Starting to load dashboard');
       emit(const DashboardLoading());
       
-      debugPrint('🔄 DashboardBloc: Calling getDashboardSummary use case');
       final result = await _getDashboardSummary(NoParams());
       
-      debugPrint('🔄 DashboardBloc: Got result from use case');
       result.fold(
         (failure) {
-          debugPrint('❌ DashboardBloc: Failure occurred: $failure');
           emit(DashboardError(
             message: _mapFailureToMessage(failure),
             canRetry: true,
           ));
         },
         (summary) {
-          debugPrint('✅ DashboardBloc: Success! Loaded summary with ${summary.recentTransactions.length} transactions');
           emit(DashboardLoaded(
             summary: summary,
             filteredTransactions: summary.recentTransactions,
@@ -54,9 +48,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
           ));
         },
       );
-    } catch (e, stackTrace) {
-      debugPrint('💥 DashboardBloc: Unexpected error in _onLoadDashboard: $e');
-      debugPrint('💥 StackTrace: $stackTrace');
+    } catch (e) {
       emit(DashboardError(
         message: 'Unexpected error occurred: $e',
         canRetry: true,
@@ -126,10 +118,6 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
         event.categoryId,
       );
 
-      debugPrint('🔄 Filter changed to: ${event.categoryId}');
-      debugPrint('📊 Filtered transactions count: ${filteredTransactions.length}');
-      debugPrint('📈 Total transactions count: ${currentState.summary.recentTransactions.length}');
-
       emit(currentState.copyWith(
         filteredTransactions: filteredTransactions,
         selectedCategoryFilter: event.categoryId,
@@ -165,7 +153,6 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   String _mapFailureToMessage(failure) {
     // Map specific failures to user-friendly messages with more details for debugging
     final failureString = failure.toString();
-    debugPrint('🔍 DashboardBloc: Mapping failure: $failureString');
     
     if (failureString.contains('network') || failureString.contains('Network')) {
       return 'No internet connection. Please check your network.\n\nDetails: $failureString';

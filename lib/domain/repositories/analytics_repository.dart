@@ -19,7 +19,8 @@ abstract class AnalyticsRepository {
   Future<Either<Failure, AnalyticsData>> getAnalytics(AnalyticsQuery query);
 
   /// Get cached analytics (for offline support)
-  Future<Either<Failure, AnalyticsData?>> getCachedAnalytics(AnalyticsQuery query);
+  Future<Either<Failure, AnalyticsData?>> getCachedAnalytics(
+      AnalyticsQuery query);
 
   /// Clear analytics cache
   Future<Either<Failure, void>> clearCache();

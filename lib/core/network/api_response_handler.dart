@@ -4,36 +4,38 @@ import '../../core/errors/failures.dart';
 
 /// API response wrapper with comprehensive error handling
 class ApiResponseHandler {
-  
   /// Handle DioException and convert to appropriate Failure
   static Failure handleDioException(DioException error) {
     switch (error.type) {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
-        return NetworkFailure(error.message ?? 'Request timeout. Please check your internet connection.');
-        
+        return NetworkFailure(error.message ??
+            'Request timeout. Please check your internet connection.');
+
       case DioExceptionType.badResponse:
         return _handleHttpError(error.response);
-        
+
       case DioExceptionType.cancel:
-        return NetworkFailure('Request was cancelled');
-        
+        return const NetworkFailure('Request was cancelled');
+
       case DioExceptionType.connectionError:
-        return NetworkFailure('No internet connection. Please check your network settings.');
-        
+        return const NetworkFailure(
+            'No internet connection. Please check your network settings.');
+
       case DioExceptionType.badCertificate:
-        return NetworkFailure('SSL certificate error. Please try again.');
-        
+        return const NetworkFailure('SSL certificate error. Please try again.');
+
       case DioExceptionType.unknown:
-        return UnknownFailure('An unexpected error occurred: ${error.message ?? 'Unknown error'}');
+        return UnknownFailure(
+            'An unexpected error occurred: ${error.message ?? 'Unknown error'}');
     }
   }
 
   /// Handle HTTP response errors
   static Failure _handleHttpError(Response? response) {
     if (response == null) {
-      return ServerFailure('No response from server');
+      return const ServerFailure('No response from server');
     }
 
     final statusCode = response.statusCode ?? 0;
@@ -57,20 +59,22 @@ class ApiResponseHandler {
       case 400:
         return ValidationFailure(errorMessage, code: errorCode);
       case 401:
-        return AuthenticationFailure('Authentication failed. Please log in again.');
+        return const AuthenticationFailure(
+            'Authentication failed. Please log in again.');
       case 403:
-        return AuthenticationFailure('Access denied. You don\'t have permission to perform this action.');
+        return const AuthenticationFailure(
+            'Access denied. You don\'t have permission to perform this action.');
       case 404:
-        return NotFoundFailure('Resource not found');
+        return const NotFoundFailure('Resource not found');
       case 422:
         return ValidationFailure(errorMessage, code: errorCode);
       case 429:
-        return NetworkFailure('Too many requests. Please try again later.');
+        return const NetworkFailure('Too many requests. Please try again later.');
       case 500:
       case 502:
       case 503:
       case 504:
-        return ServerFailure('Server error. Please try again later.');
+        return const ServerFailure('Server error. Please try again later.');
       default:
         return ServerFailure('Server error ($statusCode): $errorMessage');
     }
@@ -81,7 +85,7 @@ class ApiResponseHandler {
     if (error is DioException) {
       return handleDioException(error);
     }
-    
+
     return UnknownFailure('An unexpected error occurred: ${error.toString()}');
   }
 
@@ -107,49 +111,54 @@ class ApiResponseHandler {
     double backoffMultiplier = 2.0,
   }) async {
     Duration currentDelay = initialDelay;
-    
+
     for (int attempt = 0; attempt <= maxRetries; attempt++) {
       final result = await executeApiCall(apiCall);
-      
+
       // If successful or final attempt, return result
       if (result.isRight() || attempt == maxRetries) {
         return result;
       }
-      
+
       // Check if error is retryable
       final failure = result.fold((l) => l, (r) => null);
       if (failure != null && !_isRetryableFailure(failure)) {
         return result;
       }
-      
+
       // Wait before next attempt with exponential backoff
       if (attempt < maxRetries) {
         await Future.delayed(currentDelay);
         currentDelay = Duration(
-          milliseconds: (currentDelay.inMilliseconds * backoffMultiplier).round(),
+          milliseconds:
+              (currentDelay.inMilliseconds * backoffMultiplier).round(),
         );
       }
     }
-    
-    return Left(UnknownFailure('Max retries exceeded'));
+
+    return const Left(UnknownFailure('Max retries exceeded'));
   }
 
   /// Check if failure is retryable
   static bool _isRetryableFailure(Failure failure) {
-    return failure is NetworkFailure || 
-           failure is ServerFailure ||
-           (failure is UnknownFailure && !failure.message.contains('validation'));
+    return failure is NetworkFailure ||
+        failure is ServerFailure ||
+        (failure is UnknownFailure && !failure.message.contains('validation'));
   }
 
   /// Validate API response structure
-  static Either<Failure, Map<String, dynamic>> validateApiResponse(Response response) {
-    if (response.statusCode == null || response.statusCode! < 200 || response.statusCode! >= 300) {
-      return Left(ServerFailure('Invalid response status: ${response.statusCode}'));
+  static Either<Failure, Map<String, dynamic>> validateApiResponse(
+      Response response) {
+    if (response.statusCode == null ||
+        response.statusCode! < 200 ||
+        response.statusCode! >= 300) {
+      return Left(
+          ServerFailure('Invalid response status: ${response.statusCode}'));
     }
 
     final data = response.data;
     if (data is! Map<String, dynamic>) {
-      return Left(ServerFailure('Invalid response format'));
+      return const Left(ServerFailure('Invalid response format'));
     }
 
     final success = data['success'];
@@ -158,7 +167,7 @@ class ApiResponseHandler {
       if (error is Map<String, dynamic>) {
         return Left(ServerFailure(error['message'] ?? 'API returned error'));
       }
-      return Left(ServerFailure('API request failed'));
+      return const Left(ServerFailure('API request failed'));
     }
 
     return Right(data);
@@ -169,10 +178,11 @@ class ApiResponseHandler {
 class ValidationFailure extends Failure {
   final String code;
   final String? field;
-  
-  const ValidationFailure(String message, {this.code = 'VALIDATION_ERROR', this.field}) 
-    : super(message);
-    
+
+  const ValidationFailure(String message,
+      {this.code = 'VALIDATION_ERROR', this.field})
+      : super(message);
+
   @override
   List<Object> get props => [message, code, if (field != null) field!];
 }
@@ -224,13 +234,13 @@ enum NetworkState {
 
 class NetworkStateMonitor {
   static NetworkState _currentState = NetworkState.unknown;
-  
+
   static NetworkState get currentState => _currentState;
-  
+
   static void updateState(NetworkState state) {
     _currentState = state;
   }
-  
+
   static bool get isConnected => _currentState == NetworkState.connected;
   static bool get isDisconnected => _currentState == NetworkState.disconnected;
   static bool get isSlow => _currentState == NetworkState.slow;

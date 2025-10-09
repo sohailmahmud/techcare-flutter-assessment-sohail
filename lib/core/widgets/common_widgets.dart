@@ -40,7 +40,7 @@ class GlassMorphicContainer extends StatelessWidget {
         borderRadius: BorderRadius.circular(borderRadius),
         border: border ??
             Border.all(
-              color: Colors.white.withValues(alpha:0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               width: 1.5,
             ),
         gradient: gradient ??
@@ -48,8 +48,8 @@ class GlassMorphicContainer extends StatelessWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                Colors.white.withValues(alpha:opacity),
-                Colors.white.withValues(alpha:opacity * 0.5),
+                Colors.white.withValues(alpha: opacity),
+                Colors.white.withValues(alpha: opacity * 0.5),
               ],
             ),
       ),

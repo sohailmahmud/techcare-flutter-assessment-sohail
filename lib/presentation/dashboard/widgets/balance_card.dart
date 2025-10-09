@@ -137,70 +137,70 @@ class _BalanceCardState extends State<BalanceCard>
               ),
             ],
           ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header with visibility toggle
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Total Balance',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              // Header with visibility toggle
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Total Balance',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      _isVisible ? Icons.visibility : Icons.visibility_off,
                       color: AppColors.textSecondary,
-                      fontWeight: FontWeight.w600,
+                      size: 22,
+                    ),
+                    onPressed: _toggleVisibility,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ],
+              ),
+              const SizedBox(height: Spacing.space12),
+
+              // Balance amount
+              AnimatedCounter(
+                value: widget.balance,
+                prefix: '৳',
+                decimalPlaces: 0, // Taka typically doesn't use decimal places
+                style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.bold,
                     ),
               ),
-              IconButton(
-                icon: Icon(
-                  _isVisible ? Icons.visibility : Icons.visibility_off,
-                  color: AppColors.textSecondary,
-                  size: 22,
-                ),
-                onPressed: _toggleVisibility,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
+              const SizedBox(height: Spacing.space24),
+
+              // Income and Expense row
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildInfoColumn(
+                      icon: Icons.arrow_downward,
+                      label: 'Income',
+                      amount: widget.monthlyIncome,
+                      color: AppColors.income,
+                    ),
+                  ),
+                  const SizedBox(width: Spacing.space16),
+                  Expanded(
+                    child: _buildInfoColumn(
+                      icon: Icons.arrow_upward,
+                      label: 'Expense',
+                      amount: widget.monthlyExpense,
+                      color: AppColors.expense,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-          const SizedBox(height: Spacing.space12),
-
-          // Balance amount
-          AnimatedCounter(
-            value: widget.balance,
-            prefix: '৳',
-            decimalPlaces: 0, // Taka typically doesn't use decimal places
-            style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                  color: AppColors.textPrimary,
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-          const SizedBox(height: Spacing.space24),
-
-          // Income and Expense row
-          Row(
-            children: [
-              Expanded(
-                child: _buildInfoColumn(
-                  icon: Icons.arrow_downward,
-                  label: 'Income',
-                  amount: widget.monthlyIncome,
-                  color: AppColors.income,
-                ),
-              ),
-              const SizedBox(width: Spacing.space16),
-              Expanded(
-                child: _buildInfoColumn(
-                  icon: Icons.arrow_upward,
-                  label: 'Expense',
-                  amount: widget.monthlyExpense,
-                  color: AppColors.expense,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
         ),
       ),
     );
@@ -250,42 +250,42 @@ class _BalanceCardState extends State<BalanceCard>
               ),
             ],
           ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                'Balance Hidden',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Balance Hidden',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      _isVisible ? Icons.visibility : Icons.visibility_off,
                       color: AppColors.textSecondary,
+                      size: 22,
                     ),
+                    onPressed: _toggleVisibility,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ],
               ),
-              IconButton(
-                icon: Icon(
-                  _isVisible ? Icons.visibility : Icons.visibility_off,
-                  color: AppColors.textSecondary,
-                  size: 22,
-                ),
-                onPressed: _toggleVisibility,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
+              const SizedBox(height: Spacing.space16),
+              Text(
+                '••••••••',
+                style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                      color: AppColors.textDisabled,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 8,
+                    ),
               ),
             ],
           ),
-          const SizedBox(height: Spacing.space16),
-          Text(
-            '••••••••',
-            style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                  color: AppColors.textDisabled,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 8,
-                ),
-          ),
-        ],
-      ),
         ),
       ),
     );

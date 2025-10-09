@@ -77,15 +77,17 @@ class DateFormatter {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final yesterday = today.subtract(const Duration(days: 1));
-    final dateOnly = DateTime(date.year, date.month, date.day);
+    final transactionDate = DateTime(date.year, date.month, date.day);
 
-    if (dateOnly == today) {
+    if (transactionDate.isAtSameMomentAs(today)) {
       return 'Today';
-    } else if (dateOnly == yesterday) {
+    } else if (transactionDate.isAtSameMomentAs(yesterday)) {
       return 'Yesterday';
-    } else if (dateOnly.year == today.year) {
+    } else if (date.year == now.year) {
+      // Same year: show only month and day
       return DateFormat('MMM dd').format(date);
     } else {
+      // Different year: show month, day, and year
       return DateFormat('MMM dd, yyyy').format(date);
     }
   }

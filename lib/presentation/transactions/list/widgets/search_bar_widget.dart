@@ -39,12 +39,12 @@ class _TransactionSearchBarState extends State<TransactionSearchBar>
     super.initState();
     _controller = TextEditingController(text: widget.initialQuery);
     _focusNode = FocusNode();
-    
+
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 200),
       vsync: this,
     );
-    
+
     _scaleAnimation = Tween<double>(
       begin: 1.0,
       end: 0.95,
@@ -117,7 +117,7 @@ class _TransactionSearchBarState extends State<TransactionSearchBar>
               color: AppColors.surface,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: hasFocus 
+                color: hasFocus
                     ? AppColors.primary.withAlpha(128)
                     : AppColors.border,
                 width: hasFocus ? 2 : 1,
@@ -243,7 +243,7 @@ class _TransactionSearchBarState extends State<TransactionSearchBar>
                                   ? Colors.white
                                   : AppColors.textSecondary,
                             ),
-                            
+
                             // Filter count badge
                             if (widget.activeFilterCount > 0)
                               Positioned(

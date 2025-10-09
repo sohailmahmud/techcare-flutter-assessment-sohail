@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'package:flutter/material.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
@@ -16,14 +17,14 @@ class HiveLocalDataSource {
 
   final Connectivity _connectivity;
   final Random _random = Random();
-  
+
   /// Generate a simple UUID-like string
   String _generateId() {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     final randomPart = _random.nextInt(999999);
     return '${timestamp}_$randomPart';
   }
-  
+
   bool _isInitialized = false;
   StreamSubscription<ConnectivityResult>? _connectivitySubscription;
 
@@ -36,7 +37,7 @@ class HiveLocalDataSource {
     if (_isInitialized) return Result.success(null);
 
     try {
-      // TODO: Register adapters after running code generation
+      
       // Note: Run 'flutter packages pub run build_runner build' first
       /*
       if (!Hive.isAdapterRegistered(HiveTypeIds.transactionType)) {
@@ -60,9 +61,12 @@ class HiveLocalDataSource {
       */
 
       // Open boxes
-      _transactionsBox = await Hive.openBox<HiveTransaction>(HiveBoxNames.transactions);
-      _categoriesBox = await Hive.openBox<HiveCategory>(HiveBoxNames.categories);
-      _syncQueueBox = await Hive.openBox<HiveSyncQueueItem>(HiveBoxNames.syncQueue);
+      _transactionsBox =
+          await Hive.openBox<HiveTransaction>(HiveBoxNames.transactions);
+      _categoriesBox =
+          await Hive.openBox<HiveCategory>(HiveBoxNames.categories);
+      _syncQueueBox =
+          await Hive.openBox<HiveSyncQueueItem>(HiveBoxNames.syncQueue);
       _settingsBox = await Hive.openBox(HiveBoxNames.settings);
 
       // Set up connectivity monitoring
@@ -111,10 +115,10 @@ class HiveLocalDataSource {
         if (!includeDeleted && t.isDeleted) return false;
         if (categoryId != null && t.categoryId != categoryId) return false;
         if (type != null && t.type != type) return false;
-        
+
         if (startDate != null && t.date.isBefore(startDate)) return false;
         if (endDate != null && t.date.isAfter(endDate)) return false;
-        
+
         if (search != null && search.isNotEmpty) {
           final searchLower = search.toLowerCase();
           if (!t.title.toLowerCase().contains(searchLower) &&
@@ -122,7 +126,7 @@ class HiveLocalDataSource {
             return false;
           }
         }
-        
+
         return true;
       }).toList();
 
@@ -152,7 +156,7 @@ class HiveLocalDataSource {
       final transaction = _transactionsBox.values
           .where((t) => (t.id == id || t.localId == id) && !t.isDeleted)
           .firstOrNull;
-      
+
       return Result.success(transaction);
     } catch (e) {
       return Result.error(StorageFailure(
@@ -163,16 +167,16 @@ class HiveLocalDataSource {
   }
 
   /// Create a new transaction
-  Future<Result<HiveTransaction>> createTransaction(HiveTransaction transaction) async {
+  Future<Result<HiveTransaction>> createTransaction(
+      HiveTransaction transaction) async {
     try {
       // Generate local ID if not provided
-      if (transaction.localId == null) {
-        transaction.localId = _generateId();
-      }
+      transaction.localId ??= _generateId();
 
       // Set sync status based on connectivity
       final online = await isOnline;
-      transaction.syncStatus = online ? HiveSyncStatus.pending : HiveSyncStatus.pending;
+      transaction.syncStatus =
+          online ? HiveSyncStatus.pending : HiveSyncStatus.pending;
       transaction.createdAt = DateTime.now();
       transaction.updatedAt = DateTime.now();
 
@@ -214,16 +218,18 @@ class HiveLocalDataSource {
       }
 
       final existing = _transactionsBox.getAt(existingIndex)!;
-      
+
       // Create updated transaction
       final updated = existing.copyWith(
         title: updates['title'] ?? existing.title,
         amount: updates['amount']?.toDouble() ?? existing.amount,
-        type: updates['type'] != null 
-            ? (updates['type'] == 'income' ? HiveTransactionType.income : HiveTransactionType.expense)
+        type: updates['type'] != null
+            ? (updates['type'] == 'income'
+                ? HiveTransactionType.income
+                : HiveTransactionType.expense)
             : existing.type,
         categoryId: updates['categoryId'] ?? existing.categoryId,
-        date: updates['date'] != null 
+        date: updates['date'] != null
             ? DateTime.tryParse(updates['date']) ?? existing.date
             : existing.date,
         description: updates['description'] ?? existing.description,
@@ -270,7 +276,7 @@ class HiveLocalDataSource {
       }
 
       final existing = _transactionsBox.getAt(existingIndex)!;
-      
+
       // Mark as deleted
       final deleted = existing.copyWith(
         isDeleted: true,
@@ -299,7 +305,8 @@ class HiveLocalDataSource {
   }
 
   /// Get all categories
-  Future<Result<List<HiveCategory>>> getCategories({bool includeDeleted = false}) async {
+  Future<Result<List<HiveCategory>>> getCategories(
+      {bool includeDeleted = false}) async {
     try {
       final categories = _categoriesBox.values
           .where((c) => includeDeleted || !c.isDeleted)
@@ -320,9 +327,7 @@ class HiveLocalDataSource {
   /// Create a new category
   Future<Result<HiveCategory>> createCategory(HiveCategory category) async {
     try {
-      if (category.localId == null) {
-        category.localId = _generateId();
-      }
+      category.localId ??= _generateId();
 
       category.syncStatus = HiveSyncStatus.pending;
       category.createdAt = DateTime.now();
@@ -350,8 +355,8 @@ class HiveLocalDataSource {
   Future<Result<List<HiveSyncQueueItem>>> getPendingSyncItems() async {
     try {
       final items = _syncQueueBox.values
-          .where((item) => 
-              item.status == HiveSyncStatus.pending || 
+          .where((item) =>
+              item.status == HiveSyncStatus.pending ||
               (item.status == HiveSyncStatus.failed && item.shouldRetry))
           .toList();
 
@@ -374,9 +379,8 @@ class HiveLocalDataSource {
   /// Mark sync item as completed
   Future<Result<void>> markSyncItemCompleted(String itemId) async {
     try {
-      final itemIndex = _syncQueueBox.values
-          .toList()
-          .indexWhere((item) => item.id == itemId);
+      final itemIndex =
+          _syncQueueBox.values.toList().indexWhere((item) => item.id == itemId);
 
       if (itemIndex != -1) {
         final item = _syncQueueBox.getAt(itemIndex)!;
@@ -399,9 +403,8 @@ class HiveLocalDataSource {
   /// Mark sync item as failed
   Future<Result<void>> markSyncItemFailed(String itemId, String error) async {
     try {
-      final itemIndex = _syncQueueBox.values
-          .toList()
-          .indexWhere((item) => item.id == itemId);
+      final itemIndex =
+          _syncQueueBox.values.toList().indexWhere((item) => item.id == itemId);
 
       if (itemIndex != -1) {
         final item = _syncQueueBox.getAt(itemIndex)!;
@@ -446,10 +449,11 @@ class HiveLocalDataSource {
 
   /// Trigger automatic sync if enabled
   void _triggerAutoSync() {
-    final autoSyncEnabled = _settingsBox.get(HiveSettingsKeys.autoSync, defaultValue: true);
+    final autoSyncEnabled =
+        _settingsBox.get(HiveSettingsKeys.autoSync, defaultValue: true);
     if (autoSyncEnabled) {
       // This would be handled by a sync service
-      print('Auto sync triggered');
+      debugPrint('Auto sync triggered');
     }
   }
 
@@ -479,8 +483,8 @@ class HiveLocalDataSource {
 
       for (int i = 0; i < _syncQueueBox.length; i++) {
         final item = _syncQueueBox.getAt(i);
-        if (item != null && 
-            item.status == HiveSyncStatus.synced && 
+        if (item != null &&
+            item.status == HiveSyncStatus.synced &&
             item.createdAt.isBefore(cutoffDate)) {
           itemsToRemove.add(i);
         }
@@ -506,20 +510,34 @@ class HiveLocalDataSource {
       final stats = {
         'transactions': {
           'total': _transactionsBox.length,
-          'synced': _transactionsBox.values.where((t) => t.syncStatus == HiveSyncStatus.synced).length,
-          'pending': _transactionsBox.values.where((t) => t.syncStatus == HiveSyncStatus.pending).length,
+          'synced': _transactionsBox.values
+              .where((t) => t.syncStatus == HiveSyncStatus.synced)
+              .length,
+          'pending': _transactionsBox.values
+              .where((t) => t.syncStatus == HiveSyncStatus.pending)
+              .length,
           'deleted': _transactionsBox.values.where((t) => t.isDeleted).length,
         },
         'categories': {
           'total': _categoriesBox.length,
-          'synced': _categoriesBox.values.where((c) => c.syncStatus == HiveSyncStatus.synced).length,
-          'pending': _categoriesBox.values.where((c) => c.syncStatus == HiveSyncStatus.pending).length,
+          'synced': _categoriesBox.values
+              .where((c) => c.syncStatus == HiveSyncStatus.synced)
+              .length,
+          'pending': _categoriesBox.values
+              .where((c) => c.syncStatus == HiveSyncStatus.pending)
+              .length,
         },
         'syncQueue': {
           'total': _syncQueueBox.length,
-          'pending': _syncQueueBox.values.where((i) => i.status == HiveSyncStatus.pending).length,
-          'failed': _syncQueueBox.values.where((i) => i.status == HiveSyncStatus.failed).length,
-          'synced': _syncQueueBox.values.where((i) => i.status == HiveSyncStatus.synced).length,
+          'pending': _syncQueueBox.values
+              .where((i) => i.status == HiveSyncStatus.pending)
+              .length,
+          'failed': _syncQueueBox.values
+              .where((i) => i.status == HiveSyncStatus.failed)
+              .length,
+          'synced': _syncQueueBox.values
+              .where((i) => i.status == HiveSyncStatus.synced)
+              .length,
         },
         'lastSync': _settingsBox.get(HiveSettingsKeys.lastSyncAt),
       };

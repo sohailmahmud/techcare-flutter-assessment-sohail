@@ -10,10 +10,10 @@ import '../../../core/theme/spacing.dart';
 import '../../../core/widgets/common_widgets.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/widgets/speed_dial_fab.dart';
-import '../../../core/utils/page_transitions.dart';
+import '../../../core/router/navigation_extensions.dart';
 import '../../../injection_container.dart' as di;
-import '../../transactions/list/pages/transactions_page.dart';
 import '../../transactions/list/bloc/transactions_bloc.dart';
+import '../../transactions/list/widgets/transaction_details_modal.dart';
 import '../bloc/dashboard_bloc.dart';
 import '../bloc/dashboard_event.dart';
 import '../bloc/dashboard_state.dart';
@@ -21,7 +21,6 @@ import '../widgets/balance_card.dart';
 import '../widgets/spending_pie_chart.dart';
 import '../../../domain/entities/transaction.dart';
 import '../widgets/transactions_list.dart';
-import '../../transactions/form/pages/add_edit_transaction_screen.dart';
 
 /// Dashboard page showing user's financial overview with BLoC state management
 class DashboardPage extends StatefulWidget {
@@ -41,7 +40,6 @@ class _DashboardPageState extends State<DashboardPage> {
         listener: (context, state) {
           // Refresh dashboard when transactions are added/updated/deleted
           if (state is TransactionOperationSuccess) {
-            debugPrint('🔄 Dashboard: Transaction operation success, refreshing dashboard');
             context.read<DashboardBloc>().add(const RefreshDashboardData());
           }
         },
@@ -62,13 +60,11 @@ class _DashboardPageState extends State<DashboardPage> {
                 builder: (context, state) {
                   // Show full skeleton loader for initial loading
                   if (state is DashboardInitial || state is DashboardLoading) {
-                    debugPrint('🔄 Dashboard UI: Showing skeleton loader - State: ${state.runtimeType}');
                     return const DashboardSkeletonLoader();
                   }
                   
                   // Show error state
                   if (state is DashboardError) {
-                    debugPrint('❌ Dashboard UI: Showing error state - ${state.message}');
                     return Center(
                       child: _buildErrorCard(state.message, () {
                         context.read<DashboardBloc>().add(const RetryLoadDashboard());
@@ -76,7 +72,6 @@ class _DashboardPageState extends State<DashboardPage> {
                     );
                   }
                   
-                  debugPrint('✅ Dashboard UI: Showing main content - State: ${state.runtimeType}');
                   return RefreshIndicator(
                     onRefresh: () async {
                       final completer = Completer<void>();
@@ -238,13 +233,13 @@ class _DashboardPageState extends State<DashboardPage> {
             onDelete: (transactionId) {
               _showDeleteConfirmation(context, transactionId);
             },
+            onTransactionTap: (transaction) {
+              // Show transaction details as modal
+              _showTransactionDetails(context, transaction);
+            },
             onViewAll: () {
-              // Navigate to transaction navigation tab
-              Navigator.of(context).push(
-                AppPageTransitions.slideTransition(
-                  page: const TransactionsPage(), // Assuming TransactionsPage exists
-                )
-              );
+              // Navigate to transactions tab using go_router
+              context.goToTransactions();
             },
           );
         },
@@ -342,29 +337,15 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   void _navigateToAddTransaction(TransactionType type) {
-    // Navigate to add transaction screen with hero animation
-    Navigator.of(context).push(
-      AppPageTransitions.scaleTransition(
-        page: const AddEditTransactionScreen(),
-        settings: RouteSettings(
-          name: '/add-edit-transaction',
-          arguments: {'type': type},
-        ),
-      ),
-    );
+    // Navigate to add transaction screen using go_router with source page info
+    context.goToAddTransaction(sourcePage: 'dashboard');
   }
 
-  void _showEditTransaction(BuildContext context, String transactionId) {
-    // TODO: Get the transaction from TransactionsBloc or repository
-    // For now, navigate to edit screen without transaction data
-    Navigator.of(context).push(
-      AppPageTransitions.scaleTransition(
-        page: const AddEditTransactionScreen(), // Will be in edit mode if transaction is provided
-        settings: RouteSettings(
-          name: '/edit-transaction',
-          arguments: {'transactionId': transactionId},
-        ),
-      ),
+  void _showEditTransaction(BuildContext context, String transactionId){
+    // For now, navigate to edit screen without transaction data using go_router
+    context.goToEditTransaction(
+      transactionId: transactionId,
+      sourcePage: 'dashboard',
     );
   }
 
@@ -391,6 +372,18 @@ class _DashboardPageState extends State<DashboardPage> {
             child: const Text('Delete'),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showTransactionDetails(BuildContext context, Transaction transaction) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => TransactionDetailsModal(
+        transaction: transaction,
+        sourcePage: 'dashboard',
       ),
     );
   }
@@ -570,8 +563,6 @@ class _ParallaxHeaderDelegate extends SliverPersistentHeaderDelegate {
                       if (notificationCount == 0 && state.filteredTransactions.isNotEmpty) {
                         notificationCount = state.filteredTransactions.length.clamp(1, 5);
                       }
-                      
-                      debugPrint('🔔 Notification count: $notificationCount (Total transactions: ${state.filteredTransactions.length})');
                     }
                     return _buildNotificationBadge(context: context, count: notificationCount);
                   },
@@ -687,7 +678,6 @@ class _ParallaxHeaderDelegate extends SliverPersistentHeaderDelegate {
     
     return GestureDetector(
       onTap: () {
-        // TODO: Navigate to notifications page
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('You have $displayCount notifications!'),
@@ -766,7 +756,6 @@ class _ParallaxHeaderDelegate extends SliverPersistentHeaderDelegate {
   Widget _buildProfileAvatar(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        // TODO: Navigate to profile page
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Profile page coming soon!'),

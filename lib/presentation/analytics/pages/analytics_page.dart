@@ -45,12 +45,11 @@ class _AnalyticsPageState extends State<AnalyticsPage>
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => di.sl<AnalyticsBloc>()..add(const LoadAnalytics()),
+      create: (context) => di.sl<AnalyticsBloc>()..add(const ChangePeriod(TimePeriod.thisWeek)),
       child: BlocListener<TransactionsBloc, TransactionsState>(
         listener: (context, state) {
           // Refresh analytics when transactions are added/updated/deleted
           if (state is TransactionOperationSuccess) {
-            debugPrint('🔄 Analytics: Transaction operation success, refreshing analytics');
             context.read<AnalyticsBloc>().add(const RefreshAnalytics());
           }
         },
@@ -97,32 +96,6 @@ class _AnalyticsPageState extends State<AnalyticsPage>
       foregroundColor: AppColors.textPrimary,
       elevation: 0,
       scrolledUnderElevation: 0,
-      actions: [
-        BlocBuilder<AnalyticsBloc, AnalyticsState>(
-          builder: (context, state) {
-            if (state is AnalyticsLoaded) {
-              return IconButton(
-                onPressed: () => _onRefresh(context),
-                icon: AnimatedBuilder(
-                  animation: _refreshController,
-                  builder: (context, child) {
-                    return Transform.rotate(
-                      angle: _refreshController.value * 2 * 3.14159,
-                      child: Icon(
-                        Icons.refresh_rounded,
-                        color: AppColors.textSecondary,
-                      ),
-                    );
-                  },
-                ),
-                tooltip: 'Refresh',
-              );
-            }
-            return const SizedBox.shrink();
-          },
-        ),
-        const SizedBox(width: Spacing.space8),
-      ],
     );
   }
 
@@ -149,7 +122,7 @@ class _AnalyticsPageState extends State<AnalyticsPage>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(
+            const CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
               strokeWidth: 3,
             ),
@@ -181,7 +154,7 @@ class _AnalyticsPageState extends State<AnalyticsPage>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            const Icon(
               Icons.error_outline_rounded,
               size: 64,
               color: AppColors.error,
@@ -231,7 +204,7 @@ class _AnalyticsPageState extends State<AnalyticsPage>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            const Icon(
               Icons.analytics_outlined,
               size: 64,
               color: AppColors.textTertiary,

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/router/app_routes.dart';
 import '../../../../domain/entities/transaction.dart';
 import '../../../../injection_container.dart' as di;
 import '../bloc/transaction_form_bloc.dart';
@@ -301,7 +303,7 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen>
                   onPressed: state.isSubmitting ? null : _onBackPressed,
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: Spacing.space16),
-                    side: BorderSide(color: AppColors.textSecondary),
+                    side: const BorderSide(color: AppColors.textSecondary),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(Spacing.radiusL),
                     ),
@@ -335,7 +337,7 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen>
                       ? Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            SizedBox(
+                            const SizedBox(
                               width: 20,
                               height: 20,
                               child: CircularProgressIndicator(
@@ -373,13 +375,38 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen>
     // Add haptic feedback
     HapticFeedback.lightImpact();
     
-    // Animate out and then pop
+    // Animate out and then navigate back
     _heroAnimationController.reverse();
     _contentAnimationController.reverse().then((_) {
       if (mounted) {
-        Navigator.of(context).pop();
+        // Check if we can pop (there's a previous route)
+        if (context.canPop()) {
+          context.pop();
+        } else {
+          // If we can't pop, determine the appropriate route based on context
+          // This handles deep links or direct navigation to transaction form
+          _navigateToAppropriateRoute();
+        }
       }
     });
+  }
+
+  void _navigateToAppropriateRoute() {
+    // Get any extra data passed to this route
+    final routeState = GoRouterState.of(context);
+    final extra = routeState.extra as Map<String, dynamic>?;
+    
+    // Check if theres a source page indication in extra data
+    final sourcePage = extra?['sourcePage'] as String?;
+    
+    if (sourcePage == 'transactions') {
+      context.go(AppRoutes.transactions);
+    } else if (sourcePage == 'dashboard') {
+      context.go(AppRoutes.dashboard);
+    } else {
+      // Default fallback - go to dashboard
+      context.go(AppRoutes.dashboard);
+    }
   }
 
   void _onSavePressed() {

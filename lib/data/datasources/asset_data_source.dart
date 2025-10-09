@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/services.dart';
+import '../../core/utils/logger.dart';
 import '../models/category_model.dart';
 import '../models/transaction_model.dart';
 import '../models/analytics_model.dart';
@@ -12,51 +13,48 @@ class AssetDataSource {
 
   Future<PaginatedTransactionsResponse> getTransactions() async {
     try {
-      print('🔄 AssetDataSource: Loading transactions from $_transactionsPath');
+      Logger.d('AssetDataSource: Loading transactions from $_transactionsPath');
       final jsonString = await rootBundle.loadString(_transactionsPath);
-      print('✅ AssetDataSource: Loaded transactions JSON, length: ${jsonString.length}');
+      Logger.d('AssetDataSource: Loaded transactions JSON, length: ${jsonString.length}');
       final jsonData = json.decode(jsonString) as Map<String, dynamic>;
-      print('✅ AssetDataSource: Decoded JSON, keys: ${jsonData.keys}');
+      Logger.d('AssetDataSource: Decoded JSON, keys: ${jsonData.keys}');
       final response = PaginatedTransactionsResponse.fromJson(jsonData);
-      print('✅ AssetDataSource: Created response with ${response.data.length} transactions');
+      Logger.d('AssetDataSource: Created response with ${response.data.length} transactions');
       return response;
     } catch (e, stackTrace) {
-      print('💥 AssetDataSource: Failed to load transactions: $e');
-      print('💥 StackTrace: $stackTrace');
+      Logger.e('AssetDataSource: Failed to load transactions', error: e, stackTrace: stackTrace);
       throw Exception('Failed to load transactions: $e');
     }
   }
 
   Future<CategoriesResponse> getCategories() async {
     try {
-      print('🔄 AssetDataSource: Loading categories from $_categoriesPath');
+      Logger.d('AssetDataSource: Loading categories from $_categoriesPath');
       final jsonString = await rootBundle.loadString(_categoriesPath);
-      print('✅ AssetDataSource: Loaded categories JSON, length: ${jsonString.length}');
+      Logger.d('AssetDataSource: Loaded categories JSON, length: ${jsonString.length}');
       final jsonData = json.decode(jsonString) as Map<String, dynamic>;
-      print('✅ AssetDataSource: Decoded JSON, keys: ${jsonData.keys}');
+      Logger.d('AssetDataSource: Decoded JSON, keys: ${jsonData.keys}');
       final response = CategoriesResponse.fromJson(jsonData);
-      print('✅ AssetDataSource: Created response with ${response.categories.length} categories');
+      Logger.d('AssetDataSource: Created response with ${response.categories.length} categories');
       return response;
     } catch (e, stackTrace) {
-      print('💥 AssetDataSource: Failed to load categories: $e');
-      print('💥 StackTrace: $stackTrace');
+      Logger.e('AssetDataSource: Failed to load categories', error: e, stackTrace: stackTrace);
       throw Exception('Failed to load categories: $e');
     }
   }
 
   Future<AnalyticsResponse> getAnalytics() async {
     try {
-      print('🔄 AssetDataSource: Loading analytics from $_analyticsPath');
+      Logger.d('AssetDataSource: Loading analytics from $_analyticsPath');
       final jsonString = await rootBundle.loadString(_analyticsPath);
-      print('✅ AssetDataSource: Loaded analytics JSON, length: ${jsonString.length}');
+      Logger.d('AssetDataSource: Loaded analytics JSON, length: ${jsonString.length}');
       final jsonData = json.decode(jsonString) as Map<String, dynamic>;
-      print('✅ AssetDataSource: Decoded JSON, keys: ${jsonData.keys}');
+      Logger.d('AssetDataSource: Decoded JSON, keys: ${jsonData.keys}');
       final response = AnalyticsResponse.fromJson(jsonData);
-      print('✅ AssetDataSource: Created analytics response');
+      Logger.d('AssetDataSource: Created analytics response');
       return response;
     } catch (e, stackTrace) {
-      print('💥 AssetDataSource: Failed to load analytics: $e');  
-      print('💥 StackTrace: $stackTrace');
+      Logger.e('AssetDataSource: Failed to load analytics', error: e, stackTrace: stackTrace);
       throw Exception('Failed to load analytics: $e');
     }
   }

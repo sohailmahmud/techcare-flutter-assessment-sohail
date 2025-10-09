@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import '../errors/enhanced_failures.dart';
+import 'logger.dart';
 
 /// A result wrapper that encapsulates either success data or failure
 abstract class Result<T> extends Equatable {
@@ -101,7 +102,7 @@ abstract class Result<T> extends Equatable {
         action((this as Success<T>).data);
       } catch (e) {
         // Log the error but don't change the result
-        print('Error in onSuccess callback: $e');
+        Logger.e('Error in onSuccess callback', error: e);
       }
     }
     return this;
@@ -114,7 +115,7 @@ abstract class Result<T> extends Equatable {
         action((this as ResultFailure<T>).failure);
       } catch (e) {
         // Log the error but don't change the result
-        print('Error in onFailure callback: $e');
+        Logger.e('Error in onFailure callback', error: e);
       }
     }
     return this;
@@ -161,6 +162,7 @@ abstract class Result<T> extends Equatable {
 
 /// Represents a successful result
 class Success<T> extends Result<T> {
+  @override
   final T data;
 
   const Success(this.data);
@@ -174,6 +176,7 @@ class Success<T> extends Result<T> {
 
 /// Represents a failed result
 class ResultFailure<T> extends Result<T> {
+  @override
   final Failure failure;
 
   const ResultFailure(this.failure);
@@ -234,7 +237,7 @@ extension FutureResultExtension<T> on Future<Result<T>> {
     try {
       return await this.timeout(timeout);
     } catch (e) {
-      return ResultFailure(const NetworkFailure(
+      return const ResultFailure(NetworkFailure(
         'Operation timed out',
         code: 'TIMEOUT',
       ));

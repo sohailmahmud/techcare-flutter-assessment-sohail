@@ -68,7 +68,7 @@ class CategorySelector extends StatelessWidget {
           const SizedBox(height: Spacing.space8),
           Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.error_outline,
                 size: 16,
                 color: AppColors.error,
@@ -299,7 +299,7 @@ class HorizontalCategorySelector extends StatelessWidget {
           const SizedBox(height: Spacing.space8),
           Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.error_outline,
                 size: 16,
                 color: AppColors.error,

@@ -26,7 +26,7 @@ class CacheFailure extends Failure {
 /// Failure related to validation
 class ValidationFailure extends Failure {
   final String? field;
-  
+
   const ValidationFailure(
     String message, {
     this.field,
@@ -71,5 +71,3 @@ class SyncFailure extends Failure {
   const SyncFailure([String message = 'Sync operation failed'])
       : super(message);
 }
-
-

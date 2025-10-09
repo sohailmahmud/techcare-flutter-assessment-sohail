@@ -13,16 +13,19 @@ class TransactionsList extends StatefulWidget {
   final List<Transaction> transactions;
   final Function(String)? onEdit;
   final Function(String)? onDelete;
+  final Function(Transaction)? onTransactionTap;
   final VoidCallback? onViewAll;
   final bool isLoading;
   final int? maxItems; // Optional limit for dashboard view
   final bool enableLazyLoading; // Enable lazy loading for large datasets
+
 
   const TransactionsList({
     super.key,
     required this.transactions,
     this.onEdit,
     this.onDelete,
+    this.onTransactionTap,
     this.onViewAll,
     this.isLoading = false,
     this.maxItems,
@@ -37,7 +40,7 @@ class _TransactionsListState extends State<TransactionsList>
     with TickerProviderStateMixin {
   late AnimationController _listAnimationController;
   late Animation<double> _listAnimation;
-  
+
   // Lazy loading state
   int _displayedItemsCount = 5;
   final int _itemsPerPage = 10;
@@ -56,13 +59,14 @@ class _TransactionsListState extends State<TransactionsList>
       curve: Curves.easeOutCubic,
     );
     _listAnimationController.forward();
-    
+
     // Set up lazy loading
     if (widget.enableLazyLoading) {
       _displayedItemsCount = _itemsPerPage;
       _scrollController.addListener(_onScroll);
     } else {
-      _displayedItemsCount = widget.maxItems ?? AppConstants.maxRecentTransactions;
+      _displayedItemsCount =
+          widget.maxItems ?? AppConstants.maxRecentTransactions;
     }
   }
 
@@ -74,8 +78,8 @@ class _TransactionsListState extends State<TransactionsList>
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >= 
-        _scrollController.position.maxScrollExtent - 200 &&
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200 &&
         !_isLoadingMore &&
         _displayedItemsCount < widget.transactions.length) {
       _loadMoreItems();
@@ -84,7 +88,7 @@ class _TransactionsListState extends State<TransactionsList>
 
   void _loadMoreItems() {
     if (_isLoadingMore) return;
-    
+
     setState(() {
       _isLoadingMore = true;
     });
@@ -221,7 +225,7 @@ class _TransactionsListState extends State<TransactionsList>
 
   Widget _buildStandardList() {
     final groupedTransactions = _groupTransactionsByDate();
-    
+
     return AnimatedBuilder(
       animation: _listAnimation,
       builder: (context, child) {
@@ -229,7 +233,7 @@ class _TransactionsListState extends State<TransactionsList>
           children: groupedTransactions.entries.map((entry) {
             final date = entry.key;
             final transactions = entry.value;
-            
+
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -238,7 +242,7 @@ class _TransactionsListState extends State<TransactionsList>
                 ...transactions.asMap().entries.map((transactionEntry) {
                   final index = transactionEntry.key;
                   final transaction = transactionEntry.value;
-                  
+
                   return SlideTransition(
                     position: Tween<Offset>(
                       begin: const Offset(1, 0),
@@ -265,9 +269,10 @@ class _TransactionsListState extends State<TransactionsList>
 
   /// Builds a lazy-loading ListView for large transaction datasets
   Widget _buildLazyLoadingList() {
-    final displayedTransactions = widget.transactions.take(_displayedItemsCount).toList();
+    final displayedTransactions =
+        widget.transactions.take(_displayedItemsCount).toList();
     final groupedTransactions = _groupTransactionsByDate(displayedTransactions);
-    
+
     // Calculate total items for ListView (groups + transactions + loading indicator)
     int totalItems = 0;
     for (final entry in groupedTransactions.entries) {
@@ -275,7 +280,7 @@ class _TransactionsListState extends State<TransactionsList>
       totalItems += entry.value.length; // Transactions
     }
     if (_isLoadingMore) totalItems += 1; // Loading indicator
-    
+
     return SizedBox(
       height: 400, // Fixed height for lazy loading
       child: ListView.builder(
@@ -283,11 +288,11 @@ class _TransactionsListState extends State<TransactionsList>
         itemCount: totalItems,
         itemBuilder: (context, index) {
           int currentIndex = 0;
-          
+
           for (final entry in groupedTransactions.entries) {
             final date = entry.key;
             final transactions = entry.value;
-            
+
             // Date header
             if (index == currentIndex) {
               currentIndex++;
@@ -297,7 +302,7 @@ class _TransactionsListState extends State<TransactionsList>
               );
             }
             currentIndex++;
-            
+
             // Transaction items
             for (int i = 0; i < transactions.length; i++) {
               if (index == currentIndex) {
@@ -325,7 +330,7 @@ class _TransactionsListState extends State<TransactionsList>
               currentIndex++;
             }
           }
-          
+
           // Loading indicator
           if (_isLoadingMore && index == totalItems - 1) {
             return const Padding(
@@ -335,23 +340,26 @@ class _TransactionsListState extends State<TransactionsList>
               ),
             );
           }
-          
+
           return const SizedBox.shrink();
         },
       ),
     );
   }
 
-  Map<String, List<Transaction>> _groupTransactionsByDate([List<Transaction>? transactions]) {
+  Map<String, List<Transaction>> _groupTransactionsByDate(
+      [List<Transaction>? transactions]) {
     final Map<String, List<Transaction>> grouped = {};
-    final List<Transaction> transactionsToGroup = transactions ?? 
-        widget.transactions.take(widget.maxItems ?? AppConstants.maxRecentTransactions).toList();
-    
+    final List<Transaction> transactionsToGroup = transactions ??
+        widget.transactions
+            .take(widget.maxItems ?? AppConstants.maxRecentTransactions)
+            .toList();
+
     for (final transaction in transactionsToGroup) {
       final dateKey = DateFormatter.formatDateGrouping(transaction.date);
       grouped.putIfAbsent(dateKey, () => []).add(transaction);
     }
-    
+
     return grouped;
   }
 
@@ -370,7 +378,7 @@ class _TransactionsListState extends State<TransactionsList>
 
   Widget _buildTransactionItem(Transaction transaction) {
     final isIncome = transaction.type == TransactionType.income;
-    
+
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       child: Dismissible(
@@ -394,91 +402,94 @@ class _TransactionsListState extends State<TransactionsList>
           }
           return false;
         },
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(Spacing.radiusM),
-            border: Border.all(
-              color: AppColors.border.withValues(alpha: 0.3),
-              width: 1,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.04),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
+        child: GestureDetector(
+          onTap: () => widget.onTransactionTap?.call(transaction),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(Spacing.radiusM),
+              border: Border.all(
+                color: AppColors.border.withValues(alpha: 0.3),
+                width: 1,
               ),
-            ],
-          ),
-          child: Row(
-            children: [
-              _buildTransactionIcon(transaction, isIncome),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      transaction.title,
-                      style: AppTypography.bodyLarge.copyWith(
-                        color: AppColors.textPrimary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Row(
-                      children: [
-                        Text(
-                          transaction.categoryName,
-                          style: AppTypography.bodySmall.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                _buildTransactionIcon(transaction, isIncome),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        transaction.title,
+                        style: AppTypography.bodyLarge.copyWith(
+                          color: AppColors.textPrimary,
+                          fontWeight: FontWeight.w600,
                         ),
-                        if (transaction.notes?.isNotEmpty == true) ...[
+                      ),
+                      const SizedBox(height: 2),
+                      Row(
+                        children: [
                           Text(
-                            ' • ',
+                            transaction.categoryName,
                             style: AppTypography.bodySmall.copyWith(
                               color: AppColors.textSecondary,
                             ),
                           ),
-                          Flexible(
-                            child: Text(
-                              transaction.notes!,
+                          if (transaction.notes?.isNotEmpty == true) ...[
+                            Text(
+                              ' • ',
                               style: AppTypography.bodySmall.copyWith(
                                 color: AppColors.textSecondary,
                               ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
                             ),
-                          ),
+                            Flexible(
+                              child: Text(
+                                transaction.notes!,
+                                style: AppTypography.bodySmall.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
                         ],
-                      ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      '${isIncome ? '+' : '-'}${CurrencyFormatter.format(transaction.amount)}',
+                      style: AppTypography.bodyLarge.copyWith(
+                        color: isIncome ? AppColors.success : AppColors.error,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      DateFormatter.formatTime(transaction.date),
+                      style: AppTypography.labelSmall.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(width: 16),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    '${isIncome ? '+' : '-'}${CurrencyFormatter.format(transaction.amount)}',
-                    style: AppTypography.bodyLarge.copyWith(
-                      color: isIncome ? AppColors.success : AppColors.error,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    DateFormatter.formatTime(transaction.date),
-                    style: AppTypography.labelSmall.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -529,28 +540,30 @@ class _TransactionsListState extends State<TransactionsList>
 
   Future<bool> _showDeleteConfirmation(Transaction transaction) async {
     return await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Transaction'),
-        content: Text('Are you sure you want to delete "${transaction.title}"?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Delete Transaction'),
+            content:
+                Text('Are you sure you want to delete "${transaction.title}"?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(true);
+                  widget.onDelete?.call(transaction.id);
+                },
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.error,
+                ),
+                child: const Text('Delete'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(true);
-              widget.onDelete?.call(transaction.id);
-            },
-            style: TextButton.styleFrom(
-              foregroundColor: AppColors.error,
-            ),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    ) ?? false;
+        ) ??
+        false;
   }
 
   IconData _getTransactionIcon(String categoryId) {
@@ -559,7 +572,7 @@ class _TransactionsListState extends State<TransactionsList>
       case 'cat_001': // Food & Dining
       case 'food':
         return Icons.restaurant;
-      case 'cat_002': // Transportation  
+      case 'cat_002': // Transportation
       case 'transport':
         return Icons.directions_car;
       case 'cat_003': // Shopping

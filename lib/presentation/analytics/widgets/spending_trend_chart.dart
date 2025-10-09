@@ -66,7 +66,7 @@ class _SpendingTrendChartState extends State<SpendingTrendChart>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.textSecondary.withOpacity(0.1),
+            color: AppColors.textSecondary.withValues(alpha: 0.1),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -101,10 +101,10 @@ class _SpendingTrendChartState extends State<SpendingTrendChart>
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: AppColors.primary.withOpacity(0.1),
+            color: AppColors.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(
+          child: const Icon(
             Icons.trending_up_rounded,
             color: AppColors.primary,
             size: 20,
@@ -187,7 +187,7 @@ class _SpendingTrendChartState extends State<SpendingTrendChart>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CircularProgressIndicator(
+          const CircularProgressIndicator(
             valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
             strokeWidth: 3,
           ),
@@ -225,7 +225,7 @@ class _SpendingTrendChartState extends State<SpendingTrendChart>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
+          const Icon(
             Icons.show_chart_rounded,
             size: 48,
             color: AppColors.textTertiary,
@@ -282,7 +282,7 @@ class _SpendingTrendChartState extends State<SpendingTrendChart>
       horizontalInterval: interval,
       getDrawingHorizontalLine: (value) {
         return FlLine(
-          color: AppColors.border.withOpacity(0.5),
+          color: AppColors.border.withValues(alpha: 0.5),
           strokeWidth: 1,
           dashArray: [5, 5],
         );
@@ -357,7 +357,7 @@ class _SpendingTrendChartState extends State<SpendingTrendChart>
   FlBorderData _buildBorderData() {
     return FlBorderData(
       show: true,
-      border: Border(
+      border: const Border(
         bottom: BorderSide(color: AppColors.border, width: 1),
         left: BorderSide(color: AppColors.border, width: 1),
       ),
@@ -370,7 +370,7 @@ class _SpendingTrendChartState extends State<SpendingTrendChart>
       isCurved: true,
       gradient: LinearGradient(
         colors: [
-          AppColors.income.withOpacity(0.8),
+          AppColors.income.withValues(alpha: 0.8),
           AppColors.income,
         ],
       ),
@@ -389,8 +389,8 @@ class _SpendingTrendChartState extends State<SpendingTrendChart>
         show: true,
         gradient: LinearGradient(
           colors: [
-            AppColors.income.withOpacity(0.2 * _animation.value),
-            AppColors.income.withOpacity(0.05 * _animation.value),
+            AppColors.income.withValues(alpha: 0.2 * _animation.value),
+            AppColors.income.withValues(alpha: 0.05 * _animation.value),
           ],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
@@ -405,7 +405,7 @@ class _SpendingTrendChartState extends State<SpendingTrendChart>
       isCurved: true,
       gradient: LinearGradient(
         colors: [
-          AppColors.expense.withOpacity(0.8),
+          AppColors.expense.withValues(alpha: 0.8),
           AppColors.expense,
         ],
       ),
@@ -424,8 +424,8 @@ class _SpendingTrendChartState extends State<SpendingTrendChart>
         show: true,
         gradient: LinearGradient(
           colors: [
-            AppColors.expense.withOpacity(0.2 * _animation.value),
-            AppColors.expense.withOpacity(0.05 * _animation.value),
+            AppColors.expense.withValues(alpha: 0.2 * _animation.value),
+            AppColors.expense.withValues(alpha: 0.05 * _animation.value),
           ],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
@@ -450,7 +450,7 @@ class _SpendingTrendChartState extends State<SpendingTrendChart>
         // Handle touch interactions for future enhancements
       },
       touchTooltipData: LineTouchTooltipData(
-        getTooltipColor: (touchedSpot) => AppColors.textPrimary.withOpacity(0.8),
+        getTooltipColor: (touchedSpot) => AppColors.textPrimary.withValues(alpha: 0.8),
         tooltipRoundedRadius: 8,
         tooltipPadding: const EdgeInsets.all(8),
         tooltipMargin: 8,

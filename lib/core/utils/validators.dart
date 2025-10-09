@@ -1,9 +1,9 @@
 /// Utility class for validations
 class Validators {
-   // Private constructor
+  // Private constructor
   const Validators._();
-  
-/// Validate required field
+
+  /// Validate required field
   static String? validateRequired(String? value, [String fieldName = 'Field']) {
     if (value == null || value.trim().isEmpty) {
       return '$fieldName is required';

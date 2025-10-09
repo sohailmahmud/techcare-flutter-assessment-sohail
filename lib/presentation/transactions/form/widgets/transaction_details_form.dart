@@ -41,11 +41,11 @@ class TransactionDetailsForm extends StatelessWidget {
         // Title Input
         _buildTitleInput(),
         const SizedBox(height: Spacing.space20),
-        
+
         // Date and Time Picker
         _buildDateTimePicker(context),
         const SizedBox(height: Spacing.space20),
-        
+
         // Notes Input
         _buildNotesInput(),
       ],
@@ -54,7 +54,7 @@ class TransactionDetailsForm extends StatelessWidget {
 
   Widget _buildTitleInput() {
     final hasError = titleError != null;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -77,7 +77,7 @@ class TransactionDetailsForm extends StatelessWidget {
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(Spacing.radiusL),
-              borderSide: BorderSide(
+              borderSide: const BorderSide(
                 color: AppColors.border,
                 width: 1.5,
               ),
@@ -91,14 +91,14 @@ class TransactionDetailsForm extends StatelessWidget {
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(Spacing.radiusL),
-              borderSide: BorderSide(
+              borderSide: const BorderSide(
                 color: AppColors.error,
                 width: 2.0,
               ),
             ),
             focusedErrorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(Spacing.radiusL),
-              borderSide: BorderSide(
+              borderSide: const BorderSide(
                 color: AppColors.error,
                 width: 2.0,
               ),
@@ -119,7 +119,7 @@ class TransactionDetailsForm extends StatelessWidget {
           const SizedBox(height: Spacing.space4),
           Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.error_outline,
                 size: 16,
                 color: AppColors.error,
@@ -142,7 +142,7 @@ class TransactionDetailsForm extends StatelessWidget {
 
   Widget _buildDateTimePicker(BuildContext context) {
     final hasError = dateError != null;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -194,7 +194,7 @@ class TransactionDetailsForm extends StatelessWidget {
               ),
             ),
             const SizedBox(width: Spacing.space12),
-            
+
             // Time Picker
             Expanded(
               child: GestureDetector(
@@ -237,7 +237,7 @@ class TransactionDetailsForm extends StatelessWidget {
           const SizedBox(height: Spacing.space8),
           Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.error_outline,
                 size: 16,
                 color: AppColors.error,
@@ -260,7 +260,7 @@ class TransactionDetailsForm extends StatelessWidget {
 
   Widget _buildNotesInput() {
     final hasError = notesError != null;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -285,7 +285,7 @@ class TransactionDetailsForm extends StatelessWidget {
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(Spacing.radiusL),
-              borderSide: BorderSide(
+              borderSide: const BorderSide(
                 color: AppColors.border,
                 width: 1.5,
               ),
@@ -299,14 +299,14 @@ class TransactionDetailsForm extends StatelessWidget {
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(Spacing.radiusL),
-              borderSide: BorderSide(
+              borderSide: const BorderSide(
                 color: AppColors.error,
                 width: 2.0,
               ),
             ),
             focusedErrorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(Spacing.radiusL),
-              borderSide: BorderSide(
+              borderSide: const BorderSide(
                 color: AppColors.error,
                 width: 2.0,
               ),
@@ -327,7 +327,7 @@ class TransactionDetailsForm extends StatelessWidget {
           const SizedBox(height: Spacing.space4),
           Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.error_outline,
                 size: 16,
                 color: AppColors.error,
@@ -359,9 +359,9 @@ class TransactionDetailsForm extends StatelessWidget {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: AppColors.primary,
-              surface: AppColors.surface,
-            ),
+                  primary: AppColors.primary,
+                  surface: AppColors.surface,
+                ),
           ),
           child: child!,
         );
@@ -381,9 +381,9 @@ class TransactionDetailsForm extends StatelessWidget {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: AppColors.primary,
-              surface: AppColors.surface,
-            ),
+                  primary: AppColors.primary,
+                  surface: AppColors.surface,
+                ),
           ),
           child: child!,
         );

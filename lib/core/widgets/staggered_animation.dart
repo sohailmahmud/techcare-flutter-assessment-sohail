@@ -33,7 +33,7 @@ class _StaggeredListItemState extends State<StaggeredListItem>
   @override
   void initState() {
     super.initState();
-    
+
     _controller = AnimationController(
       duration: widget.duration ?? AppConstants.listItemAnimation,
       vsync: this,
@@ -56,9 +56,11 @@ class _StaggeredListItemState extends State<StaggeredListItem>
     ));
 
     // Start animation with stagger delay
-    final delay = widget.delay ?? 
-        Duration(milliseconds: widget.index * AppConstants.listItemAnimation.inMilliseconds);
-    
+    final delay = widget.delay ??
+        Duration(
+            milliseconds:
+                widget.index * AppConstants.listItemAnimation.inMilliseconds);
+
     Future.delayed(delay, () {
       if (mounted) {
         _controller.forward();
@@ -117,15 +119,15 @@ class StaggeredList extends StatelessWidget {
     final staggeredChildren = children.asMap().entries.map((entry) {
       final index = entry.key;
       final child = entry.value;
-      
+
       return StaggeredListItem(
         key: ValueKey(index),
         index: index,
         delay: itemDelay,
         duration: itemDuration,
         curve: curve,
-        slideOffset: direction == Axis.vertical 
-            ? const Offset(0, 0.3) 
+        slideOffset: direction == Axis.vertical
+            ? const Offset(0, 0.3)
             : const Offset(0.3, 0),
         child: child,
       );

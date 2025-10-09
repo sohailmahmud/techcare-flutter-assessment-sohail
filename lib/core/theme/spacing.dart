@@ -16,7 +16,7 @@ class Spacing {
   static const double space48 = 48.0;
   static const double space64 = 64.0;
 
-  // Header height  
+  // Header height
   static const double headerExpandedHeight = 120.0;
   static const double headerCollapsedHeight = 80.0;
 
@@ -37,7 +37,7 @@ class Spacing {
   // Color constants
   static const int maxCategoryColors = 10;
 
-   // Profile avatar size
+  // Profile avatar size
   static const double profileAvatarSize = 40.0;
 
   // Transaction dimensions

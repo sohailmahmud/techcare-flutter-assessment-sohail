@@ -6,20 +6,14 @@ class EventTransformers {
   /// Debounce transformer - delays events until no new events occur for the specified duration
   static EventTransformer<T> debounce<T>(Duration duration) {
     return (events, mapper) {
-      return events
-          .distinct()
-          .debounceTime(duration)
-          .asyncExpand(mapper);
+      return events.distinct().debounceTime(duration).asyncExpand(mapper);
     };
   }
 
   /// Throttle transformer - emits first event and ignores subsequent events for the specified duration
   static EventTransformer<T> throttle<T>(Duration duration) {
     return (events, mapper) {
-      return events
-          .distinct()
-          .throttleTime(duration)
-          .asyncExpand(mapper);
+      return events.distinct().throttleTime(duration).asyncExpand(mapper);
     };
   }
 

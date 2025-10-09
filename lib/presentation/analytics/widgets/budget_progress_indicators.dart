@@ -88,9 +88,6 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
 
   @override
   Widget build(BuildContext context) {
-    // Debug information
-    debugPrint('BudgetProgressIndicators: Building with ${widget.budgetData.length} items, isLoading: ${widget.isLoading}');
-    
     return Container(
       padding: const EdgeInsets.all(Spacing.space16),
       decoration: BoxDecoration(
@@ -98,7 +95,7 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.textSecondary.withOpacity(0.1),
+            color: AppColors.textSecondary.withValues(alpha: 0.1),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -127,7 +124,7 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: AppColors.warning.withOpacity(0.1),
+            color: AppColors.warning.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: const Icon(
@@ -192,7 +189,7 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
         vertical: Spacing.space4,
       ),
       decoration: BoxDecoration(
-        color: statusColor.withOpacity(0.1),
+        color: statusColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -237,8 +234,7 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
   }
 
   Widget _buildEmptyState() {
-    debugPrint('BudgetProgressIndicators: Showing empty state');
-    return Container(
+    return SizedBox(
       height: 200,
       width: double.infinity, // Ensure it takes full width
       child: Center(
@@ -274,10 +270,7 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
   Widget _buildBudgetGrid() {
     final displayData = widget.budgetData; // Show all categories
     
-    debugPrint('BudgetProgressIndicators: Building grid with ${displayData.length} items');
-    
     if (displayData.isEmpty) {
-      debugPrint('BudgetProgressIndicators: DisplayData is empty, returning SizedBox.shrink()');
       return const SizedBox.shrink();
     }
     
@@ -289,7 +282,6 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
         
         // Dynamic crossAxisCount based on screen width and category count
         final crossAxisCount = availableWidth > 500 && displayData.length > 4 ? 3 : 2;
-        final rowCount = (displayData.length / crossAxisCount).ceil();
         
         // Calculate item dimensions with responsive aspect ratio
         final spacingWidth = (crossAxisCount - 1) * Spacing.space12;
@@ -297,22 +289,10 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
         final aspectRatio = displayData.length <= 2 ? 1.1 : 1.0; // Taller cards for few items
         final itemHeight = itemWidth / aspectRatio;
         
-        // Calculate total required height
-        final totalHeight = (rowCount * itemHeight) + ((rowCount - 1) * Spacing.space12);
-        
         // Calculate optimal height with dynamic scaling
         final constrainedHeight = _calculateOptimalHeight(displayData.length, itemHeight);
         final minHeight = itemHeight; // At least one row
         final maxHeight = math.min(constrainedHeight, screenHeight * 0.81); // Cap at 60% of screen
-        
-        // Debug information for dynamic height calculation
-        debugPrint('BudgetProgressIndicators Dynamic Height: '
-            'categories=${displayData.length}, '
-            'crossAxis=$crossAxisCount, '
-            'rows=$rowCount, '
-            'itemHeight=${itemHeight.toStringAsFixed(1)}, '
-            'totalHeight=${totalHeight.toStringAsFixed(1)}, '
-            'maxHeight=${maxHeight.toStringAsFixed(1)}');
         
         return ConstrainedBox(
           constraints: BoxConstraints(
@@ -352,7 +332,7 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
         color: AppColors.background,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: statusColor.withOpacity(0.2),
+          color: statusColor.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -366,7 +346,7 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
                 width: 24,
                 height: 24,
                 decoration: BoxDecoration(
-                  color: _getCategoryColor(budget.categoryName).withOpacity(0.1),
+                  color: _getCategoryColor(budget.categoryName).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Icon(
@@ -594,7 +574,7 @@ class CompactBudgetProgress extends StatelessWidget {
             color: AppColors.surface,
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: _getStatusColor(_getBudgetStatus(budget)).withOpacity(0.2),
+              color: _getStatusColor(_getBudgetStatus(budget)).withValues(alpha: 0.2),
             ),
           ),
           child: Row(
@@ -604,7 +584,7 @@ class CompactBudgetProgress extends StatelessWidget {
                 width: 32,
                 height: 32,
                 decoration: BoxDecoration(
-                  color: _getCategoryColor(budget.categoryName).withOpacity(0.1),
+                  color: _getCategoryColor(budget.categoryName).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(

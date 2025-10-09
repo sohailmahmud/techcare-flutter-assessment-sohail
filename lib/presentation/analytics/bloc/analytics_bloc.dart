@@ -119,10 +119,14 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
       emit(const AnalyticsLoading());
       
       final now = DateTime.now();
-      final startDate = event.startDate ?? DateTime(now.year, now.month, 1);
-      final endDate = event.endDate ?? DateTime(now.year, now.month + 1, 0);
+      // Default to "This Week" instead of "This Month"
+      final defaultStartDate = now.subtract(Duration(days: now.weekday - 1));
+      final defaultEndDate = defaultStartDate.add(const Duration(days: 6));
       
-      final analyticsData = await _calculateAnalytics(startDate, endDate);
+      final startDate = event.startDate ?? defaultStartDate;
+      final endDate = event.endDate ?? defaultEndDate;
+      
+      final analyticsData = await _calculateAnalytics(startDate, endDate, period: TimePeriod.thisWeek);
       emit(AnalyticsLoaded(analyticsData));
     } catch (error) {
       emit(AnalyticsError('Failed to load analytics: $error'));
@@ -132,7 +136,7 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
   Future<void> _onUpdateDateRange(UpdateDateRange event, Emitter<AnalyticsState> emit) async {
     try {
       emit(const AnalyticsLoading());
-      final analyticsData = await _calculateAnalytics(event.startDate, event.endDate);
+      final analyticsData = await _calculateAnalytics(event.startDate, event.endDate, period: TimePeriod.custom);
       emit(AnalyticsLoaded(analyticsData));
     } catch (error) {
       emit(AnalyticsError('Failed to update date range: $error'));
@@ -150,6 +154,7 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
         data.dateRange.startDate, 
         data.dateRange.endDate,
         categoryFilter: event.categoryId,
+        period: data.period,
       );
       emit(AnalyticsLoaded(analyticsData));
     } catch (error) {
@@ -189,7 +194,7 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
           break;
       }
       
-      final analyticsData = await _calculateAnalytics(startDate, endDate);
+      final analyticsData = await _calculateAnalytics(startDate, endDate, period: event.period);
       emit(AnalyticsLoaded(analyticsData));
     } catch (error) {
       emit(AnalyticsError('Failed to change period: $error'));
@@ -201,7 +206,11 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
       final currentState = state;
       if (currentState is AnalyticsLoaded) {
         final data = currentState.data;
-        final analyticsData = await _calculateAnalytics(data.dateRange.startDate, data.dateRange.endDate);
+        final analyticsData = await _calculateAnalytics(
+          data.dateRange.startDate, 
+          data.dateRange.endDate,
+          period: data.period,
+        );
         emit(AnalyticsLoaded(analyticsData));
       } else {
         add(const LoadAnalytics());
@@ -215,6 +224,8 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
     final transactionsState = transactionsBloc.state;
     if (transactionsState is TransactionLoaded) {
       return transactionsState.transactions;
+    } else if (transactionsState is TransactionError) {
+      throw Exception('Failed to load transactions');
     }
     return [];
   }
@@ -223,6 +234,7 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
     DateTime startDate, 
     DateTime endDate, {
     String? categoryFilter,
+    TimePeriod? period,
   }) async {
     final transactions = _getTransactionsFromBloc();
     final dateRange = DateRange(startDate: startDate, endDate: endDate);
@@ -244,7 +256,7 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
     
     final totalExpenses = filteredTransactions
         .where((t) => t.type == tx.TransactionType.expense)
-        .fold(0.0, (sum, t) => sum + t.amount);
+        .fold(0.0, (sum, t) => sum + t.amount.abs());
     
     final netAmount = totalIncome - totalExpenses;
 
@@ -259,7 +271,7 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
     final budgetProgress = _calculateBudgetProgress(filteredTransactions);
 
     return AnalyticsData(
-      period: TimePeriod.thisMonth,
+      period: period ?? TimePeriod.thisWeek,
       dateRange: dateRange,
       totalIncome: totalIncome,
       totalExpenses: totalExpenses,

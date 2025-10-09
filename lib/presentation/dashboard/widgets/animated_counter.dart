@@ -38,7 +38,7 @@ class _AnimatedCounterState extends State<AnimatedCounter>
       duration: widget.duration ?? AppConstants.counterAnimation,
       vsync: this,
     );
-    
+
     _animation = Tween<double>(
       begin: _previousValue,
       end: widget.value,
@@ -53,10 +53,10 @@ class _AnimatedCounterState extends State<AnimatedCounter>
   @override
   void didUpdateWidget(AnimatedCounter oldWidget) {
     super.didUpdateWidget(oldWidget);
-    
+
     if (oldWidget.value != widget.value) {
       _previousValue = oldWidget.value;
-      
+
       _animation = Tween<double>(
         begin: _previousValue,
         end: widget.value,

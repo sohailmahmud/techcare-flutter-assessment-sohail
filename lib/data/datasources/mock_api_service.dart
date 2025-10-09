@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:dio/dio.dart';
+import '../../core/utils/logger.dart';
 import '../models/transaction_model.dart';
 import '../models/category_model.dart';
 import '../models/analytics_model.dart';
@@ -22,7 +23,7 @@ class MockApiService {
     if (_isInitialized) return;
     
     try {
-      print('🔄 MockApiService: Starting initialization');
+      Logger.d('MockApiService: Starting initialization');
       // Load data from assets
       final transactionsResponse = await _assetDataSource.getTransactions();
       final categoriesResponse = await _assetDataSource.getCategories();
@@ -33,9 +34,9 @@ class MockApiService {
       _analytics = analyticsResponse.analytics;
       
       _isInitialized = true;
-      print('✅ MockApiService initialized with ${_transactions.length} transactions and ${_categories.length} categories');
+      Logger.i('MockApiService initialized with ${_transactions.length} transactions and ${_categories.length} categories');
     } catch (e) {
-      print('💥 Failed to initialize MockApiService: $e');
+      Logger.e('Failed to initialize MockApiService', error: e);
       rethrow;
     }
   }
@@ -413,16 +414,16 @@ class MockApiService {
   /// Get dashboard summary data
   Future<Response<Map<String, dynamic>>> getDashboardSummary() async {
     try {
-      print('🔄 MockApiService: Starting getDashboardSummary');
+      Logger.d('MockApiService: Starting getDashboardSummary');
       await initialize();
       await _simulateDelay();
       _simulateNetworkError();
 
-      print('🔄 MockApiService: Processing ${_transactions.length} transactions');
+      Logger.d('MockApiService: Processing ${_transactions.length} transactions');
 
       // If no transactions loaded, return empty but valid response
       if (_transactions.isEmpty) {
-        print('⚠️ MockApiService: No transactions found, returning empty response');
+        Logger.w('MockApiService: No transactions found, returning empty response');
         final response = {
           'success': true,
           'data': {
@@ -450,7 +451,7 @@ class MockApiService {
         return transactionDate.isAfter(currentMonth.subtract(const Duration(days: 1)));
       }).toList();
 
-      print('🔄 MockApiService: Found ${currentMonthTransactions.length} transactions for current month');
+      Logger.d('MockApiService: Found ${currentMonthTransactions.length} transactions for current month');
 
       final totalIncome = currentMonthTransactions
           .where((t) => t.typeString == 'income')
@@ -460,7 +461,7 @@ class MockApiService {
           .where((t) => t.typeString == 'expense')
           .fold<double>(0.0, (sum, t) => sum + t.amount);
 
-      print('🔄 MockApiService: Total income: $totalIncome, Total expenses: $totalExpenses');
+      Logger.d('MockApiService: Total income: $totalIncome, Total expenses: $totalExpenses');
 
       // Calculate category expenses
       final categoryExpenseMap = <String, Map<String, dynamic>>{};
@@ -532,7 +533,7 @@ class MockApiService {
         }
       };
 
-      print('✅ MockApiService: Returning dashboard summary with ${categoryExpenses.length} categories and ${recentTransactions.length} recent transactions');
+      Logger.i('MockApiService: Returning dashboard summary with ${categoryExpenses.length} categories and ${recentTransactions.length} recent transactions');
 
       return Response<Map<String, dynamic>>(
         data: response,
@@ -540,8 +541,7 @@ class MockApiService {
         requestOptions: RequestOptions(path: '/api/dashboard/summary'),
       );
     } catch (e, stackTrace) {
-      print('💥 MockApiService: Error in getDashboardSummary: $e');
-      print('💥 StackTrace: $stackTrace');
+      Logger.e('MockApiService: Error in getDashboardSummary', error: e, stackTrace: stackTrace);
       rethrow;
     }
   }

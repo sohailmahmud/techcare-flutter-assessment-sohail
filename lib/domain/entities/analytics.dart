@@ -60,8 +60,10 @@ class DateRange extends Equatable {
   String get description {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final startDate = DateTime(this.startDate.year, this.startDate.month, this.startDate.day);
-    final endDate = DateTime(this.endDate.year, this.endDate.month, this.endDate.day);
+    final startDate =
+        DateTime(this.startDate.year, this.startDate.month, this.startDate.day);
+    final endDate =
+        DateTime(this.endDate.year, this.endDate.month, this.endDate.day);
 
     if (startDate == endDate) {
       if (startDate == today) {
@@ -88,9 +90,10 @@ class DateRange extends Equatable {
     final dateOnly = DateTime(date.year, date.month, date.day);
     final startOnly = DateTime(startDate.year, startDate.month, startDate.day);
     final endOnly = DateTime(endDate.year, endDate.month, endDate.day);
-    
-    return (dateOnly.isAfter(startOnly) || dateOnly.isAtSameMomentAs(startOnly)) &&
-           (dateOnly.isBefore(endOnly) || dateOnly.isAtSameMomentAs(endOnly));
+
+    return (dateOnly.isAfter(startOnly) ||
+            dateOnly.isAtSameMomentAs(startOnly)) &&
+        (dateOnly.isBefore(endOnly) || dateOnly.isAtSameMomentAs(endOnly));
   }
 
   @override
@@ -129,8 +132,12 @@ class TrendData extends Equatable {
 
   /// Get the maximum value across all data points
   double get maxValue {
-    final incomeMax = incomePoints.isEmpty ? 0.0 : incomePoints.map((e) => e.value).reduce((a, b) => a > b ? a : b);
-    final expenseMax = expensePoints.isEmpty ? 0.0 : expensePoints.map((e) => e.value).reduce((a, b) => a > b ? a : b);
+    final incomeMax = incomePoints.isEmpty
+        ? 0.0
+        : incomePoints.map((e) => e.value).reduce((a, b) => a > b ? a : b);
+    final expenseMax = expensePoints.isEmpty
+        ? 0.0
+        : expensePoints.map((e) => e.value).reduce((a, b) => a > b ? a : b);
     return incomeMax > expenseMax ? incomeMax : expenseMax;
   }
 
@@ -170,7 +177,8 @@ class CategoryBreakdown extends Equatable {
   });
 
   @override
-  List<Object> get props => [categoryId, categoryName, amount, transactionCount, percentage];
+  List<Object> get props =>
+      [categoryId, categoryName, amount, transactionCount, percentage];
 }
 
 /// Model for budget vs actual spending
@@ -201,7 +209,8 @@ class BudgetComparison extends Equatable {
     required double actualAmount,
   }) {
     final remaining = budgetAmount - actualAmount;
-    final percentage = budgetAmount > 0 ? (actualAmount / budgetAmount) * 100 : 0.0;
+    final percentage =
+        budgetAmount > 0 ? (actualAmount / budgetAmount) * 100 : 0.0;
     final isOverBudget = actualAmount > budgetAmount;
 
     return BudgetComparison(
@@ -298,7 +307,8 @@ class AnalyticsData extends Equatable {
       totalExpenses: totalExpenses ?? this.totalExpenses,
       netAmount: netAmount ?? this.netAmount,
       totalTransactions: totalTransactions ?? this.totalTransactions,
-      averageTransactionAmount: averageTransactionAmount ?? this.averageTransactionAmount,
+      averageTransactionAmount:
+          averageTransactionAmount ?? this.averageTransactionAmount,
       lastUpdated: lastUpdated ?? this.lastUpdated,
     );
   }

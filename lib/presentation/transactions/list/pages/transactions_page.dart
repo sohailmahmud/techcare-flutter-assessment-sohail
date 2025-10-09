@@ -1,3 +1,4 @@
+import 'package:fintrack/core/router/navigation_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -13,9 +14,6 @@ import '../widgets/search_bar_widget.dart';
 import '../widgets/filter_bottom_sheet.dart';
 import '../widgets/transactions_list_view.dart';
 import '../widgets/transaction_details_modal.dart';
-import '../../form/pages/add_edit_transaction_screen.dart';
-import '../../form/bloc/transaction_form_bloc.dart';
-import 'cache_debug_screen.dart';
 
 class TransactionsPage extends StatefulWidget {
   const TransactionsPage({super.key});
@@ -26,7 +24,6 @@ class TransactionsPage extends StatefulWidget {
 
 class _TransactionsPageState extends State<TransactionsPage>
     with AutomaticKeepAliveClientMixin {
-  
   @override
   bool get wantKeepAlive => true;
 
@@ -44,20 +41,20 @@ class _TransactionsPageState extends State<TransactionsPage>
   void _onFilterTap() {
     final currentState = context.read<TransactionsBloc>().state;
     TransactionFilter currentFilter = const TransactionFilter();
-    
+
     if (currentState is TransactionLoaded) {
       // Convert the current filters from the state to TransactionFilter
       currentFilter = _convertToTransactionFilter(currentState.currentFilters);
     }
-    
+
     showFilterBottomSheet(
       context: context,
       currentFilter: currentFilter,
       categoryRepository: di.sl<CategoryRepository>(),
       onApplyFilters: (filter) {
         context.read<TransactionsBloc>().add(
-          FilterTransactions(_convertToFiltersMap(filter)),
-        );
+              FilterTransactions(_convertToFiltersMap(filter)),
+            );
       },
       onClearFilters: () {
         // Clear filters by applying empty filter
@@ -68,7 +65,7 @@ class _TransactionsPageState extends State<TransactionsPage>
 
   TransactionFilter _convertToTransactionFilter(Map<String, dynamic>? filters) {
     if (filters == null) return const TransactionFilter();
-    
+
     return TransactionFilter(
       selectedCategories: List<String>.from(filters['categories'] ?? []),
       transactionType: _parseTransactionType(filters['type']),
@@ -90,7 +87,7 @@ class _TransactionsPageState extends State<TransactionsPage>
 
   Map<String, dynamic> _convertToFiltersMap(TransactionFilter filter) {
     final Map<String, dynamic> filtersMap = {};
-    
+
     if (filter.selectedCategories.isNotEmpty) {
       filtersMap['categories'] = filter.selectedCategories;
     }
@@ -103,14 +100,16 @@ class _TransactionsPageState extends State<TransactionsPage>
     if (filter.amountRange != null) {
       filtersMap['amountRange'] = filter.amountRange;
     }
-    
+
     return filtersMap;
   }
 
   void _onLoadMore() {
     final currentState = context.read<TransactionsBloc>().state;
     if (currentState is TransactionLoaded) {
-      context.read<TransactionsBloc>().add(LoadTransactions(page: currentState.currentPage + 1));
+      context
+          .read<TransactionsBloc>()
+          .add(LoadTransactions(page: currentState.currentPage + 1));
     }
   }
 
@@ -135,11 +134,12 @@ class _TransactionsPageState extends State<TransactionsPage>
       PageRouteBuilder(
         opaque: false,
         barrierColor: Colors.black.withValues(alpha: 0.5),
-        pageBuilder: (context, animation, secondaryAnimation) => 
+        pageBuilder: (context, animation, secondaryAnimation) =>
             TransactionDetailsModal(
-              transaction: transaction,
-              heroTag: 'transaction_amount_${transaction.id}_transactions_page',
-            ),
+          transaction: transaction,
+          heroTag: 'transaction_amount_${transaction.id}_transactions_page',
+          sourcePage: 'transactions',
+        ),
         transitionDuration: const Duration(milliseconds: 300),
         reverseTransitionDuration: const Duration(milliseconds: 250),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
@@ -153,21 +153,18 @@ class _TransactionsPageState extends State<TransactionsPage>
   }
 
   void _showEditTransaction(tx.Transaction transaction) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Edit "${transaction.title}" - Feature coming soon!'),
-        action: SnackBarAction(
-          label: 'OK',
-          onPressed: () {},
-        ),
-      ),
+    // need to route with go_router to keep the back stack correct
+    context.goToEditTransaction(
+      transaction: transaction,
+      transactionId: transaction.id,
+      sourcePage: 'transactions',
     );
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    
+
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -190,49 +187,19 @@ class _TransactionsPageState extends State<TransactionsPage>
           foregroundColor: AppColors.textPrimary,
           elevation: 0,
           scrolledUnderElevation: 0,
-          actions: [
-            // Debug button (only show in debug mode)
-            if (const bool.fromEnvironment('dart.vm.product') == false)
-              IconButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const CacheDebugScreen(),
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.bug_report_outlined),
-                tooltip: 'Cache Debug',
-                color: AppColors.textSecondary,
-              ),
-            BlocBuilder<TransactionsBloc, TransactionsState>(
-              builder: (context, state) {
-                if (state is TransactionLoaded) {
-                  return IconButton(
-                    onPressed: _onRefresh,
-                    icon: const Icon(Icons.refresh_rounded),
-                    tooltip: 'Refresh',
-                    color: AppColors.textSecondary,
-                  );
-                }
-                return const SizedBox.shrink();
-              },
-            ),
-          ],
         ),
-      body: BlocBuilder<TransactionsBloc, TransactionsState>(
-        builder: (context, state) {
-          return Column(
-            children: [
-              _buildSearchBar(state),
-              Expanded(
-                child: _buildContent(state),
-              ),
-            ],
-          );
-        },
-      ),
+        body: BlocBuilder<TransactionsBloc, TransactionsState>(
+          builder: (context, state) {
+            return Column(
+              children: [
+                _buildSearchBar(state),
+                Expanded(
+                  child: _buildContent(state),
+                ),
+              ],
+            );
+          },
+        ),
         floatingActionButton: FloatingActionButton(
           heroTag: "add_transaction_fab",
           onPressed: _showAddTransaction,
@@ -319,15 +286,16 @@ class _TransactionsPageState extends State<TransactionsPage>
             Text(
               'Something went wrong',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: Spacing.space8),
             Text(
               state.error,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withAlpha(153),
-              ),
+                    color:
+                        Theme.of(context).colorScheme.onSurface.withAlpha(153),
+                  ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: Spacing.space24),
@@ -349,26 +317,7 @@ class _TransactionsPageState extends State<TransactionsPage>
   }
 
   void _showAddTransaction() {
-    Navigator.of(context).push(
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => 
-            BlocProvider(
-              create: (context) => TransactionFormBloc(
-                transactionsBloc: context.read<TransactionsBloc>(),
-              ),
-              child: const AddEditTransactionScreen(),
-            ),
-        transitionDuration: const Duration(milliseconds: 400),
-        reverseTransitionDuration: const Duration(milliseconds: 300),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return FadeTransition(
-            opacity: animation,
-            child: child,
-          );
-        },
-      ),
-    );
+    // Use go_router navigation to hide bottom navigation bar like dashboard does
+    context.goToAddTransaction(sourcePage: 'transactions');
   }
 }
-
-

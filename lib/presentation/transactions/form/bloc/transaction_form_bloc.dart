@@ -134,14 +134,17 @@ class TransactionFormReady extends TransactionFormBlocState {
       formData: formData ?? this.formData,
       errors: errors ?? this.errors,
       submissionStatus: submissionStatus ?? this.submissionStatus,
-      submissionError: clearSubmissionError ? null : (submissionError ?? this.submissionError),
+      submissionError: clearSubmissionError
+          ? null
+          : (submissionError ?? this.submissionError),
     );
   }
 
   // Convenience getters
   bool get isValid => errors.isEmpty && formData.isValid;
   bool get isSubmitting => submissionStatus == FormSubmissionStatus.inProgress;
-  bool get hasSubmissionError => submissionStatus == FormSubmissionStatus.failure;
+  bool get hasSubmissionError =>
+      submissionStatus == FormSubmissionStatus.failure;
   bool get isSuccessful => submissionStatus == FormSubmissionStatus.success;
   bool get isEditMode => formData.isEditMode;
 
@@ -151,21 +154,22 @@ class TransactionFormReady extends TransactionFormBlocState {
 
   @override
   List<Object?> get props => [
-    formData,
-    errors,
-    submissionStatus,
-    submissionError,
-  ];
+        formData,
+        errors,
+        submissionStatus,
+        submissionError,
+      ];
 }
 
 // BLoC Implementation
-class TransactionFormBloc extends Bloc<TransactionFormEvent, TransactionFormBlocState> {
+class TransactionFormBloc
+    extends Bloc<TransactionFormEvent, TransactionFormBlocState> {
   final TransactionsBloc _transactionsBloc;
-  
+
   TransactionFormBloc({
     required TransactionsBloc transactionsBloc,
-  }) : _transactionsBloc = transactionsBloc,
-       super(const TransactionFormInitial()) {
+  })  : _transactionsBloc = transactionsBloc,
+        super(const TransactionFormInitial()) {
     on<InitializeForm>(_onInitializeForm);
     on<AmountChanged>(_onAmountChanged);
     on<TitleChanged>(_onTitleChanged);
@@ -198,8 +202,10 @@ class TransactionFormBloc extends Bloc<TransactionFormEvent, TransactionFormBloc
     if (currentState is! TransactionFormReady) return;
 
     final formattedAmount = _formatAmount(event.amount);
-    final updatedFormData = currentState.formData.copyWith(amount: formattedAmount);
-    final errors = _validateField(updatedFormData, TransactionFormError.amountRequired, currentState.errors);
+    final updatedFormData =
+        currentState.formData.copyWith(amount: formattedAmount);
+    final errors = _validateField(updatedFormData,
+        TransactionFormError.amountRequired, currentState.errors);
 
     emit(currentState.copyWith(
       formData: updatedFormData,
@@ -217,7 +223,8 @@ class TransactionFormBloc extends Bloc<TransactionFormEvent, TransactionFormBloc
     if (currentState is! TransactionFormReady) return;
 
     final updatedFormData = currentState.formData.copyWith(title: event.title);
-    final errors = _validateField(updatedFormData, TransactionFormError.titleRequired, currentState.errors);
+    final errors = _validateField(updatedFormData,
+        TransactionFormError.titleRequired, currentState.errors);
 
     emit(currentState.copyWith(
       formData: updatedFormData,
@@ -235,7 +242,8 @@ class TransactionFormBloc extends Bloc<TransactionFormEvent, TransactionFormBloc
     if (currentState is! TransactionFormReady) return;
 
     final updatedFormData = currentState.formData.copyWith(notes: event.notes);
-    final errors = _validateField(updatedFormData, TransactionFormError.notesTooLong, currentState.errors);
+    final errors = _validateField(updatedFormData,
+        TransactionFormError.notesTooLong, currentState.errors);
 
     emit(currentState.copyWith(
       formData: updatedFormData,
@@ -271,8 +279,10 @@ class TransactionFormBloc extends Bloc<TransactionFormEvent, TransactionFormBloc
     final currentState = state;
     if (currentState is! TransactionFormReady) return;
 
-    final updatedFormData = currentState.formData.copyWith(selectedCategory: event.category);
-    final errors = _validateField(updatedFormData, TransactionFormError.categoryRequired, currentState.errors);
+    final updatedFormData =
+        currentState.formData.copyWith(selectedCategory: event.category);
+    final errors = _validateField(updatedFormData,
+        TransactionFormError.categoryRequired, currentState.errors);
 
     emit(currentState.copyWith(
       formData: updatedFormData,
@@ -290,7 +300,8 @@ class TransactionFormBloc extends Bloc<TransactionFormEvent, TransactionFormBloc
     if (currentState is! TransactionFormReady) return;
 
     final updatedFormData = currentState.formData.copyWith(date: event.date);
-    final errors = _validateField(updatedFormData, TransactionFormError.dateInFuture, currentState.errors);
+    final errors = _validateField(updatedFormData,
+        TransactionFormError.dateInFuture, currentState.errors);
 
     emit(currentState.copyWith(
       formData: updatedFormData,
@@ -308,7 +319,8 @@ class TransactionFormBloc extends Bloc<TransactionFormEvent, TransactionFormBloc
     if (currentState is! TransactionFormReady) return;
 
     final updatedFormData = currentState.formData.copyWith(time: event.time);
-    final errors = _validateField(updatedFormData, TransactionFormError.dateInFuture, currentState.errors);
+    final errors = _validateField(updatedFormData,
+        TransactionFormError.dateInFuture, currentState.errors);
 
     emit(currentState.copyWith(
       formData: updatedFormData,
@@ -343,19 +355,21 @@ class TransactionFormBloc extends Bloc<TransactionFormEvent, TransactionFormBloc
       return;
     }
 
-    emit(currentState.copyWith(submissionStatus: FormSubmissionStatus.inProgress));
+    emit(currentState.copyWith(
+        submissionStatus: FormSubmissionStatus.inProgress));
 
     try {
       final transaction = currentState.formData.toTransaction();
-      
-      emit(currentState.copyWith(submissionStatus: FormSubmissionStatus.success));
+
+      emit(currentState.copyWith(
+          submissionStatus: FormSubmissionStatus.success));
 
       if (currentState.isEditMode) {
-        _transactionsBloc.add(UpdateTransaction(id: transaction.id, transaction: transaction));
+        _transactionsBloc.add(
+            UpdateTransaction(id: transaction.id, transaction: transaction));
       } else {
         _transactionsBloc.add(AddTransaction(transaction));
       }
-
     } catch (e) {
       emit(currentState.copyWith(
         submissionStatus: FormSubmissionStatus.failure,
@@ -374,7 +388,7 @@ class TransactionFormBloc extends Bloc<TransactionFormEvent, TransactionFormBloc
   // Helper methods
   String _formatAmount(String amount) {
     String cleanAmount = amount.replaceAll(RegExp(r'[^\d.]'), '');
-    
+
     final parts = cleanAmount.split('.');
     if (parts.length > 2) {
       cleanAmount = '${parts[0]}.${parts.sublist(1).join('')}';
@@ -385,8 +399,9 @@ class TransactionFormBloc extends Bloc<TransactionFormEvent, TransactionFormBloc
 
     final formatter = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
     final integerPart = value.truncate().toString();
-    final formattedInteger = integerPart.replaceAllMapped(formatter, (Match m) => '${m[1]},');
-    
+    final formattedInteger =
+        integerPart.replaceAllMapped(formatter, (Match m) => '${m[1]},');
+
     if (cleanAmount.contains('.')) {
       final decimalPart = cleanAmount.split('.')[1];
       return '$formattedInteger.$decimalPart';
@@ -416,7 +431,7 @@ class TransactionFormBloc extends Bloc<TransactionFormEvent, TransactionFormBloc
 // Add Transaction Event (if not already defined in TransactionsBloc)
 class AddTransaction extends TransactionsEvent {
   final Transaction transaction;
-  
+
   const AddTransaction(this.transaction);
 
   @override

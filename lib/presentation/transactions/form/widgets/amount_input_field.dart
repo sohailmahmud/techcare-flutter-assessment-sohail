@@ -38,12 +38,12 @@ class _AmountInputFieldState extends State<AmountInputField>
     super.initState();
     _controller = TextEditingController(text: widget.value);
     _focusNode = widget.focusNode ?? FocusNode();
-    
+
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 200),
       vsync: this,
     );
-    
+
     _scaleAnimation = Tween<double>(
       begin: 1.0,
       end: 1.02,
@@ -77,7 +77,7 @@ class _AmountInputFieldState extends State<AmountInputField>
     setState(() {
       _isFocused = _focusNode.hasFocus;
     });
-    
+
     if (_isFocused) {
       _animationController.forward();
     } else {
@@ -88,7 +88,7 @@ class _AmountInputFieldState extends State<AmountInputField>
   @override
   Widget build(BuildContext context) {
     final hasError = widget.errorText != null;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -149,7 +149,7 @@ class _AmountInputFieldState extends State<AmountInputField>
                         ),
                       ),
                       const SizedBox(width: Spacing.space16),
-                      
+
                       // Amount Input
                       Expanded(
                         child: TextFormField(
@@ -163,7 +163,8 @@ class _AmountInputFieldState extends State<AmountInputField>
                           decoration: InputDecoration(
                             hintText: '0',
                             hintStyle: AppTypography.displaySmall.copyWith(
-                              color: AppColors.textSecondary.withValues(alpha: 0.5),
+                              color: AppColors.textSecondary
+                                  .withValues(alpha: 0.5),
                               fontWeight: FontWeight.bold,
                             ),
                             border: InputBorder.none,
@@ -188,13 +189,13 @@ class _AmountInputFieldState extends State<AmountInputField>
             );
           },
         ),
-        
+
         // Error Message
         if (hasError) ...[
           const SizedBox(height: Spacing.space8),
           Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.error_outline,
                 size: 16,
                 color: AppColors.error,
@@ -225,13 +226,13 @@ class _AmountInputFormatter extends TextInputFormatter {
   ) {
     // Remove any non-digit characters except decimal point and comma
     String newText = newValue.text.replaceAll(RegExp(r'[^\d.,]'), '');
-    
+
     // Handle multiple decimal points
     final parts = newText.split('.');
     if (parts.length > 2) {
       newText = '${parts[0]}.${parts.sublist(1).join('')}';
     }
-    
+
     // Limit decimal places to 2
     if (newText.contains('.')) {
       final splitText = newText.split('.');
@@ -239,30 +240,30 @@ class _AmountInputFormatter extends TextInputFormatter {
         newText = '${splitText[0]}.${splitText[1].substring(0, 2)}';
       }
     }
-    
+
     // Apply thousand separators
     newText = _applyThousandSeparators(newText);
-    
+
     return TextEditingValue(
       text: newText,
       selection: TextSelection.collapsed(offset: newText.length),
     );
   }
-  
+
   String _applyThousandSeparators(String text) {
     if (text.isEmpty) return text;
-    
+
     // Split by decimal point
     final parts = text.split('.');
     String integerPart = parts[0].replaceAll(',', '');
-    
+
     // Add commas to integer part
     final formatter = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
     integerPart = integerPart.replaceAllMapped(
       formatter,
       (Match m) => '${m[1]},',
     );
-    
+
     // Reconstruct with decimal part if exists
     if (parts.length > 1) {
       return '$integerPart.${parts[1]}';

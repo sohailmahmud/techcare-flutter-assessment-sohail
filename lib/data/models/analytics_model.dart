@@ -110,7 +110,7 @@ class AnalyticsDataModel {
           transactionCount: model.transactionCount,
         )
       ).toList(),
-      budgetComparisons: [], // No budget comparisons in this model 
+      budgetComparisons: const [], // No budget comparisons in this model 
       trendData: TrendData(
         dateRange: dateRange,
         incomePoints: monthlyTrend.map((trend) => 

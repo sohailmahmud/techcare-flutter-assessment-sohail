@@ -26,22 +26,27 @@ enum DateRangePreset {
   DateRange getDateRange() {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    
+
     switch (this) {
       case DateRangePreset.today:
         return DateRange(
           start: today,
-          end: today.add(const Duration(days: 1)).subtract(const Duration(milliseconds: 1)),
+          end: today
+              .add(const Duration(days: 1))
+              .subtract(const Duration(milliseconds: 1)),
         );
       case DateRangePreset.thisWeek:
         final startOfWeek = today.subtract(Duration(days: now.weekday - 1));
         return DateRange(
           start: startOfWeek,
-          end: startOfWeek.add(const Duration(days: 7)).subtract(const Duration(milliseconds: 1)),
+          end: startOfWeek
+              .add(const Duration(days: 7))
+              .subtract(const Duration(milliseconds: 1)),
         );
       case DateRangePreset.thisMonth:
         final startOfMonth = DateTime(now.year, now.month, 1);
-        final endOfMonth = DateTime(now.year, now.month + 1, 1).subtract(const Duration(milliseconds: 1));
+        final endOfMonth = DateTime(now.year, now.month + 1, 1)
+            .subtract(const Duration(milliseconds: 1));
         return DateRange(start: startOfMonth, end: endOfMonth);
       case DateRangePreset.lastThreeMonths:
         final threeMonthsAgo = DateTime(now.year, now.month - 3, now.day);
@@ -96,7 +101,7 @@ class DateRange extends Equatable {
 
   bool contains(DateTime date) {
     return date.isAfter(start.subtract(const Duration(milliseconds: 1))) &&
-           date.isBefore(end.add(const Duration(milliseconds: 1)));
+        date.isBefore(end.add(const Duration(milliseconds: 1)));
   }
 
   Duration get duration => end.difference(start);
@@ -176,10 +181,10 @@ class TransactionFilter extends Equatable {
 
   bool get hasActiveFilters {
     return searchQuery.isNotEmpty ||
-           dateRange != null ||
-           selectedCategories.isNotEmpty ||
-           amountRange != null ||
-           transactionType != TransactionType.all;
+        dateRange != null ||
+        selectedCategories.isNotEmpty ||
+        amountRange != null ||
+        transactionType != TransactionType.all;
   }
 
   int get activeFilterCount {
@@ -240,5 +245,6 @@ class PaginationInfo extends Equatable {
   bool get isLastPage => !hasNextPage;
 
   @override
-  List<Object> get props => [currentPage, itemsPerPage, totalItems, hasNextPage, isLoading];
+  List<Object> get props =>
+      [currentPage, itemsPerPage, totalItems, hasNextPage, isLoading];
 }
