@@ -229,7 +229,7 @@ void main() {
         act: (bloc) => bloc.add(const LoadAnalytics()),
         expect: () => [
           const AnalyticsLoading(),
-          const AnalyticsError('Failed to load analytics: Failed to load transactions'),
+          const AnalyticsError('Failed to load analytics: Exception: Failed to load transactions'),
         ],
       );
     });

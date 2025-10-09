@@ -83,7 +83,7 @@ void main() {
         expect: () => [
           const DashboardLoading(),
           const DashboardError(
-            message: 'Network connection failed. Please check your internet connection.',
+            message: 'No internet connection. Please check your network.\n\nDetails: NetworkFailure(Network error)',
             canRetry: true,
           ),
         ],
@@ -125,7 +125,7 @@ void main() {
         expect: () => [
           const DashboardLoading(),
           const DashboardError(
-            message: 'Failed to load data from cache. Please restart the app.',
+            message: 'Something went wrong. Please try again.\n\nDetails: CacheFailure(Cache error)',
             canRetry: true,
           ),
         ],
