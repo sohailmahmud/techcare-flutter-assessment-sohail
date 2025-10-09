@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'hive_registrar.g.dart';
 
 // Existing imports
+import 'core/network/network_client.dart';
 import 'data/cache/hive_cache_manager.dart';
 import 'data/datasources/mock_api_service.dart';
 import 'data/repositories/dashboard_repository_impl.dart';
@@ -46,6 +47,12 @@ Future<void> init() async {
 
   //! External dependencies
   sl.registerLazySingleton<Connectivity>(() => Connectivity());
+  
+  //! Network Client
+  sl.registerLazySingleton<NetworkClient>(() => NetworkClient());
+  
+  // Future API service integration (when real API is available)
+  // sl.registerLazySingleton<ApiService>(() => ApiService(sl<NetworkClient>()));
 
   //! Features - Dashboard
   // Bloc
