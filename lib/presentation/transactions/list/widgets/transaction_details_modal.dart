@@ -6,7 +6,6 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/utils/formatters.dart';
-import '../../../../domain/entities/category.dart';
 import '../../../../domain/entities/transaction.dart' as tx;
 import '../bloc/transactions_bloc.dart';
 
@@ -294,7 +293,7 @@ class _TransactionDetailsModalState extends State<TransactionDetailsModal>
   }
 
   Widget _buildCategoryBadge() {
-    final category = AppCategories.findById(widget.transaction.categoryId);
+    final category = widget.transaction.category;
 
     return Container(
       padding: const EdgeInsets.all(Spacing.space16),
@@ -307,81 +306,42 @@ class _TransactionDetailsModalState extends State<TransactionDetailsModal>
       ),
       child: Row(
         children: [
-          if (category != null) ...[
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: category.color.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(
-                category.icon,
-                color: category.color,
-                size: 24,
-              ),
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: category.color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
             ),
-            const SizedBox(width: Spacing.space16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Category',
-                    style: AppTypography.labelMedium.copyWith(
-                      color: AppColors.textSecondary,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    category.name,
-                    style: AppTypography.bodyLarge.copyWith(
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
+            child: Icon(
+              category.icon,
+              color: category.color,
+              size: 24,
             ),
-          ] else ...[
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: AppColors.border.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(
-                Icons.category_outlined,
-                color: AppColors.textSecondary,
-                size: 24,
-              ),
-            ),
-            const SizedBox(width: Spacing.space16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Category',
-                    style: AppTypography.labelMedium.copyWith(
-                      color: AppColors.textSecondary,
-                      fontWeight: FontWeight.w500,
-                    ),
+          ),
+          const SizedBox(width: Spacing.space16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Category',
+                  style: AppTypography.labelMedium.copyWith(
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w500,
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    widget.transaction.categoryName,
-                    style: AppTypography.bodyLarge.copyWith(
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.w600,
-                    ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  category.name,
+                  style: AppTypography.bodyLarge.copyWith(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w600,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
+          ),
         ],
       ),
     );

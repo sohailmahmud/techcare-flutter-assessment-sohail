@@ -500,14 +500,12 @@ class _TransactionsListState extends State<TransactionsList>
       width: Spacing.transactionIconSize,
       height: Spacing.transactionIconSize,
       decoration: BoxDecoration(
-        color: isIncome
-            ? AppColors.success.withValues(alpha: 0.1)
-            : AppColors.error.withValues(alpha: 0.1),
+        color: transaction.category.color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(Spacing.transactionIconSize / 2),
       ),
       child: Icon(
-        _getTransactionIcon(transaction.categoryId),
-        color: isIncome ? AppColors.success : AppColors.error,
+        transaction.category.icon,
+        color: transaction.category.color,
         size: Spacing.transactionIconSize / 2,
       ),
     );
@@ -563,43 +561,5 @@ class _TransactionsListState extends State<TransactionsList>
           ),
         ) ??
         false;
-  }
-
-  IconData _getTransactionIcon(String categoryId) {
-    // Map category IDs to icons based on the JSON mock data structure
-    switch (categoryId.toLowerCase()) {
-      case 'cat_001': // Food & Dining
-      case 'food':
-        return Icons.restaurant;
-      case 'cat_002': // Transportation
-      case 'transport':
-        return Icons.directions_car;
-      case 'cat_003': // Shopping
-      case 'shopping':
-        return Icons.shopping_bag;
-      case 'cat_004': // Entertainment
-      case 'entertainment':
-        return Icons.movie;
-      case 'cat_005': // Bills & Utilities
-      case 'utilities':
-        return Icons.receipt;
-      case 'cat_006': // Health & Fitness
-      case 'healthcare':
-        return Icons.fitness_center;
-      case 'cat_007': // Education
-      case 'education':
-        return Icons.school;
-      case 'cat_income': // Salary
-      case 'salary':
-        return Icons.payments;
-      case 'cat_freelance': // Freelance
-      case 'freelance':
-        return Icons.work;
-      case 'cat_investment': // Investment
-      case 'investment':
-        return Icons.trending_up;
-      default:
-        return Icons.account_balance_wallet;
-    }
   }
 }
