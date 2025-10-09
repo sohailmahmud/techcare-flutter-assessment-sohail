@@ -562,15 +562,18 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart>
     final name = categoryName.toLowerCase();
 
     // Direct mapping from JSON mock data categories
-    if (name.contains('food') || name.contains('dining'))
+    if (name.contains('food') || name.contains('dining')) {
       return Icons.restaurant;
+    }
     if (name.contains('transport')) return Icons.directions_car;
     if (name.contains('shopping')) return Icons.shopping_bag;
     if (name.contains('entertainment')) return Icons.movie;
-    if (name.contains('bills') || name.contains('utilities'))
+    if (name.contains('bills') || name.contains('utilities')) {
       return Icons.receipt;
-    if (name.contains('health') || name.contains('fitness'))
+    }
+    if (name.contains('health') || name.contains('fitness')) {
       return Icons.fitness_center;
+    }
     if (name.contains('education')) return Icons.school;
     if (name.contains('salary')) return Icons.payments;
     if (name.contains('freelance')) return Icons.work;

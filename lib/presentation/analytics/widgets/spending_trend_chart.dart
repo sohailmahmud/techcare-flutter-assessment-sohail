@@ -521,7 +521,9 @@ class _SpendingTrendChartState extends State<SpendingTrendChart>
 
   double _getMaxY() {
     if (widget.trendData.incomePoints.isEmpty &&
-        widget.trendData.expensePoints.isEmpty) return 100;
+        widget.trendData.expensePoints.isEmpty) {
+      return 100;
+    }
 
     double maxValue = 0;
 
