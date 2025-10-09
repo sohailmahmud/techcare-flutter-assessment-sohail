@@ -356,10 +356,12 @@ class HiveCacheManager {
 
     final parts = <String>[];
     if (filter.searchQuery.isNotEmpty) parts.add('q:${filter.searchQuery}');
-    if (filter.selectedCategories.isNotEmpty)
+    if (filter.selectedCategories.isNotEmpty) {
       parts.add('cat:${filter.selectedCategories.join(',')}');
-    if (filter.transactionType != TransactionType.all)
+    }
+    if (filter.transactionType != TransactionType.all) {
       parts.add('type:${filter.transactionType.name}');
+    }
     if (filter.dateRange != null) {
       parts.add(
           'date:${filter.dateRange!.start.millisecondsSinceEpoch}-${filter.dateRange!.end.millisecondsSinceEpoch}');
