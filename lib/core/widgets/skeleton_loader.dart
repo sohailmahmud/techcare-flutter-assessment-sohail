@@ -21,7 +21,7 @@ class SkeletonLoader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
-      baseColor: AppColors.surfaceVariant.withValues(alpha: 0.3),
+      baseColor: AppColors.textDisabled.withValues(alpha: 0.3),
       highlightColor: AppColors.surface,
       period: const Duration(milliseconds: 1500),
       child: Container(
@@ -43,11 +43,13 @@ class SkeletonLoader extends StatelessWidget {
 class DashboardSkeletonLoaders {
   /// Balance card skeleton with detailed structure
   static Widget balanceCard() {
-    return Container(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: Spacing.space16),
+      child: Container(
       height: Spacing.balanceCardHeight,
-      padding: const EdgeInsets.all(Spacing.space16),
+      padding: const EdgeInsets.all(Spacing.space24),
       decoration: BoxDecoration(
-        color: AppColors.textTertiary,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(Spacing.radiusL),
         boxShadow: [
           BoxShadow(
@@ -60,25 +62,22 @@ class DashboardSkeletonLoaders {
       child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          SizedBox(height: Spacing.space16),
           // Header row
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               SkeletonLoader(
-                  width: 80, height: 16, borderRadius: Spacing.radiusS),
+                  width: 100, height: 20, borderRadius: Spacing.radiusS),
               SkeletonLoader(
-                  width: 24, height: 24, borderRadius: Spacing.radiusM),
+                  width: 30, height: 30, borderRadius: Spacing.radiusFull),
             ],
           ),
           SizedBox(height: Spacing.space16),
 
           // Main balance amount
           SkeletonLoader(width: 140, height: 32, borderRadius: Spacing.radiusS),
-          SizedBox(height: Spacing.space8),
-
-          // Balance change indicator
-          SkeletonLoader(width: 100, height: 16, borderRadius: Spacing.radiusS),
-          Spacer(),
+          SizedBox(height: Spacing.space24),
 
           // Income/Expense row
           Row(
@@ -112,12 +111,15 @@ class DashboardSkeletonLoaders {
           ),
         ],
       ),
+    ),
     );
   }
 
   /// Pie chart skeleton with legend
   static Widget spendingChart() {
-    return Container(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: Spacing.space16),
+      child: Container(
       height: Spacing.pieChartHeight,
       padding: const EdgeInsets.all(Spacing.space16),
       decoration: BoxDecoration(
@@ -135,26 +137,22 @@ class DashboardSkeletonLoaders {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header with title and filter
-          const Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              SkeletonLoader(
-                  width: 120, height: 20, borderRadius: Spacing.radiusS),
-              SkeletonLoader(width: 20, height: 20, borderRadius: 10),
-            ],
-          ),
+          const SkeletonLoader(
+                  width: 200, height: 20, borderRadius: Spacing.radiusS),
           const SizedBox(height: Spacing.space16),
 
           // Chart and legend
           Expanded(
-            child: Row(
+            child: Padding(
+              padding: const EdgeInsets.only(right: Spacing.space8),
+              child: Row(
               children: [
                 // Pie chart circle
                 const Expanded(
                   flex: 2,
                   child: Center(
                     child: SkeletonLoader(
-                        width: 140, height: 140, borderRadius: 70),
+                        width: 180, height: 180, borderRadius: Spacing.radiusFull),
                   ),
                 ),
                 const SizedBox(width: Spacing.space16),
@@ -199,9 +197,11 @@ class DashboardSkeletonLoaders {
                 ),
               ],
             ),
+            ),
           ),
         ],
       ),
+    ),
     );
   }
 
@@ -272,7 +272,7 @@ class DashboardSkeletonLoaders {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               SkeletonLoader(
-                  width: 140, height: 20, borderRadius: Spacing.radiusS),
+                  width: 200, height: 20, borderRadius: Spacing.radiusS),
               SkeletonLoader(
                   width: 60, height: 16, borderRadius: Spacing.radiusS),
             ],
@@ -296,142 +296,7 @@ class DashboardSkeletonLoaders {
   }
 }
 
-/// Complete dashboard skeleton loader
-class DashboardSkeletonLoader extends StatelessWidget {
-  const DashboardSkeletonLoader({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor:
-          Colors.orange.withValues(alpha: 0.2), // Very visible background
-      body: SafeArea(
-        child: Container(
-          color: Colors.blue.withValues(alpha: 0.2), // Container background
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(Spacing.space16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Simple visible skeleton blocks
-                Container(
-                  width: double.infinity,
-                  height: 100,
-                  margin: const EdgeInsets.only(bottom: 16),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.withValues(alpha: 0.8), // Very visible
-                    borderRadius: BorderRadius.circular(Spacing.radiusL),
-                  ),
-                  child: const Center(
-                    child: Text(
-                      'Loading Header...',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
-                    ),
-                  ),
-                ),
-
-                // Balance card skeleton
-                Container(
-                  width: double.infinity,
-                  height: Spacing.balanceCardHeight,
-                  margin: const EdgeInsets.only(bottom: 16),
-                  decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    borderRadius: BorderRadius.circular(Spacing.radiusL),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: const Padding(
-                    padding: EdgeInsets.all(Spacing.space16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SkeletonLoader(width: 80, height: 16),
-                        SizedBox(height: Spacing.space8),
-                        SkeletonLoader(width: 150, height: 28),
-                        SizedBox(height: Spacing.space16),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  SkeletonLoader(width: 50, height: 12),
-                                  SizedBox(height: 4),
-                                  SkeletonLoader(width: 80, height: 18),
-                                ],
-                              ),
-                            ),
-                            SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  SkeletonLoader(width: 60, height: 12),
-                                  SizedBox(height: 4),
-                                  SkeletonLoader(width: 85, height: 18),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                // Chart skeleton
-                Container(
-                  width: double.infinity,
-                  height: Spacing.pieChartHeight,
-                  margin: const EdgeInsets.only(bottom: 16),
-                  decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    borderRadius: BorderRadius.circular(Spacing.radiusL),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: const Center(
-                    child: SkeletonLoader(
-                        width: 140, height: 140, borderRadius: 70),
-                  ),
-                ),
-
-                // Transactions skeleton
-                const Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SkeletonLoader(width: 140, height: 20),
-                    SizedBox(height: 16),
-                    SkeletonLoader(width: double.infinity, height: 72),
-                    SizedBox(height: 12),
-                    SkeletonLoader(width: double.infinity, height: 72),
-                    SizedBox(height: 12),
-                    SkeletonLoader(width: double.infinity, height: 72),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 /// List item skeleton loader
 class ListItemSkeletonLoader extends StatelessWidget {

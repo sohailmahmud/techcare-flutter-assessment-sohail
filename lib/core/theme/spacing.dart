@@ -15,6 +15,12 @@ class Spacing {
   static const double space40 = 40.0;
   static const double space48 = 48.0;
   static const double space64 = 64.0;
+  static const double space80 = 80.0;
+  static const double space96 = 96.0;
+  static const double space128 = 128.0;
+  static const double space160 = 160.0;
+  static const double space192 = 192.0;
+  static const double space256 = 256.0;
 
   // Header height
   static const double headerExpandedHeight = 120.0;

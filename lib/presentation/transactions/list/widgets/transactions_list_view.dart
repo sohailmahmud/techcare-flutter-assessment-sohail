@@ -307,7 +307,7 @@ class _TransactionsListViewState extends State<TransactionsListView> {
       height: Spacing.transactionIconSize,
       decoration: BoxDecoration(
         color: transaction.category.color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(Spacing.transactionIconSize / 2),
+        borderRadius: BorderRadius.circular(Spacing.radiusM),
       ),
       child: Icon(
         transaction.category.icon,
@@ -486,15 +486,26 @@ class TransactionListSkeleton extends StatelessWidget {
       itemCount: itemCount,
       itemBuilder: (context, index) {
         return Padding(
-          padding: const EdgeInsets.only(bottom: Spacing.space8),
+          padding: const EdgeInsets.only(bottom: Spacing.space12),
           child: Container(
             padding: const EdgeInsets.all(Spacing.space16),
             decoration: BoxDecoration(
               color: AppColors.surface,
               borderRadius: BorderRadius.circular(Spacing.radiusM),
-              border: Border.all(color: AppColors.border),
+              border: Border.all(
+                color: AppColors.border.withValues(alpha: 0.3),
+                width: 1,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: Row(
+              spacing: Spacing.space12,
               children: [
                 // Icon skeleton
                 const SkeletonLoader(
@@ -502,35 +513,20 @@ class TransactionListSkeleton extends StatelessWidget {
                   height: Spacing.transactionIconSize,
                   borderRadius: Spacing.radiusM,
                 ),
-                const SizedBox(width: Spacing.space12),
 
                 // Content skeleton
                 Expanded(
                   child: Column(
+                    spacing: Spacing.space8,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SkeletonLoader(
-                        width: double.infinity,
-                        height: 16,
+                      SkeletonLoader(
+                        width: MediaQuery.of(context).size.width * 0.4,
+                        height: 15,
                       ),
-                      const SizedBox(height: 4),
                       SkeletonLoader(
                         width: MediaQuery.of(context).size.width * 0.6,
-                        height: 12,
-                      ),
-                      const SizedBox(height: 8),
-                      const Row(
-                        children: [
-                          SkeletonLoader(
-                            width: 60,
-                            height: 16,
-                          ),
-                          SizedBox(width: Spacing.space8),
-                          SkeletonLoader(
-                            width: 80,
-                            height: 12,
-                          ),
-                        ],
+                        height: 15,
                       ),
                     ],
                   ),
@@ -538,17 +534,18 @@ class TransactionListSkeleton extends StatelessWidget {
 
                 // Amount skeleton
                 const Column(
+                  spacing: Spacing.space8,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     SkeletonLoader(
-                      width: 80,
-                      height: 16,
-                    ),
-                    SizedBox(height: 4),
-                    SkeletonLoader(
                       width: 50,
-                      height: 16,
+                      height: 15,
                     ),
+                    SkeletonLoader(
+                      width: 60,
+                      height: 15,
+                    ),
+                    
                   ],
                 ),
               ],

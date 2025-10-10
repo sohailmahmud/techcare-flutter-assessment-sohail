@@ -60,7 +60,26 @@ class _DashboardPageState extends State<DashboardPage> {
                     // Show full skeleton loader for initial loading
                     if (state is DashboardInitial ||
                         state is DashboardLoading) {
-                      return const DashboardSkeletonLoader();
+                      //return const DashboardSkeletonLoader();
+                      // need to use current buildHeader for better ux in skeleton
+                      return CustomScrollView(
+                        physics:
+                            const AlwaysScrollableScrollPhysics(), // Ensure scroll works even with short content
+                        slivers: [
+                          _buildHeader(),
+                          SliverList(
+                            delegate: SliverChildListDelegate([
+                              const SizedBox(height: Spacing.space16),
+                              DashboardSkeletonLoaders.balanceCard(),
+                              const SizedBox(height: Spacing.space16),
+                              DashboardSkeletonLoaders.spendingChart(),
+                              const SizedBox(height: Spacing.space24),
+                              DashboardSkeletonLoaders.transactionsSection(),
+                              const SizedBox(height: Spacing.space16),
+                            ]),
+                          ),
+                        ],
+                      );
                     }
 
                     // Show error state
