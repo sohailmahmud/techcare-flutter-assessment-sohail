@@ -74,7 +74,7 @@ jobs:
         - **Responsive Design**: Optimized for phones and tablets
         
         ### 🏗️ Technical Highlights
-        - **Flutter 3.24+**: Latest stable Flutter framework
+        - **Flutter 3.35+**: Latest stable Flutter framework
         - **BLoC Pattern**: Clean architecture with state management
         - **Material Design 3**: Modern UI with smooth animations
         - **Offline Support**: Local data caching with Hive
