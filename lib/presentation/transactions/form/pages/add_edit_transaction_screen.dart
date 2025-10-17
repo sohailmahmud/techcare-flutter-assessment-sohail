@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/router/app_routes.dart';
+import '../../../../domain/entities/category.dart';
 import '../../../../domain/entities/transaction.dart';
 import '../../../../injection_container.dart' as di;
 import '../bloc/transaction_form_bloc.dart';
@@ -108,10 +109,13 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen>
 
   @override
   Widget build(BuildContext context) {
-    // Get route arguments for transaction type if provided
-    final routeArgs =
-        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-    final transactionType = routeArgs?['type'] as TransactionType?;
+  // Get route arguments for transaction type if provided.
+  // Prefer go_router extras (GoRouterState.extra), fall back to ModalRoute arguments for compatibility.
+  final routeState = GoRouterState.of(context);
+  final extraFromGoRouter = routeState.extra as Map<String, dynamic>?;
+  final modalArgs = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+  final transactionType = (extraFromGoRouter?['type'] as TransactionType?) ??
+    (modalArgs?['type'] as TransactionType?);
 
     return BlocProvider(
       create: (context) {
@@ -128,28 +132,35 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen>
             _onFormSubmissionSuccess();
           }
         },
+        child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (bool didPop, Object? result) async {
+          if (didPop) return;
+          _onBackPressed();
+        },
         child: Scaffold(
-          backgroundColor: AppColors.background,
-          body: SafeArea(
-            child: Column(
-              children: [
-                _buildAppBar(),
-                Expanded(
-                  child: AnimatedBuilder(
-                    animation: _contentFadeAnimation,
-                    builder: (context, child) {
-                      return FadeTransition(
-                        opacity: _contentFadeAnimation,
-                        child: SlideTransition(
-                          position: _contentSlideAnimation,
-                          child: _buildContent(),
-                        ),
-                      );
-                    },
+            backgroundColor: AppColors.background,
+            body: SafeArea(
+              child: Column(
+                children: [
+                  _buildAppBar(),
+                  Expanded(
+                    child: AnimatedBuilder(
+                      animation: _contentFadeAnimation,
+                      builder: (context, child) {
+                        return FadeTransition(
+                          opacity: _contentFadeAnimation,
+                          child: SlideTransition(
+                            position: _contentSlideAnimation,
+                            child: _buildContent(),
+                          ),
+                        );
+                      },
+                    ),
                   ),
-                ),
-                _buildActionButtons(),
-              ],
+                  _buildActionButtons(),
+                ],
+              ),
             ),
           ),
         ),
@@ -250,14 +261,26 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen>
               const SizedBox(height: Spacing.space24),
 
               // Category Selector
-              CategorySelector(
-                categories: state.formData.availableCategories,
-                selectedCategory: state.formData.selectedCategory,
-                onCategorySelected: (category) => context
-                    .read<TransactionFormBloc>()
-                    .add(CategorySelected(category)),
-                errorText:
-                    state.getFieldError(TransactionFormError.categoryRequired),
+              FutureBuilder<List<Category>>(
+                future: state.formData.availableCategories,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    return const Text('Error loading categories');
+                  }
+                  final categories = snapshot.data ?? [];
+                  return CategorySelector(
+                    categories: categories,
+                    selectedCategory: state.formData.selectedCategory,
+                    onCategorySelected: (category) => context
+                        .read<TransactionFormBloc>()
+                        .add(CategorySelected(category)),
+                    errorText:
+                        state.getFieldError(TransactionFormError.categoryRequired),
+                  );
+                },
               ),
               const SizedBox(height: Spacing.space24),
 
@@ -342,52 +365,54 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen>
               // Save Button
               Expanded(
                 flex: 2,
-                child: ElevatedButton(
-                  onPressed: state.isSubmitting || !state.isValid
-                      ? null
-                      : _onSavePressed,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    padding:
-                        const EdgeInsets.symmetric(vertical: Spacing.space16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(Spacing.radiusL),
+                child: Builder(
+                  builder: (buttonContext) => ElevatedButton(
+                    onPressed: state.isSubmitting || !state.isValid
+                        ? null
+                        : () => _onSavePressedWithContext(buttonContext),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding:
+                          const EdgeInsets.symmetric(vertical: Spacing.space16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(Spacing.radiusL),
+                      ),
+                      elevation: 0,
                     ),
-                    elevation: 0,
-                  ),
-                  child: state.isSubmitting
-                      ? Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor:
-                                    AlwaysStoppedAnimation<Color>(Colors.white),
+                    child: state.isSubmitting
+                        ? Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor:
+                                      AlwaysStoppedAnimation<Color>(Colors.white),
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: Spacing.space8),
-                            Text(
-                              'Saving...',
-                              style: AppTypography.titleMedium.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
+                              const SizedBox(width: Spacing.space8),
+                              Text(
+                                'Saving...',
+                                style: AppTypography.titleMedium.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
+                            ],
+                          )
+                        : Text(
+                            isEditMode
+                                ? 'Update Transaction'
+                                : 'Save Transaction',
+                            style: AppTypography.titleMedium.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
                             ),
-                          ],
-                        )
-                      : Text(
-                          isEditMode
-                              ? 'Update Transaction'
-                              : 'Save Transaction',
-                          style: AppTypography.titleMedium.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
                           ),
-                        ),
+                  ),
                 ),
               ),
             ],
@@ -425,44 +450,56 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen>
     // Check if theres a source page indication in extra data
     final sourcePage = extra?['sourcePage'] as String?;
 
-    if (sourcePage == 'transactions') {
-      context.go(AppRoutes.transactions);
-    } else if (sourcePage == 'dashboard') {
-      context.go(AppRoutes.dashboard);
-    } else {
-      // Default fallback - go to dashboard
-      context.go(AppRoutes.dashboard);
-    }
+    // if (sourcePage == 'transactions') {
+    //   context.go(AppRoutes.transactions);
+    // } 
+    // if (sourcePage == 'dashboard') {
+    //   context.go(AppRoutes.dashboard);
+    // }
+    // context.go(AppRoutes.dashboard);
+    // use switch case for future extensibility
+    switch (sourcePage) {
+      case 'transactions':
+        context.go(AppRoutes.transactions);
+        break;
+      case 'dashboard':
+        context.go(AppRoutes.dashboard);
+        break;
+      default:
+        context.go(AppRoutes.dashboard);
+    }   
   }
 
-  void _onSavePressed() {
+  void _onSavePressedWithContext(BuildContext buttonContext) {
     // Add haptic feedback
     HapticFeedback.mediumImpact();
 
-    // Validate and submit form
-    context.read<TransactionFormBloc>().add(const ValidateForm());
-    context.read<TransactionFormBloc>().add(const SubmitForm());
+    // Validate and submit form using the correct context
+    buttonContext.read<TransactionFormBloc>().add(const ValidateForm());
+    buttonContext.read<TransactionFormBloc>().add(const SubmitForm());
   }
 
   void _onFormSubmissionSuccess() {
     // Add haptic feedback
     HapticFeedback.heavyImpact();
 
-    // Show success message
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          isEditMode
-              ? 'Transaction updated successfully!'
-              : 'Transaction added successfully!',
+    // Show success message only if still mounted
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            isEditMode
+                ? 'Transaction updated successfully!'
+                : 'Transaction added successfully!',
+          ),
+          backgroundColor: AppColors.success,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(Spacing.radiusM),
+          ),
         ),
-        backgroundColor: AppColors.success,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(Spacing.radiusM),
-        ),
-      ),
-    );
+      );
+    }
 
     // Navigate back with a slight delay for better UX
     Future.delayed(const Duration(milliseconds: 500), () {

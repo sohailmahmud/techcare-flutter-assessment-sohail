@@ -69,6 +69,8 @@ class CategoryModel {
         return Icons.school;
       case 'local_hospital':
         return Icons.local_hospital;
+      case 'trending_up':
+        return Icons.trending_up;
       default:
         return Icons.category;
     }

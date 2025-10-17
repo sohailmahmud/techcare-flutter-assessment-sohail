@@ -92,16 +92,13 @@ class CategoryRepositoryImpl implements CategoryRepository {
   Future<Either<Failure, List<Category>>> getCategoriesByType(
       bool isIncome) async {
     try {
-      final categoriesResult = await getCategories();
-
-      return categoriesResult.fold(
-        (failure) => Left(failure),
-        (categories) {
-          final filteredCategories =
-              categories.where((cat) => cat.isIncome == isIncome).toList();
-          return Right(filteredCategories);
-        },
-      );
+      List<Category> filteredCategories;
+      if (isIncome) {
+        filteredCategories = await AppCategories.incomeCategories();
+      } else {
+        filteredCategories = await AppCategories.expenseCategories();
+      }
+      return Right(filteredCategories);
     } catch (e) {
       return Left(UnknownFailure(e.toString()));
     }

@@ -4,15 +4,18 @@ import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/spacing.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../domain/entities/analytics.dart';
+import '../../../domain/entities/category.dart';
 
 class CategoryBreakdownChart extends StatefulWidget {
   final List<CategoryBreakdown> categoryData;
+  final List<Category> categories;
   final bool isLoading;
   final VoidCallback? onTap;
 
   const CategoryBreakdownChart({
     super.key,
     required this.categoryData,
+    required this.categories,
     this.isLoading = false,
     this.onTap,
   });
@@ -21,8 +24,40 @@ class CategoryBreakdownChart extends StatefulWidget {
   State<CategoryBreakdownChart> createState() => _CategoryBreakdownChartState();
 }
 
-class _CategoryBreakdownChartState extends State<CategoryBreakdownChart>
-    with TickerProviderStateMixin {
+class _CategoryBreakdownChartState extends State<CategoryBreakdownChart> with TickerProviderStateMixin {
+  Widget _buildCategoryIcon(IconData icon, Color color) {
+    return Container(
+      width: 32,
+      height: 32,
+      decoration: BoxDecoration(
+        color: color.withValues(alpha:0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Icon(icon, color: color, size: 18),
+    );
+  }
+
+  Widget _buildProgressBar(double percentage, double animationValue, Color color) {
+    return Container(
+      height: 6,
+      decoration: BoxDecoration(
+        color: AppColors.border,
+        borderRadius: BorderRadius.circular(3),
+      ),
+      child: FractionallySizedBox(
+        alignment: Alignment.centerLeft,
+        widthFactor: ((percentage / 100) * animationValue).clamp(0.0, 1.0),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [color.withValues(alpha:  0.7), color],
+            ),
+            borderRadius: BorderRadius.circular(3),
+          ),
+        ),
+      ),
+    );
+  }
   late AnimationController _animationController;
   late Animation<double> _animation;
 
@@ -195,6 +230,14 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart>
   }
 
   Widget _buildChart() {
+    final barHeight = 60.0;
+    final maxVisibleBars = 5;
+    final totalBars = widget.categoryData.length;
+    final showAllBars = totalBars <= maxVisibleBars;
+    final chartHeight = showAllBars ? totalBars * barHeight : maxVisibleBars * barHeight;
+
+    final ScrollController barScrollController = ScrollController();
+
     return Column(
       children: [
         // Horizontal Bar Chart
@@ -202,13 +245,31 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart>
           animation: _animation,
           builder: (context, child) {
             return SizedBox(
-              height: widget.categoryData.length * 60.0,
-              child: ListView.builder(
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: widget.categoryData.length,
-                itemBuilder: (context, index) {
-                  return _buildCategoryBar(widget.categoryData[index], index);
+              height: chartHeight,
+              child: NotificationListener<ScrollNotification>(
+                onNotification: (notification) {
+                  // If at edge, let parent scroll
+                  if (notification is ScrollUpdateNotification || notification is OverscrollNotification) {
+                    final atTop = barScrollController.position.pixels <= barScrollController.position.minScrollExtent;
+                    final atBottom = barScrollController.position.pixels >= barScrollController.position.maxScrollExtent;
+                    if (atTop || atBottom) {
+                      // Allow parent scroll
+                      return false;
+                    }
+                  }
+                  // Prevent parent scroll when not at edge
+                  return true;
                 },
+                child: ListView.builder(
+                  controller: barScrollController,
+                  physics: showAllBars
+                      ? const NeverScrollableScrollPhysics()
+                      : const AlwaysScrollableScrollPhysics(),
+                  itemCount: totalBars,
+                  itemBuilder: (context, index) {
+                    return _buildCategoryBar(widget.categoryData[index], index);
+                  },
+                ),
               ),
             );
           },
@@ -222,117 +283,84 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart>
 
   Widget _buildCategoryBar(CategoryBreakdown data, int index) {
     final animationDelay = index * 0.1;
-    final barAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(
+    final barAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _animationController,
-        curve: Interval(
-          animationDelay,
-          (animationDelay + 0.3).clamp(0.0, 1.0),
-          curve: Curves.easeOut,
-        ),
+        curve: Interval(animationDelay, (animationDelay + 0.3).clamp(0.0, 1.0),
+            curve: Curves.easeOut),
       ),
     );
-
-    return AnimatedBuilder(
-      animation: barAnimation,
-      builder: (context, child) {
-        return GestureDetector(
-          onTap: () => _onCategoryTap(data),
-          child: Container(
-            margin: const EdgeInsets.only(bottom: Spacing.space12),
-            child: Column(
-              children: [
-                Row(
+    return FutureBuilder<Category>(
+      future: _findCategory(data),
+      builder: (context, snapshot) {
+        final cat = snapshot.data ?? Category(
+          id: data.categoryId,
+          name: data.categoryName,
+          color: AppColors.primary,
+          icon: Icons.category,
+        );
+        return AnimatedBuilder(
+          animation: barAnimation,
+          builder: (context, child) {
+            return GestureDetector(
+              onTap: () => _onCategoryTap(data),
+              child: Container(
+                margin: const EdgeInsets.only(bottom: Spacing.space12),
+                child: Column(
                   children: [
-                    // Category icon and name
-                    Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: _getCategoryColor(data.categoryName)
-                            .withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Icon(
-                        _getCategoryIcon(data.categoryName),
-                        color: _getCategoryColor(data.categoryName),
-                        size: 18,
-                      ),
-                    ),
-                    const SizedBox(width: Spacing.space12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            data.categoryName,
-                            style: AppTypography.bodyMedium.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                          Text(
-                            '${data.transactionCount} transactions',
-                            style: AppTypography.labelSmall.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    // Amount and percentage
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
+                    Row(
                       children: [
-                        Text(
-                          CurrencyFormatter.formatCompact(data.amount),
-                          style: AppTypography.bodyMedium.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
+                        _buildCategoryIcon(cat.icon, cat.color),
+                        const SizedBox(width: Spacing.space12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                cat.name,
+                                style: AppTypography.bodyMedium.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              Text(
+                                '${data.transactionCount} transactions',
+                                style: AppTypography.labelSmall.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        Text(
-                          '${data.percentage.toStringAsFixed(1)}%',
-                          style: AppTypography.labelSmall.copyWith(
-                            color: _getCategoryColor(data.categoryName),
-                            fontWeight: FontWeight.w600,
-                          ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              CurrencyFormatter.formatCompact(data.amount),
+                              style: AppTypography.bodyMedium.copyWith(
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                            Text(
+                              '${data.percentage.toStringAsFixed(1)}%',
+                              style: AppTypography.labelSmall.copyWith(
+                                color: cat.color,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
+                    const SizedBox(height: Spacing.space8),
+                    _buildProgressBar(
+                        data.percentage, barAnimation.value, cat.color),
                   ],
                 ),
-                const SizedBox(height: Spacing.space8),
-                // Progress bar
-                Container(
-                  height: 6,
-                  decoration: BoxDecoration(
-                    color: AppColors.border,
-                    borderRadius: BorderRadius.circular(3),
-                  ),
-                  child: FractionallySizedBox(
-                    alignment: Alignment.centerLeft,
-                    widthFactor: (data.percentage / 100) * barAnimation.value,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            _getCategoryColor(data.categoryName)
-                                .withValues(alpha: 0.7),
-                            _getCategoryColor(data.categoryName),
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(3),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );
@@ -375,33 +403,44 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart>
           ),
           if (topCategory != null) ...[
             const SizedBox(height: Spacing.space8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Top Category',
-                  style: AppTypography.bodyMedium.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                Row(
+            FutureBuilder<Category>(
+              future: _findCategory(topCategory),
+              builder: (context, snapshot) {
+                final cat = snapshot.data ?? Category(
+                  id: topCategory.categoryId,
+                  name: topCategory.categoryName,
+                  color: AppColors.primary,
+                  icon: Icons.category,
+                );
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Icon(
-                      _getCategoryIcon(topCategory.categoryName),
-                      color: _getCategoryColor(topCategory.categoryName),
-                      size: 16,
-                    ),
-                    const SizedBox(width: Spacing.space4),
                     Text(
-                      topCategory.categoryName,
+                      'Top Category',
                       style: AppTypography.bodyMedium.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: _getCategoryColor(topCategory.categoryName),
+                        color: AppColors.textSecondary,
                       ),
                     ),
+                    Row(
+                      children: [
+                        Icon(
+                          cat.icon,
+                          color: cat.color,
+                          size: 16,
+                        ),
+                        const SizedBox(width: Spacing.space4),
+                        Text(
+                          topCategory.categoryName,
+                          style: AppTypography.bodyMedium.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: cat.color,
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
-                ),
-              ],
+                );
+              },
             ),
           ],
         ],
@@ -414,104 +453,115 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart>
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useRootNavigator: true,
       backgroundColor: Colors.transparent,
       builder: (context) => _buildCategoryDetailsSheet(data),
     );
   }
 
   Widget _buildCategoryDetailsSheet(CategoryBreakdown data) {
-    return Container(
-      padding: const EdgeInsets.all(Spacing.space24),
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(24),
-          topRight: Radius.circular(24),
-        ),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Handle
-          Container(
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: AppColors.border,
-              borderRadius: BorderRadius.circular(2),
+    return FutureBuilder<Category>(
+      future: _findCategory(data),
+      builder: (context, snapshot) {
+        final cat = snapshot.data ?? Category(
+          id: data.categoryId,
+          name: data.categoryName,
+          color: AppColors.primary,
+          icon: Icons.category,
+        );
+        return Container(
+          padding: const EdgeInsets.all(Spacing.space24),
+          decoration: const BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(24),
+              topRight: Radius.circular(24),
             ),
           ),
-          const SizedBox(height: Spacing.space24),
-          // Category info
-          Row(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
+              // Handle
               Container(
-                width: 48,
-                height: 48,
+                width: 40,
+                height: 4,
                 decoration: BoxDecoration(
-                  color: _getCategoryColor(data.categoryName)
-                      .withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  _getCategoryIcon(data.categoryName),
-                  color: _getCategoryColor(data.categoryName),
-                  size: 24,
+                  color: AppColors.border,
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              const SizedBox(width: Spacing.space16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      data.categoryName,
-                      style: AppTypography.headlineSmall.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
-                      ),
+              const SizedBox(height: Spacing.space24),
+              // Category info
+              Row(
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: cat.color.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    Text(
-                      'Category Details',
-                      style: AppTypography.bodyMedium.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
+                    child: Icon(
+                      cat.icon,
+                      color: cat.color,
+                      size: 24,
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: Spacing.space16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          data.categoryName,
+                          style: AppTypography.headlineSmall.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        Text(
+                          'Category Details',
+                          style: AppTypography.bodyMedium.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
+              const SizedBox(height: Spacing.space24),
+              // Stats
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildStatItem(
+                      'Total Spent',
+                      CurrencyFormatter.format(data.amount),
+                      AppColors.expense,
+                    ),
+                  ),
+                  Expanded(
+                    child: _buildStatItem(
+                      'Percentage',
+                      '${data.percentage.toStringAsFixed(1)}%',
+                      cat.color,
+                    ),
+                  ),
+                  Expanded(
+                    child: _buildStatItem(
+                      'Transactions',
+                      data.transactionCount.toString(),
+                      AppColors.primary,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: Spacing.space24),
             ],
           ),
-          const SizedBox(height: Spacing.space24),
-          // Stats
-          Row(
-            children: [
-              Expanded(
-                child: _buildStatItem(
-                  'Total Spent',
-                  CurrencyFormatter.format(data.amount),
-                  AppColors.expense,
-                ),
-              ),
-              Expanded(
-                child: _buildStatItem(
-                  'Percentage',
-                  '${data.percentage.toStringAsFixed(1)}%',
-                  _getCategoryColor(data.categoryName),
-                ),
-              ),
-              Expanded(
-                child: _buildStatItem(
-                  'Transactions',
-                  data.transactionCount.toString(),
-                  AppColors.primary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: Spacing.space24),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -536,49 +586,14 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart>
       ],
     );
   }
-
-  // Helper method to get category color from name (for demo purposes)
-  Color _getCategoryColor(String categoryName) {
-    // Simple hash-based color generation for consistent colors
-    final hash = categoryName.hashCode;
-    final colors = [
-      AppColors.primary,
-      AppColors.secondary,
-      Colors.deepPurple,
-      Colors.blue,
-      Colors.green,
-      Colors.orange,
-      Colors.purple,
-      Colors.teal,
-      Colors.red,
-      Colors.indigo,
-    ];
-    return colors[hash.abs() % colors.length];
-  }
-
-  // Helper method to get category icon from category name based on JSON mock data
-  IconData _getCategoryIcon(String categoryName) {
-    // Map category names to icons based on the JSON mock data structure
-    final name = categoryName.toLowerCase();
-
-    // Direct mapping from JSON mock data categories
-    if (name.contains('food') || name.contains('dining')) {
-      return Icons.restaurant;
-    }
-    if (name.contains('transport')) return Icons.directions_car;
-    if (name.contains('shopping')) return Icons.shopping_bag;
-    if (name.contains('entertainment')) return Icons.movie;
-    if (name.contains('bills') || name.contains('utilities')) {
-      return Icons.receipt;
-    }
-    if (name.contains('health') || name.contains('fitness')) {
-      return Icons.fitness_center;
-    }
-    if (name.contains('education')) return Icons.school;
-    if (name.contains('salary')) return Icons.payments;
-    if (name.contains('freelance')) return Icons.work;
-    if (name.contains('investment')) return Icons.trending_up;
-
-    return Icons.category; // default icon
+  Future<Category> _findCategory(CategoryBreakdown data) async {
+    final category = await AppCategories.findById(data.categoryId);
+    // Provide a fallback category if not found
+    return category ?? Category(
+      id: data.categoryId,
+      name: data.categoryName,
+      color: AppColors.primary,
+      icon: Icons.category,
+    );
   }
 }

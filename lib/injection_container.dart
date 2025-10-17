@@ -86,7 +86,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GetAnalytics(sl()));
 
   // Bloc
-  sl.registerFactory(() => AnalyticsBloc(transactionsBloc: sl()));
+  sl.registerFactory(() => AnalyticsBloc(transactionsBloc: sl(), categories: []));
 
   //! Features - Categories
   // Bloc

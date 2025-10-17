@@ -32,7 +32,6 @@ void main() {
       name: 'Food',
       icon: Icons.restaurant,
       color: Colors.orange,
-      isIncome: false,
     );
 
     final testTransaction = Transaction(
@@ -105,7 +104,7 @@ void main() {
         final filteredQuery = TransactionQuery(
           page: 1,
           limit: 20,
-          category: 'food',
+          categories: ['cat_001'],
           type: TransactionType.expense,
           startDate: DateTime(2024, 1, 1),
           endDate: DateTime(2024, 1, 31),

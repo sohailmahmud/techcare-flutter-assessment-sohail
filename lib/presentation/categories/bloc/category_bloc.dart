@@ -322,19 +322,18 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   void _filterCategoriesLocally(bool? isIncome, String? selectedCategoryId,
       Emitter<CategoryState> emit) async {
     try {
-      final allCategories = await _loadCategories();
-
-      final filteredCategories = isIncome != null
-          ? allCategories
-              .where((category) => category.isIncome == isIncome)
-              .toList()
-          : allCategories;
-
+      List<Category> filteredCategories;
+      if (isIncome == null) {
+        filteredCategories = await AppCategories.getAllCategories();
+      } else if (isIncome) {
+        filteredCategories = await AppCategories.incomeCategories();
+      } else {
+        filteredCategories = await AppCategories.expenseCategories();
+      }
       emit(CategoryLoaded(
         categories: filteredCategories,
         selectedCategoryId: selectedCategoryId,
       ));
-
       Logger.i(
           'Categories filtered successfully from local data: ${filteredCategories.length} categories');
     } catch (error) {
@@ -344,14 +343,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   }
 
   Future<List<Category>> _loadCategories() async {
-    // Simulate network delay
-    await Future.delayed(const Duration(milliseconds: 300));
-
-    // Return all available categories (both income and expense)
-    final allCategories = <Category>[];
-    allCategories.addAll(AppCategories.expenseCategories);
-    allCategories.addAll(AppCategories.incomeCategories);
-
-    return allCategories;
+  // Load categories from local JSON asset
+  return await AppCategories.loadFromJsonAsset();
   }
 }

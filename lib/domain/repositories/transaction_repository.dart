@@ -6,39 +6,43 @@ import '../entities/transaction.dart';
 class TransactionQuery {
   final int page;
   final int limit;
-  final String? category;
+  final List<String>? categories;
   final TransactionType? type;
   final DateTime? startDate;
   final DateTime? endDate;
   final String? searchQuery;
+  final Map<String, dynamic>? amountRange;
 
   const TransactionQuery({
     this.page = 1,
     this.limit = 20,
-    this.category,
+    this.categories,
     this.type,
     this.startDate,
     this.endDate,
     this.searchQuery,
+    this.amountRange,
   });
 
   TransactionQuery copyWith({
     int? page,
     int? limit,
-    String? category,
+    List<String>? categories,
     TransactionType? type,
     DateTime? startDate,
     DateTime? endDate,
     String? searchQuery,
+    Map<String, dynamic>? amountRange,
   }) {
     return TransactionQuery(
       page: page ?? this.page,
       limit: limit ?? this.limit,
-      category: category ?? this.category,
+      categories: categories ?? this.categories,
       type: type ?? this.type,
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
       searchQuery: searchQuery ?? this.searchQuery,
+      amountRange: amountRange ?? this.amountRange,
     );
   }
 }

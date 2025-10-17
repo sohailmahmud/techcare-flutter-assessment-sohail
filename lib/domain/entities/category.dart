@@ -1,3 +1,4 @@
+import '../../data/datasources/asset_data_source.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
@@ -7,7 +8,7 @@ class Category extends Equatable {
   final String name;
   final IconData icon;
   final Color color;
-  final bool isIncome;
+  // Removed isIncome, now determined by transaction type
   final double? budget;
 
   const Category({
@@ -15,14 +16,12 @@ class Category extends Equatable {
     required this.name,
     required this.icon,
     required this.color,
-    this.isIncome = false,
     this.budget,
   });
 
   // Helper methods for API integration
   String get iconName => _getIconName(icon);
-  String get colorHex =>
-      '#${color.toARGB32().toRadixString(16).substring(2).toUpperCase()}';
+  String get colorHex => '#${color.value.toRadixString(16).substring(2).toUpperCase()}';
 
   static String _getIconName(IconData icon) {
     // Map common icons to string names for API
@@ -30,13 +29,14 @@ class Category extends Equatable {
       Icons.restaurant: 'restaurant',
       Icons.directions_car: 'directions_car',
       Icons.shopping_bag: 'shopping_bag',
-      Icons.receipt: 'receipt',
       Icons.movie: 'movie',
+      Icons.receipt: 'receipt',
+      Icons.fitness_center: 'fitness_center',
+      Icons.school: 'school',
       Icons.payments: 'payments',
       Icons.work: 'work',
-      Icons.home: 'home',
-      Icons.local_hospital: 'local_hospital',
-      Icons.school: 'school',
+      Icons.trending_up: 'trending_up',
+      Icons.category: 'category',
     };
     return iconMap[icon] ?? 'category';
   }
@@ -50,20 +50,20 @@ class Category extends Equatable {
         return Icons.directions_car;
       case 'shopping_bag':
         return Icons.shopping_bag;
-      case 'receipt':
-        return Icons.receipt;
       case 'movie':
         return Icons.movie;
+      case 'receipt':
+        return Icons.receipt;
+      case 'fitness_center':
+        return Icons.fitness_center;
+      case 'school':
+        return Icons.school;
       case 'payments':
         return Icons.payments;
       case 'work':
         return Icons.work;
-      case 'home':
-        return Icons.home;
-      case 'local_hospital':
-        return Icons.local_hospital;
-      case 'school':
-        return Icons.school;
+      case 'trending_up':
+        return Icons.trending_up;
       default:
         return Icons.category;
     }
@@ -80,7 +80,6 @@ class Category extends Equatable {
     required String name,
     required String iconName,
     required String colorHex,
-    bool isIncome = false,
     double? budget,
   }) {
     return Category(
@@ -88,144 +87,75 @@ class Category extends Equatable {
       name: name,
       icon: _getIconFromName(iconName),
       color: _getColorFromHex(colorHex),
-      isIncome: isIncome,
       budget: budget,
     );
   }
 
   @override
-  List<Object?> get props => [id, name, icon, color, isIncome, budget];
+  List<Object?> get props => [id, name, icon, color, budget];
 }
 
 /// Predefined categories for the application
 class AppCategories {
-  // Expense Categories
-  static const List<Category> expenseCategories = [
-    Category(
-      id: 'food',
-      name: 'Food',
-      icon: Icons.restaurant,
-      color: Colors.orange,
-    ),
-    Category(
-      id: 'transport',
-      name: 'Transport',
-      icon: Icons.directions_car,
-      color: Colors.blue,
-    ),
-    Category(
-      id: 'shopping',
-      name: 'Shopping',
-      icon: Icons.shopping_bag,
-      color: Colors.purple,
-    ),
-    Category(
-      id: 'bills',
-      name: 'Bills',
-      icon: Icons.receipt_long,
-      color: Colors.red,
-    ),
-    Category(
-      id: 'entertainment',
-      name: 'Entertainment',
-      icon: Icons.movie,
-      color: Colors.pink,
-    ),
-    Category(
-      id: 'health',
-      name: 'Health',
-      icon: Icons.medical_services,
-      color: Colors.green,
-    ),
-    Category(
-      id: 'education',
-      name: 'Education',
-      icon: Icons.school,
-      color: Colors.indigo,
-    ),
-    Category(
-      id: 'utilities',
-      name: 'Utilities',
-      icon: Icons.electrical_services,
-      color: Colors.amber,
-    ),
-    Category(
-      id: 'insurance',
-      name: 'Insurance',
-      icon: Icons.security,
-      color: Colors.teal,
-    ),
-    Category(
-      id: 'other_expense',
-      name: 'Other',
-      icon: Icons.more_horiz,
-      color: Colors.grey,
-    ),
-  ];
-
-  // Income Categories
-  static const List<Category> incomeCategories = [
-    Category(
-      id: 'salary',
-      name: 'Salary',
-      icon: Icons.work,
-      color: Colors.green,
-      isIncome: true,
-    ),
-    Category(
-      id: 'freelance',
-      name: 'Freelance',
-      icon: Icons.laptop,
-      color: Colors.lightGreen,
-      isIncome: true,
-    ),
-    Category(
-      id: 'business',
-      name: 'Business',
-      icon: Icons.business,
-      color: Colors.teal,
-      isIncome: true,
-    ),
-    Category(
-      id: 'investment',
-      name: 'Investment',
-      icon: Icons.trending_up,
-      color: Colors.cyan,
-      isIncome: true,
-    ),
-    Category(
-      id: 'gift',
-      name: 'Gift',
-      icon: Icons.card_giftcard,
-      color: Colors.pink,
-      isIncome: true,
-    ),
-    Category(
-      id: 'bonus',
-      name: 'Bonus',
-      icon: Icons.stars,
-      color: Colors.amber,
-      isIncome: true,
-    ),
-    Category(
-      id: 'other_income',
-      name: 'Other',
-      icon: Icons.more_horiz,
-      color: Colors.grey,
-      isIncome: true,
-    ),
-  ];
-
-  static List<Category> getAllCategories() {
-    return [...expenseCategories, ...incomeCategories];
+  /// Loads categories from local JSON asset using AssetDataSource
+  static Future<List<Category>> loadFromJsonAsset() async {
+    final assetDataSource = AssetDataSource();
+    final response = await assetDataSource.getCategories();
+    return response.categories.map((model) => model.toEntity()).toList();
+  }
+  /// Loads expense categories by grouping transaction categories from transactions.json
+  static Future<List<Category>> expenseCategories() async {
+    final assetDataSource = AssetDataSource();
+    final transactionsResponse = await assetDataSource.getTransactions();
+    final expenseCategories = <Category>{};
+    for (final txn in transactionsResponse.data) {
+      if (txn.typeString.toLowerCase() == 'expense') {
+        final cat = txn.category;
+        expenseCategories.add(Category(
+          id: cat.id,
+          name: cat.name,
+          icon: Category._getIconFromName(cat.icon),
+          color: Category._getColorFromHex(cat.color),
+          budget: cat.budget,
+        ));
+      }
+    }
+    return expenseCategories.toList();
   }
 
-  static List<Category> getCategoriesFor(bool isIncome) {
-    return isIncome ? incomeCategories : expenseCategories;
+  /// Loads income categories by grouping transaction categories from transactions.json
+  static Future<List<Category>> incomeCategories() async {
+    final assetDataSource = AssetDataSource();
+    final transactionsResponse = await assetDataSource.getTransactions();
+    final incomeCategories = <Category>{};
+    for (final txn in transactionsResponse.data) {
+      if (txn.typeString.toLowerCase() == 'income') {
+        final cat = txn.category;
+        incomeCategories.add(Category(
+          id: cat.id,
+          name: cat.name,
+          icon: Category._getIconFromName(cat.icon),
+          color: Category._getColorFromHex(cat.color),
+          budget: cat.budget,
+        ));
+      }
+    }
+    return incomeCategories.toList();
   }
 
-  static Category? findById(String id) {
-    return getAllCategories().firstWhere(
+  static Future<List<Category>> getAllCategories() async {
+    final expenses = await expenseCategories();
+    final incomes = await incomeCategories();
+    return [...expenses, ...incomes];
+  }
+
+  static Future<List<Category>> getCategoriesFor(bool isIncome) async {
+    return isIncome ? await incomeCategories() : await expenseCategories();
+  }
+
+  static Future<Category?> findById(String id) async {
+    final allCategories = await getAllCategories();
+    return allCategories.firstWhere(
       (category) => category.id == id,
       orElse: () => const Category(
         id: 'unknown',

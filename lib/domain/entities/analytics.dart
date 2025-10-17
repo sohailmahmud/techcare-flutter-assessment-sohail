@@ -1,4 +1,6 @@
 import 'package:equatable/equatable.dart';
+import 'category.dart';
+import 'package:flutter/material.dart';
 
 /// Enum for different time period options
 enum TimePeriod {
@@ -162,23 +164,29 @@ class TrendData extends Equatable {
 
 /// Model for category breakdown data
 class CategoryBreakdown extends Equatable {
-  final String categoryId;
-  final String categoryName;
+  final Category category;
   final double amount;
   final int transactionCount;
   final double percentage;
+  final double? budget;
+  final double? budgetUtilization;
 
   const CategoryBreakdown({
-    required this.categoryId,
-    required this.categoryName,
+    required this.category,
     required this.amount,
     required this.transactionCount,
     required this.percentage,
+    this.budget,
+    this.budgetUtilization,
   });
 
+  String get categoryId => category.id;
+  String get categoryName => category.name;
+  Color get categoryColor => category.color;
+  IconData get categoryIcon => category.icon;
+
   @override
-  List<Object> get props =>
-      [categoryId, categoryName, amount, transactionCount, percentage];
+  List<Object?> get props => [category, amount, transactionCount, percentage, budget, budgetUtilization];
 }
 
 /// Model for budget vs actual spending
@@ -190,23 +198,26 @@ class BudgetComparison extends Equatable {
   final double remainingAmount;
   final double percentage;
   final bool isOverBudget;
+  final Category category;
 
   const BudgetComparison({
-    required this.categoryId,
-    required this.categoryName,
-    required this.budgetAmount,
-    required this.actualAmount,
-    required this.remainingAmount,
-    required this.percentage,
-    required this.isOverBudget,
+  required this.categoryId,
+  required this.categoryName,
+  required this.budgetAmount,
+  required this.actualAmount,
+  required this.remainingAmount,
+  required this.percentage,
+  required this.isOverBudget,
+  required this.category,
   });
 
   /// Factory constructor to create from budget and actual amounts
   factory BudgetComparison.fromAmounts({
-    required String categoryId,
-    required String categoryName,
-    required double budgetAmount,
-    required double actualAmount,
+  required String categoryId,
+  required String categoryName,
+  required double budgetAmount,
+  required double actualAmount,
+  required Category category,
   }) {
     final remaining = budgetAmount - actualAmount;
     final percentage =
@@ -214,13 +225,14 @@ class BudgetComparison extends Equatable {
     final isOverBudget = actualAmount > budgetAmount;
 
     return BudgetComparison(
-      categoryId: categoryId,
-      categoryName: categoryName,
-      budgetAmount: budgetAmount,
-      actualAmount: actualAmount,
-      remainingAmount: remaining,
-      percentage: percentage,
-      isOverBudget: isOverBudget,
+  categoryId: categoryId,
+  categoryName: categoryName,
+  budgetAmount: budgetAmount,
+  actualAmount: actualAmount,
+  remainingAmount: remaining,
+  percentage: percentage,
+  isOverBudget: isOverBudget,
+  category: category,
     );
   }
 
@@ -243,9 +255,11 @@ class AnalyticsData extends Equatable {
   final TrendData trendData;
   final List<CategoryBreakdown> categoryBreakdown;
   final List<BudgetComparison> budgetComparisons;
+  final List<Category> categories;
   final double totalIncome;
   final double totalExpenses;
-  final double netAmount;
+  final double netBalance;
+  final double savingsRate;
   final int totalTransactions;
   final double averageTransactionAmount;
   final DateTime lastUpdated;
@@ -256,19 +270,17 @@ class AnalyticsData extends Equatable {
     required this.trendData,
     required this.categoryBreakdown,
     required this.budgetComparisons,
+    required this.categories,
     required this.totalIncome,
     required this.totalExpenses,
-    required this.netAmount,
+    required this.netBalance,
+    required this.savingsRate,
     required this.totalTransactions,
     required this.averageTransactionAmount,
     required this.lastUpdated,
   });
 
-  /// Get savings rate as a percentage
-  double get savingsRate {
-    if (totalIncome <= 0) return 0.0;
-    return ((totalIncome - totalExpenses) / totalIncome) * 100;
-  }
+  // savingsRate is now a field, not a computed getter
 
   /// Get the category with highest spending
   CategoryBreakdown? get topSpendingCategory {
@@ -285,17 +297,19 @@ class AnalyticsData extends Equatable {
 
   /// Copy with new values
   AnalyticsData copyWith({
-    DateRange? dateRange,
-    TimePeriod? period,
-    TrendData? trendData,
-    List<CategoryBreakdown>? categoryBreakdown,
-    List<BudgetComparison>? budgetComparisons,
-    double? totalIncome,
-    double? totalExpenses,
-    double? netAmount,
-    int? totalTransactions,
-    double? averageTransactionAmount,
-    DateTime? lastUpdated,
+  DateRange? dateRange,
+  TimePeriod? period,
+  TrendData? trendData,
+  List<CategoryBreakdown>? categoryBreakdown,
+  List<BudgetComparison>? budgetComparisons,
+  List<Category>? categories,
+  double? totalIncome,
+  double? totalExpenses,
+  double? netBalance,
+  double? savingsRate,
+  int? totalTransactions,
+  double? averageTransactionAmount,
+  DateTime? lastUpdated,
   }) {
     return AnalyticsData(
       dateRange: dateRange ?? this.dateRange,
@@ -303,9 +317,11 @@ class AnalyticsData extends Equatable {
       trendData: trendData ?? this.trendData,
       categoryBreakdown: categoryBreakdown ?? this.categoryBreakdown,
       budgetComparisons: budgetComparisons ?? this.budgetComparisons,
+      categories: categories ?? this.categories,
       totalIncome: totalIncome ?? this.totalIncome,
       totalExpenses: totalExpenses ?? this.totalExpenses,
-      netAmount: netAmount ?? this.netAmount,
+      netBalance: netBalance ?? this.netBalance,
+      savingsRate: savingsRate ?? this.savingsRate,
       totalTransactions: totalTransactions ?? this.totalTransactions,
       averageTransactionAmount:
           averageTransactionAmount ?? this.averageTransactionAmount,
@@ -315,16 +331,18 @@ class AnalyticsData extends Equatable {
 
   @override
   List<Object> get props => [
-        dateRange,
-        period,
-        trendData,
-        categoryBreakdown,
-        budgetComparisons,
-        totalIncome,
-        totalExpenses,
-        netAmount,
-        totalTransactions,
-        averageTransactionAmount,
-        lastUpdated,
-      ];
+    dateRange,
+    period,
+    trendData,
+    categoryBreakdown,
+    budgetComparisons,
+    categories,
+    totalIncome,
+    totalExpenses,
+    netBalance,
+    savingsRate,
+    totalTransactions,
+    averageTransactionAmount,
+    lastUpdated,
+  ];
 }

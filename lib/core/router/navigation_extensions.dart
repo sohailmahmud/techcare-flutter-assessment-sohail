@@ -17,16 +17,19 @@ extension AppNavigation on BuildContext {
   // Add transaction
   void goToAddTransaction({
     Transaction? transaction,
+    TransactionType? type,
     String? sourcePage,
   }) {
     final extra = <String, dynamic>{};
     if (transaction != null) {
       extra['transaction'] = transaction;
     }
+    if (type != null) {
+      extra['type'] = type;
+    }
     if (sourcePage != null) {
       extra['sourcePage'] = sourcePage;
     }
-
     go(
       AppRoutes.addTransaction,
       extra: extra.isNotEmpty ? extra : null,

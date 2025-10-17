@@ -151,6 +151,8 @@ class TransactionError extends TransactionsState {
 }
 
 class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
+  List<tx.Transaction> _allUnfilteredTransactions = [];
+  List<tx.Transaction> get allUnfilteredTransactions => _allUnfilteredTransactions;
   final HiveCacheManager cacheManager;
   final TransactionRepository transactionRepository;
   List<tx.Transaction> _allTransactions = [];
@@ -220,16 +222,16 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
       final query = TransactionQuery(
         page: event.page,
         limit: _pageSize,
-        category: event.filters?['category'],
+        categories: event.filters?['categories'] as List<String>?,
         type: _parseTransactionType(event.filters?['type']),
         searchQuery: _currentSearchQuery,
+        amountRange: event.filters?['amountRange'],
       );
 
       final result = await transactionRepository.getTransactions(query);
       result.fold(
         (failure) {
-          Logger.e('Error loading transactions from repository',
-              error: failure.message);
+          Logger.e('Error loading transactions from repository', error: failure.message);
           emit(TransactionError(error: failure.message));
         },
         (paginatedResponse) {
@@ -238,25 +240,19 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
 
           if (event.page == 1) {
             _allTransactions = transactions;
-          } else {
-            _allTransactions.addAll(transactions);
-            // For infinite scroll, combine with existing transactions
-            if (state is TransactionLoaded) {
-              final existingTransactions =
-                  (state as TransactionLoaded).transactions;
-              emit(TransactionLoaded(
-                transactions: [...existingTransactions, ...transactions],
-                hasMore: hasMore,
-                currentPage: event.page,
-                currentFilters: event.filters,
-                searchQuery: _currentSearchQuery,
-              ));
-              return;
+            // Set unfiltered transactions only if no filters or search query
+            if ((event.filters == null || event.filters!.isEmpty) && (_currentSearchQuery == null || _currentSearchQuery!.isEmpty)) {
+              _allUnfilteredTransactions = List<tx.Transaction>.from(transactions);
             }
+          } else {
+            // Prevent duplicates by checking IDs before adding
+            final newIds = transactions.map((t) => t.id).toSet();
+            _allTransactions.removeWhere((t) => newIds.contains(t.id));
+            _allTransactions.addAll(transactions);
           }
 
           emit(TransactionLoaded(
-            transactions: transactions,
+            transactions: _allTransactions,
             hasMore: hasMore,
             currentPage: event.page,
             currentFilters: event.filters,
@@ -398,9 +394,10 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
         limit: _pageSize,
         searchQuery: _currentSearchQuery,
         type: _parseTransactionType(_currentFilters?['type']),
-        category: _currentFilters?['categoryId'],
+        categories: _currentFilters?['categories'] as List<String>?,
         startDate: _currentFilters?['startDate'],
         endDate: _currentFilters?['endDate'],
+        amountRange: _currentFilters?['amountRange'],
       );
 
       final result = await transactionRepository.getTransactions(query);
@@ -436,14 +433,21 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
       _currentFilters = event.filters;
       _currentPage = 1;
 
+      dynamic categoryFilter;
+      if (_currentFilters?['categories'] != null && (_currentFilters?['categories'] as List).isNotEmpty) {
+        categoryFilter = List<String>.from(_currentFilters?['categories']);
+      } else if (_currentFilters?['categories'] != null) {
+        categoryFilter = _currentFilters?['categories'];
+      }
       final query = TransactionQuery(
         page: 1,
         limit: _pageSize,
         searchQuery: _currentSearchQuery,
         type: _parseTransactionType(_currentFilters?['type']),
-        category: _currentFilters?['categoryId'],
-        startDate: _currentFilters?['startDate'],
-        endDate: _currentFilters?['endDate'],
+        categories: categoryFilter as List<String>?,
+        startDate: _currentFilters?['startDate'] != null ? DateTime.parse(_currentFilters?['startDate']) : null,
+        endDate: _currentFilters?['endDate'] != null ? DateTime.parse(_currentFilters?['endDate']) : null,
+        amountRange: _currentFilters?['amountRange'],
       );
 
       final result = await transactionRepository.getTransactions(query);

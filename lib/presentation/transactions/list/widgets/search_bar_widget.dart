@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -60,7 +59,9 @@ class _TransactionSearchBarState extends State<TransactionSearchBar>
   @override
   void didUpdateWidget(TransactionSearchBar oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.initialQuery != oldWidget.initialQuery &&
+    // Only update the controller if the new initialQuery is non-empty and different
+    if (widget.initialQuery.isNotEmpty &&
+        widget.initialQuery != oldWidget.initialQuery &&
         widget.initialQuery != _controller.text) {
       _controller.text = widget.initialQuery;
     }

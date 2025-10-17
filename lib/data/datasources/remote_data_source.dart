@@ -46,10 +46,12 @@ abstract class RemoteDataSource {
   Future<PaginatedResponse<Transaction>> getTransactions({
     int page = 1,
     int limit = 10,
-    String? categoryId,
+    List<String>? categories,
     String? type,
     String? startDate,
     String? endDate,
+    Map<String, dynamic>? amountRange,
+    String? search,
   });
 
   Future<Transaction> createTransaction(Transaction transaction);
@@ -76,16 +78,22 @@ class RemoteDataSourceImpl implements RemoteDataSource {
   Future<PaginatedResponse<Transaction>> getTransactions({
     int page = 1,
     int limit = 10,
-    String? categoryId,
+    List<String>? categories,
     String? type,
     String? startDate,
     String? endDate,
+    Map<String, dynamic>? amountRange,
+    String? search,
   }) async {
     final response = await _apiService.getTransactions(
       page: page,
       limit: limit,
-      category: categoryId,
+      categories: categories,
       type: type,
+      startDate: startDate,
+      endDate: endDate,
+      amountRange: amountRange,
+      search: search,
     );
 
     final paginatedResponse =
@@ -98,7 +106,7 @@ class RemoteDataSourceImpl implements RemoteDataSource {
     final transactionModel = TransactionModel.fromEntity(transaction);
 
     final response = await _apiService.createTransaction(transactionModel);
-    final createdModel = TransactionModel.fromJson(response.data!);
+    final createdModel = TransactionModel.fromJson(response.data!['data']);
     return createdModel.toEntity();
   }
 
@@ -108,7 +116,7 @@ class RemoteDataSourceImpl implements RemoteDataSource {
 
     final response =
         await _apiService.updateTransaction(transaction.id, transactionModel);
-    final updatedModel = TransactionModel.fromJson(response.data!);
+    final updatedModel = TransactionModel.fromJson(response.data!['data']);
     return updatedModel.toEntity();
   }
 

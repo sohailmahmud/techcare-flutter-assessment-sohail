@@ -147,12 +147,12 @@ class _PeriodSelectorState extends State<PeriodSelector>
       runSpacing: Spacing.space8,
       children: TimePeriod.values.map((period) {
         final isSelected = _selectedPeriod == period;
-        return _buildPeriodChip(period, isSelected);
+        return _buildChip(period, isSelected);
       }).toList(),
     );
   }
 
-  Widget _buildPeriodChip(TimePeriod period, bool isSelected) {
+  Widget _buildChip(TimePeriod period, bool isSelected) {
     return AnimatedContainer(
       key: ValueKey('period_chip_${period.name}'),
       duration: const Duration(milliseconds: 200),
@@ -169,52 +169,63 @@ class _PeriodSelectorState extends State<PeriodSelector>
               horizontal: Spacing.space16,
               vertical: Spacing.space8,
             ),
-            decoration: BoxDecoration(
-              color: isSelected ? AppColors.primary : AppColors.background,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: isSelected ? AppColors.primary : AppColors.border,
-                width: 1,
-              ),
-              boxShadow: isSelected
-                  ? [
-                      BoxShadow(
-                        color: AppColors.primary.withValues(alpha: 0.2),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ]
-                  : null,
-            ),
+            decoration: _chipDecoration(isSelected),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (period == TimePeriod.custom)
-                  AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 200),
-                    child: Icon(
-                      Icons.calendar_today_rounded,
-                      key: ValueKey('calendar_icon_$isSelected'),
-                      size: 16,
-                      color:
-                          isSelected ? Colors.white : AppColors.textSecondary,
-                    ),
-                  ),
+                  _chipIcon(isSelected),
                 if (period == TimePeriod.custom)
                   const SizedBox(width: Spacing.space4),
-                AnimatedDefaultTextStyle(
-                  duration: const Duration(milliseconds: 200),
-                  style: AppTypography.labelMedium.copyWith(
-                    color: isSelected ? Colors.white : AppColors.textSecondary,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                  ),
-                  child: Text(period.displayName),
-                ),
+                _chipText(period.displayName, isSelected),
               ],
             ),
           ),
         ),
       ),
+    );
+  }
+
+  BoxDecoration _chipDecoration(bool isSelected) {
+    return BoxDecoration(
+      color: isSelected ? AppColors.primary : AppColors.background,
+      borderRadius: BorderRadius.circular(20),
+      border: Border.all(
+        color: isSelected ? AppColors.primary : AppColors.border,
+        width: 1,
+      ),
+      boxShadow: isSelected
+          ? [
+              BoxShadow(
+                color: AppColors.primary.withValues(alpha: 0.2),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ]
+          : null,
+    );
+  }
+
+  Widget _chipIcon(bool isSelected) {
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 200),
+      child: Icon(
+        Icons.calendar_today_rounded,
+        key: ValueKey('calendar_icon_$isSelected'),
+        size: 16,
+        color: isSelected ? Colors.white : AppColors.textSecondary,
+      ),
+    );
+  }
+
+  Widget _chipText(String text, bool isSelected) {
+    return AnimatedDefaultTextStyle(
+      duration: const Duration(milliseconds: 200),
+      style: AppTypography.labelMedium.copyWith(
+        color: isSelected ? Colors.white : AppColors.textSecondary,
+        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+      ),
+      child: Text(text),
     );
   }
 

@@ -3,8 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'core/theme/app_theme.dart';
 import 'core/bloc/app_bloc_observer.dart';
 import 'core/router/app_router.dart';
-import 'presentation/transactions/list/bloc/transactions_bloc.dart';
 import 'injection_container.dart' as di;
+import 'presentation/transactions/list/bloc/transactions_bloc.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

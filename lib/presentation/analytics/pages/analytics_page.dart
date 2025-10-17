@@ -1,6 +1,8 @@
+import 'package:fintrack/data/datasources/asset_data_source.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../domain/entities/category.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/spacing.dart';
@@ -13,6 +15,7 @@ import '../widgets/summary_statistics_cards.dart';
 import '../widgets/spending_trend_chart.dart';
 import '../widgets/category_breakdown_chart.dart';
 import '../widgets/budget_progress_indicators.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 
 class AnalyticsPage extends StatefulWidget {
   const AnalyticsPage({super.key});
@@ -44,42 +47,78 @@ class _AnalyticsPageState extends State<AnalyticsPage>
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) =>
-          di.sl<AnalyticsBloc>()..add(const ChangePeriod(TimePeriod.thisWeek)),
-      child: BlocListener<TransactionsBloc, TransactionsState>(
-        listener: (context, state) {
-          // Refresh analytics when transactions are added/updated/deleted
-          if (state is TransactionOperationSuccess) {
-            context.read<AnalyticsBloc>().add(const RefreshAnalytics());
-          }
-        },
-        child: AnnotatedRegion<SystemUiOverlayStyle>(
-          value: const SystemUiOverlayStyle(
-            statusBarColor: Colors.transparent,
-            statusBarIconBrightness: Brightness.dark,
-            statusBarBrightness: Brightness.light,
-            systemNavigationBarColor: AppColors.background,
-            systemNavigationBarIconBrightness: Brightness.dark,
-          ),
-          child: Scaffold(
-            backgroundColor: AppColors.background,
-            appBar: _buildAppBar(),
-            body: BlocBuilder<AnalyticsBloc, AnalyticsState>(
+    return FutureBuilder<List<Category>>(
+      future: _loadCategories(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return _buildScaffold(
+            body: const Center(child: AnalyticsSkeletonLoader()),
+          );
+        }
+        final categories = snapshot.data ?? [];
+        return BlocProvider(
+          create: (context) => AnalyticsBloc(
+            transactionsBloc: di.sl<TransactionsBloc>(),
+            categories: categories,
+          )..add(const ChangePeriod(TimePeriod.thisWeek)),
+          child: BlocListener<TransactionsBloc, TransactionsState>(
+            listener: (context, state) {
+              // Refresh analytics when transactions are added/updated/deleted
+              if (state is TransactionOperationSuccess) {
+                context.read<AnalyticsBloc>().add(const RefreshAnalytics());
+              }
+            },
+            child: BlocBuilder<AnalyticsBloc, AnalyticsState>(
               builder: (context, state) {
-                return RefreshIndicator(
-                  onRefresh: () => _onRefresh(context),
-                  child: SingleChildScrollView(
-                    controller: _scrollController,
-                    physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.all(Spacing.space16),
-                    child: _buildContent(context, state),
+                if (state is AnalyticsLoading) {
+                  return _buildScaffold(
+                    body: const Center(child: AnalyticsSkeletonLoader()),
+                  );
+                }
+                return _buildScaffold(
+                  body: RefreshIndicator(
+                    onRefresh: () => _onRefresh(context),
+                    child: SingleChildScrollView(
+                      controller: _scrollController,
+                      physics: const BouncingScrollPhysics(),
+                      padding: const EdgeInsets.all(Spacing.space16),
+                      child: _buildContent(context, state),
+                    ),
                   ),
                 );
               },
             ),
           ),
-        ),
+        );
+      },
+    );
+  }
+
+  Future<List<Category>> _loadCategories() async {
+    // Load categories from category entity
+    final AssetDataSource assetDataSource = AssetDataSource();
+    final categoriesResponse = await assetDataSource.getCategories();
+    if (categoriesResponse.categories.isNotEmpty) {
+      return categoriesResponse.categories
+          .map((model) => model.toEntity())
+          .toList();
+    }
+    return [];
+  }
+
+  Widget _buildScaffold({required Widget body}) {
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+        systemNavigationBarColor: AppColors.background,
+        systemNavigationBarIconBrightness: Brightness.dark,
+      ),
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: _buildAppBar(),
+        body: body,
       ),
     );
   }
@@ -102,21 +141,28 @@ class _AnalyticsPageState extends State<AnalyticsPage>
 
   Widget _buildContent(BuildContext context, AnalyticsState state) {
     if (state is AnalyticsLoading) {
-      return _buildLoadingState();
+      return _buildLoadingWidget(
+        title: 'Loading Analytics...',
+        subtitle: 'Analyzing your financial data',
+      );
     }
 
     if (state is AnalyticsError) {
-      return _buildErrorState(context, state.message);
+      return _buildErrorWidget(
+        context,
+        state.message,
+        onRetry: () => context.read<AnalyticsBloc>().add(const LoadAnalytics()),
+        title: 'Something went wrong',
+      );
     }
 
     if (state is AnalyticsLoaded) {
       return _buildLoadedState(context, state.data);
     }
-
-    return _buildInitialState(context);
+    return const SizedBox.shrink();
   }
 
-  Widget _buildLoadingState() {
+  Widget _buildLoadingWidget({String? title, String? subtitle}) {
     return SizedBox(
       height: MediaQuery.of(context).size.height * 0.6,
       child: Center(
@@ -127,28 +173,33 @@ class _AnalyticsPageState extends State<AnalyticsPage>
               valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
               strokeWidth: 3,
             ),
-            const SizedBox(height: Spacing.space24),
-            Text(
-              'Loading Analytics...',
-              style: AppTypography.bodyLarge.copyWith(
-                color: AppColors.textSecondary,
-                fontWeight: FontWeight.w500,
+            if (title != null) ...[
+              const SizedBox(height: Spacing.space24),
+              Text(
+                title,
+                style: AppTypography.bodyLarge.copyWith(
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-            ),
-            const SizedBox(height: Spacing.space8),
-            Text(
-              'Analyzing your financial data',
-              style: AppTypography.bodyMedium.copyWith(
-                color: AppColors.textTertiary,
+            ],
+            if (subtitle != null) ...[
+              const SizedBox(height: Spacing.space8),
+              Text(
+                subtitle,
+                style: AppTypography.bodyMedium.copyWith(
+                  color: AppColors.textTertiary,
+                ),
               ),
-            ),
+            ],
           ],
         ),
       ),
     );
   }
 
-  Widget _buildErrorState(BuildContext context, String message) {
+  Widget _buildErrorWidget(BuildContext context, String message,
+      {VoidCallback? onRetry, String? title}) {
     return SizedBox(
       height: MediaQuery.of(context).size.height * 0.6,
       child: Center(
@@ -161,14 +212,15 @@ class _AnalyticsPageState extends State<AnalyticsPage>
               color: AppColors.error,
             ),
             const SizedBox(height: Spacing.space24),
-            Text(
-              'Something went wrong',
-              style: AppTypography.headlineSmall.copyWith(
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.w600,
+            if (title != null)
+              Text(
+                title,
+                style: AppTypography.headlineSmall.copyWith(
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
-            const SizedBox(height: Spacing.space8),
+            if (title != null) const SizedBox(height: Spacing.space8),
             Text(
               message,
               style: AppTypography.bodyMedium.copyWith(
@@ -177,71 +229,20 @@ class _AnalyticsPageState extends State<AnalyticsPage>
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: Spacing.space24),
-            ElevatedButton.icon(
-              onPressed: () {
-                context.read<AnalyticsBloc>().add(const LoadAnalytics());
-              },
-              icon: const Icon(Icons.refresh_rounded),
-              label: const Text('Try Again'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: Spacing.space24,
-                  vertical: Spacing.space12,
+            if (onRetry != null)
+              ElevatedButton.icon(
+                onPressed: onRetry,
+                icon: const Icon(Icons.refresh_rounded),
+                label: const Text('Try Again'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: Spacing.space24,
+                    vertical: Spacing.space12,
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInitialState(BuildContext context) {
-    return SizedBox(
-      height: MediaQuery.of(context).size.height * 0.6,
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.analytics_outlined,
-              size: 64,
-              color: AppColors.textTertiary,
-            ),
-            const SizedBox(height: Spacing.space24),
-            Text(
-              'Welcome to Analytics',
-              style: AppTypography.headlineSmall.copyWith(
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: Spacing.space8),
-            Text(
-              'Get insights into your spending patterns',
-              style: AppTypography.bodyMedium.copyWith(
-                color: AppColors.textSecondary,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: Spacing.space24),
-            ElevatedButton.icon(
-              onPressed: () {
-                context.read<AnalyticsBloc>().add(const LoadAnalytics());
-              },
-              icon: const Icon(Icons.insights_rounded),
-              label: const Text('Get Started'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: Spacing.space24,
-                  vertical: Spacing.space12,
-                ),
-              ),
-            ),
           ],
         ),
       ),
@@ -249,6 +250,30 @@ class _AnalyticsPageState extends State<AnalyticsPage>
   }
 
   Widget _buildLoadedState(BuildContext context, AnalyticsData data) {
+    // Calculate previous period for percentage change
+    final previousData = data.trendData;
+    double previousIncome = 0.0;
+    double previousExpenses = 0.0;
+    double previousNetBalance = 0.0;
+    if (previousData.incomePoints.length > 1) {
+      previousIncome =
+          previousData.incomePoints[previousData.incomePoints.length - 2].value;
+    }
+    if (previousData.expensePoints.length > 1) {
+      previousExpenses = previousData
+          .expensePoints[previousData.expensePoints.length - 2].value;
+    }
+    previousNetBalance = previousIncome - previousExpenses;
+
+    double pctChange(double current, double previous) {
+      if (previous == 0) return 0.0;
+      return ((current - previous) / previous) * 100;
+    }
+
+    final incomeChange = pctChange(data.totalIncome, previousIncome);
+    final expenseChange = pctChange(data.totalExpenses, previousExpenses);
+    final netBalanceChange = pctChange(data.netBalance, previousNetBalance);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min, // Prevent excessive height
@@ -270,7 +295,12 @@ class _AnalyticsPageState extends State<AnalyticsPage>
         const SizedBox(height: Spacing.space16), // Reduced spacing
 
         // Summary Statistics
-        ResponsiveSummaryStats(statistics: data),
+        ResponsiveSummaryStats(
+          statistics: data,
+          incomeChange: incomeChange,
+          expenseChange: expenseChange,
+          netBalanceChange: netBalanceChange,
+        ),
 
         const SizedBox(height: Spacing.space16), // Reduced spacing
 
@@ -297,6 +327,7 @@ class _AnalyticsPageState extends State<AnalyticsPage>
                     Expanded(
                       child: CategoryBreakdownChart(
                         categoryData: data.categoryBreakdown,
+                        categories: data.categories,
                         isLoading: false,
                       ),
                     ),
@@ -304,6 +335,7 @@ class _AnalyticsPageState extends State<AnalyticsPage>
                     Expanded(
                       child: BudgetProgressIndicators(
                         budgetData: data.budgetComparisons,
+                        categories: data.categories,
                         isLoading: false,
                       ),
                     ),
@@ -317,11 +349,13 @@ class _AnalyticsPageState extends State<AnalyticsPage>
                 children: [
                   CategoryBreakdownChart(
                     categoryData: data.categoryBreakdown,
+                    categories: data.categories,
                     isLoading: false,
                   ),
                   const SizedBox(height: Spacing.space16),
                   BudgetProgressIndicators(
                     budgetData: data.budgetComparisons,
+                    categories: data.categories,
                     isLoading: false,
                   ),
                 ],
@@ -346,11 +380,4 @@ class _AnalyticsPageState extends State<AnalyticsPage>
     await _refreshController.forward();
     _refreshController.reset();
   }
-}
-
-/// Extension for responsive design breakpoints
-extension ResponsiveBreakpoints on BuildContext {
-  bool get isTablet => MediaQuery.of(this).size.width >= 768;
-  bool get isDesktop => MediaQuery.of(this).size.width >= 1024;
-  bool get isMobile => MediaQuery.of(this).size.width < 768;
 }

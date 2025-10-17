@@ -43,18 +43,4 @@ class AppColors {
   // Overlay colors
   static const Color overlay = Color(0x33000000);
   static const Color scrim = Color(0x99000000);
-
-  // Category colors for pie chart
-  static const List<Color> categoryColors = [
-    AppColors.primary,
-    AppColors.secondary,
-    AppColors.success,
-    AppColors.warning,
-    AppColors.error,
-    AppColors.info,
-    Color(0xFF9C27B0), // Purple
-    Color(0xFFFF5722), // Deep Orange
-    Color(0xFF607D8B), // Blue Grey
-    Color(0xFF795548), // Brown
-  ];
 }

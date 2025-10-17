@@ -6,7 +6,7 @@ import 'package:hive_ce/hive.dart';
 import 'package:fintrack/data/models/cache_metadata.dart';
 import 'package:fintrack/data/models/cached_transaction.dart';
 import 'package:fintrack/data/models/hive_key_value.dart';
-import 'data/models/hive_models.dart';
+import 'package:fintrack/data/models/hive_models.dart';
 
 extension HiveRegistrar on HiveInterface {
   void registerAdapters() {

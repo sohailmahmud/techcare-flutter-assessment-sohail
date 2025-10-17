@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+
 import '../../../domain/entities/transaction.dart' as tx;
 import '../../../domain/entities/category.dart';
 import '../../../domain/entities/analytics.dart';
@@ -93,21 +94,21 @@ class AnalyticsError extends AnalyticsState {
 
 class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
   final TransactionsBloc transactionsBloc;
+  final List<Category> categories;
 
   // Default budget amounts per category (in BDT)
   static const Map<String, double> _defaultBudgets = {
-    'food': 15000.0,
-    'transport': 8000.0,
-    'entertainment': 5000.0,
-    'healthcare': 10000.0,
-    'shopping': 12000.0,
-    'utilities': 6000.0,
-    'education': 8000.0,
-    'other': 5000.0,
+    'Food & Dining': 20000.00,
+    'Transportation': 15000.00,
+    'Shopping': 10000.00,
+    'Entertainment': 8000.00,
+    'Bills & Utilities': 12000.0,
+    'Health & Fitness': 5000.00,
+    'Education': 3000.00,
   };
 
-  AnalyticsBloc({required this.transactionsBloc})
-      : super(const AnalyticsInitial()) {
+  AnalyticsBloc({required this.transactionsBloc, required this.categories})
+    : super(const AnalyticsInitial()) {
     on<LoadAnalytics>(_onLoadAnalytics);
     on<UpdateDateRange>(_onUpdateDateRange);
     on<FilterByCategory>(_onFilterByCategory);
@@ -231,13 +232,8 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
   }
 
   List<tx.Transaction> _getTransactionsFromBloc() {
-    final transactionsState = transactionsBloc.state;
-    if (transactionsState is TransactionLoaded) {
-      return transactionsState.transactions;
-    } else if (transactionsState is TransactionError) {
-      throw Exception('Failed to load transactions');
-    }
-    return [];
+    // Always use all unfiltered transactions for analytics
+    return transactionsBloc.allUnfilteredTransactions;
   }
 
   Future<AnalyticsData> _calculateAnalytics(
@@ -246,7 +242,8 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
     String? categoryFilter,
     TimePeriod? period,
   }) async {
-    final transactions = _getTransactionsFromBloc();
+  final transactions = _getTransactionsFromBloc();
+  // Use injected categories list
     final dateRange = DateRange(startDate: startDate, endDate: endDate);
 
     // Filter transactions by date range and category
@@ -269,15 +266,15 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
 
     final totalExpenses = filteredTransactions
         .where((t) => t.type == tx.TransactionType.expense)
-        .fold(0.0, (sum, t) => sum + t.amount.abs());
+        .fold(0.0, (sum, t) => sum + t.amount);
 
-    final netAmount = totalIncome - totalExpenses;
+    // Calculate net balance and savings rate
+    final netBalance = totalIncome - totalExpenses;
+    final savingsRate = totalIncome > 0 ? (netBalance / totalIncome) * 100 : 0.0;
 
     // Generate trend data points
-    final incomeDataPoints =
-        _generateTrendDataPoints(endDate, totalIncome, true);
-    final expenseDataPoints =
-        _generateTrendDataPoints(endDate, totalExpenses, false);
+    final incomeDataPoints = _generateTrendDataPoints(endDate, totalIncome, true);
+    final expenseDataPoints = _generateTrendDataPoints(endDate, totalExpenses, false);
 
     // Create category breakdown
     final categoryBreakdown =
@@ -291,7 +288,8 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
       dateRange: dateRange,
       totalIncome: totalIncome,
       totalExpenses: totalExpenses,
-      netAmount: netAmount,
+      netBalance: netBalance,
+      savingsRate: savingsRate,
       totalTransactions: filteredTransactions.length,
       averageTransactionAmount: filteredTransactions.isNotEmpty
           ? totalExpenses / filteredTransactions.length
@@ -303,6 +301,7 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
         dateRange: dateRange,
       ),
       budgetComparisons: budgetProgress,
+      categories: categories,
       lastUpdated: DateTime.now(),
     );
   }
@@ -350,80 +349,113 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
 
     for (final transaction
         in transactions.where((t) => t.type == tx.TransactionType.expense)) {
-      final categoryName = transaction.categoryName;
-      categoryTotals[categoryName] =
-          (categoryTotals[categoryName] ?? 0) + transaction.amount;
-      categoryCounts[categoryName] = (categoryCounts[categoryName] ?? 0) + 1;
+      final categoryId = transaction.categoryId;
+      categoryTotals[categoryId] =
+          (categoryTotals[categoryId] ?? 0) + transaction.amount;
+      categoryCounts[categoryId] = (categoryCounts[categoryId] ?? 0) + 1;
     }
 
     return categoryTotals.entries.map((entry) {
-      final percentage =
-          totalExpenses > 0 ? (entry.value / totalExpenses) * 100 : 0.0;
+      final percentage = totalExpenses > 0 ? (entry.value / totalExpenses) * 100 : 0.0;
 
-      // Create a mock category for now - in a real app, you'd get this from a category service
-      final category = Category(
-        id: entry.key,
-        name: entry.key,
-        icon: Icons.category_rounded,
-        color: _getCategoryColor(entry.key),
+      // Find the first transaction for this category to get its entity values
+
+      // Find the first transaction for this category
+      bool found = false;
+      final txForCategory = transactions.firstWhere(
+        (t) => t.categoryId == entry.key && t.type == tx.TransactionType.expense,
+        orElse: () {
+          found = false;
+          return tx.Transaction(
+            id: '',
+            title: '',
+            amount: 0.0,
+            type: tx.TransactionType.expense,
+            category: const Category(
+              id: 'unknown',
+              name: 'Unknown',
+              icon: Icons.category,
+              color: Colors.grey,
+            ),
+            date: DateTime.now(),
+          );
+        },
       );
+      found = txForCategory.id.isNotEmpty;
+
+      final category = found
+          ? txForCategory.category
+          : const Category(
+              id: 'unknown',
+              name: 'Unknown',
+              icon: Icons.category,
+              color: Colors.grey,
+            );
+
+      final budget = category.budget;
+      final budgetUtilization = (budget != null && budget > 0)
+          ? (entry.value / budget) * 100
+          : null;
 
       return CategoryBreakdown(
-        categoryId: category.id,
-        categoryName: category.name,
+        category: category,
         amount: entry.value,
         percentage: percentage,
         transactionCount: categoryCounts[entry.key] ?? 0,
+        budget: budget,
+        budgetUtilization: budgetUtilization,
       );
     }).toList()
       ..sort((a, b) => b.amount.compareTo(a.amount));
   }
 
-  List<BudgetComparison> _calculateBudgetProgress(
-      List<tx.Transaction> transactions) {
+  List<BudgetComparison> _calculateBudgetProgress(List<tx.Transaction> transactions) {
+    // DEBUG: Print normalized budget keys and injected category names
+    debugPrint('>>> ENTERED _calculateBudgetProgress');
+    debugPrint('--- Budget Category Keys (normalized) ---');
+    for (final key in _defaultBudgets.keys) {
+      debugPrint('Budget Key: ' + key.trim().toLowerCase());
+    }
+    debugPrint('Injected categories list length: ${categories.length}');
+    debugPrint('Injected categories list: $categories');
+    debugPrint('--- Injected Category Names (normalized) ---');
+    for (final cat in categories) {
+      debugPrint('Category: ${cat.name.trim().toLowerCase()} | icon: ${cat.icon} | color: ${cat.color}');
+    }
+    debugPrint('--- End of Category Debug ---');
+    debugPrint('<<< EXITING _calculateBudgetProgress');
+
     final categoryTotals = <String, double>{};
 
-    for (final transaction
-        in transactions.where((t) => t.type == tx.TransactionType.expense)) {
-      final categoryName = transaction.categoryName.toLowerCase();
-      categoryTotals[categoryName] =
-          (categoryTotals[categoryName] ?? 0) + transaction.amount;
+    for (final transaction in transactions.where((t) => t.type == tx.TransactionType.expense)) {
+      final categoryName = transaction.categoryName;
+      categoryTotals[categoryName] = (categoryTotals[categoryName] ?? 0) + transaction.amount;
     }
 
-    return _defaultBudgets.entries.map((entry) {
-      final actualAmount = categoryTotals[entry.key] ?? 0.0;
+    // Build a lookup map for category name -> Category entity
+    final categoryNameMap = {
+      for (final cat in categories)
+        cat.name.trim().toLowerCase(): cat
+    };
 
-      // Create a mock category for now - in a real app, you'd get this from a category service
-      final category = Category(
-        id: entry.key,
+    return _defaultBudgets.entries.map((entry) {
+      final normalizedName = entry.key.trim().toLowerCase();
+      final category = categoryNameMap[normalizedName] ?? Category(
+        id: '',
         name: entry.key,
-        icon: Icons.category_rounded,
-        color: _getCategoryColor(entry.key),
+        icon: Icons.category,
+        color: Colors.grey,
       );
+
+      final actualAmount = categoryTotals[entry.key] ?? 0.0;
 
       return BudgetComparison.fromAmounts(
         categoryId: category.id,
         categoryName: category.name,
         budgetAmount: entry.value,
         actualAmount: actualAmount,
+        category: category,
       );
     }).toList();
-  }
-
-  Color _getCategoryColor(String categoryName) {
-    // Simple color mapping based on category name
-    final colors = [
-      Colors.blue,
-      Colors.green,
-      Colors.orange,
-      Colors.purple,
-      Colors.red,
-      Colors.teal,
-      Colors.indigo,
-      Colors.pink,
-    ];
-
-    final hash = categoryName.hashCode;
-    return colors[hash.abs() % colors.length];
   }
 }

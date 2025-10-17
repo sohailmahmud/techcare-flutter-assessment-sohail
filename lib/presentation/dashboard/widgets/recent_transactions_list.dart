@@ -6,20 +6,20 @@ import '../../../core/theme/spacing.dart';
 import '../../../core/widgets/common_widgets.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/utils/formatters.dart';
-import '../../../domain/entities/transaction.dart';
+import '../../../domain/entities/transaction.dart' as tx;
 
 /// Enhanced recent transactions list with lazy loading and swipe gestures
-class TransactionsList extends StatefulWidget {
-  final List<Transaction> transactions;
-  final Function(String)? onEdit;
-  final Function(String)? onDelete;
-  final Function(Transaction)? onTransactionTap;
+class RecentTransactionsList extends StatefulWidget {
+  final List<tx.Transaction> transactions;
+  final Function(tx.Transaction)? onEdit;
+  final Function(tx.Transaction)? onDelete;
+  final Function(tx.Transaction)? onTransactionTap;
   final VoidCallback? onViewAll;
   final bool isLoading;
   final int? maxItems; // Optional limit for dashboard view
   final bool enableLazyLoading; // Enable lazy loading for large datasets
 
-  const TransactionsList({
+  const RecentTransactionsList({
     super.key,
     required this.transactions,
     this.onEdit,
@@ -32,10 +32,10 @@ class TransactionsList extends StatefulWidget {
   });
 
   @override
-  State<TransactionsList> createState() => _TransactionsListState();
+  State<RecentTransactionsList> createState() => _RecentTransactionsListState();
 }
 
-class _TransactionsListState extends State<TransactionsList>
+class _RecentTransactionsListState extends State<RecentTransactionsList>
     with TickerProviderStateMixin {
   late AnimationController _listAnimationController;
   late Animation<double> _listAnimation;
@@ -107,7 +107,7 @@ class _TransactionsListState extends State<TransactionsList>
   @override
   Widget build(BuildContext context) {
     return GlassMorphicContainer(
-      padding: const EdgeInsets.all(Spacing.space16),
+      padding: const EdgeInsets.symmetric(vertical: Spacing.space16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -229,40 +229,41 @@ class _TransactionsListState extends State<TransactionsList>
       animation: _listAnimation,
       builder: (context, child) {
         return Column(
-          children: groupedTransactions.entries.map((entry) {
-            final date = entry.key;
-            final transactions = entry.value;
-
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildDateHeader(date),
-                const SizedBox(height: 8),
-                ...transactions.asMap().entries.map((transactionEntry) {
-                  final index = transactionEntry.key;
-                  final transaction = transactionEntry.value;
-
-                  return SlideTransition(
-                    position: Tween<Offset>(
-                      begin: const Offset(1, 0),
-                      end: Offset.zero,
-                    ).animate(CurvedAnimation(
-                      parent: _listAnimation,
-                      curve: Interval(
-                        index * 0.1,
-                        1.0,
-                        curve: Curves.easeOutCubic,
-                      ),
-                    )),
-                    child: _buildTransactionItem(transaction),
-                  );
-                }).toList(),
-                const SizedBox(height: 16),
-              ],
-            );
-          }).toList(),
+          children: groupedTransactions.entries
+              .map((entry) => _buildTransactionGroup(entry.key, entry.value))
+              .toList(),
         );
       },
+    );
+  }
+
+  Widget _buildTransactionGroup(
+      String date, List<tx.Transaction> transactions) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildDateHeader(date),
+        const SizedBox(height: 8),
+        ...transactions.asMap().entries.map((transactionEntry) {
+          final index = transactionEntry.key;
+          final transaction = transactionEntry.value;
+          return SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(1, 0),
+              end: Offset.zero,
+            ).animate(CurvedAnimation(
+              parent: _listAnimation,
+              curve: Interval(
+                index * 0.1,
+                1.0,
+                curve: Curves.easeOutCubic,
+              ),
+            )),
+            child: _buildTransactionItem(transaction),
+          );
+        }).toList(),
+        const SizedBox(height: 16),
+      ],
     );
   }
 
@@ -346,10 +347,10 @@ class _TransactionsListState extends State<TransactionsList>
     );
   }
 
-  Map<String, List<Transaction>> _groupTransactionsByDate(
-      [List<Transaction>? transactions]) {
-    final Map<String, List<Transaction>> grouped = {};
-    final List<Transaction> transactionsToGroup = transactions ??
+  Map<String, List<tx.Transaction>> _groupTransactionsByDate(
+      [List<tx.Transaction>? transactions]) {
+    final Map<String, List<tx.Transaction>> grouped = {};
+    final List<tx.Transaction> transactionsToGroup = transactions ??
         widget.transactions
             .take(widget.maxItems ?? AppConstants.maxRecentTransactions)
             .toList();
@@ -375,8 +376,8 @@ class _TransactionsListState extends State<TransactionsList>
     );
   }
 
-  Widget _buildTransactionItem(Transaction transaction) {
-    final isIncome = transaction.type == TransactionType.income;
+  Widget _buildTransactionItem(tx.Transaction transaction) {
+    final isIncome = transaction.type == tx.TransactionType.income;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
@@ -393,11 +394,14 @@ class _TransactionsListState extends State<TransactionsList>
           alignment: Alignment.centerRight,
         ),
         confirmDismiss: (direction) async {
-          if (direction == DismissDirection.startToEnd) {
-            widget.onEdit?.call(transaction.id);
-            return false;
-          } else if (direction == DismissDirection.endToStart) {
+          if (direction == DismissDirection.endToStart) {
+            // Delete action
             return await _showDeleteConfirmation(transaction);
+          }
+          if (direction == DismissDirection.startToEnd) {
+            // Edit action
+            widget.onEdit?.call(transaction);
+            return false; // Don't dismiss
           }
           return false;
         },
@@ -422,7 +426,7 @@ class _TransactionsListState extends State<TransactionsList>
             ),
             child: Row(
               children: [
-                _buildTransactionIcon(transaction, isIncome),
+                _buildTransactionIcon(transaction),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
@@ -495,13 +499,13 @@ class _TransactionsListState extends State<TransactionsList>
     );
   }
 
-  Widget _buildTransactionIcon(Transaction transaction, bool isIncome) {
+  Widget _buildTransactionIcon(tx.Transaction transaction) {
     return Container(
       width: Spacing.transactionIconSize,
       height: Spacing.transactionIconSize,
       decoration: BoxDecoration(
         color: transaction.category.color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(Spacing.transactionIconSize / 2),
+        borderRadius: BorderRadius.circular(Spacing.radiusM),
       ),
       child: Icon(
         transaction.category.icon,
@@ -535,31 +539,33 @@ class _TransactionsListState extends State<TransactionsList>
     );
   }
 
-  Future<bool> _showDeleteConfirmation(Transaction transaction) async {
-    return await showDialog<bool>(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Delete Transaction'),
-            content:
-                Text('Are you sure you want to delete "${transaction.title}"?'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Cancel'),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop(true);
-                  widget.onDelete?.call(transaction.id);
-                },
-                style: TextButton.styleFrom(
-                  foregroundColor: AppColors.error,
-                ),
-                child: const Text('Delete'),
-              ),
-            ],
+  Future<bool> _showDeleteConfirmation(tx.Transaction transaction) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Transaction'),
+        content:
+            Text('Are you sure you want to delete "${transaction.title}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
           ),
-        ) ??
-        false;
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.error,
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (result == true) {
+      widget.onDelete?.call(transaction);
+    }
+
+    return result ?? false;
   }
 }

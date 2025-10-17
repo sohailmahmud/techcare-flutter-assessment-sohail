@@ -75,7 +75,7 @@ void main() {
       const customQuery = TransactionQuery(
         page: 2,
         limit: 10,
-        category: 'cat1',
+        categories: ['cat_001'],
         type: TransactionType.expense,
       );
 

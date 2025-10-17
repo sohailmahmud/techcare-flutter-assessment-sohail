@@ -27,7 +27,7 @@ class Spacing {
   static const double headerCollapsedHeight = 80.0;
 
   // Balance card height
-  static const double balanceCardHeight = 200.0;
+  static const double balanceCardHeight = 250.0;
 
   // Pie chart height
   static const double pieChartHeight = 300.0;

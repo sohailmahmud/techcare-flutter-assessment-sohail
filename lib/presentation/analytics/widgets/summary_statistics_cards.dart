@@ -7,10 +7,16 @@ import '../../../domain/entities/analytics.dart';
 
 class SummaryStatisticsCards extends StatefulWidget {
   final AnalyticsData statistics;
+  final double incomeChange;
+  final double expenseChange;
+  final double netBalanceChange;
 
   const SummaryStatisticsCards({
     super.key,
     required this.statistics,
+    required this.incomeChange,
+    required this.expenseChange,
+    required this.netBalanceChange,
   });
 
   @override
@@ -19,8 +25,42 @@ class SummaryStatisticsCards extends StatefulWidget {
 
 class _SummaryStatisticsCardsState extends State<SummaryStatisticsCards>
     with TickerProviderStateMixin {
+  final List<Map<String, dynamic>> _cardConfigs = [
+    {
+      'title': 'Total Income',
+      'color': AppColors.income,
+      'icon': Icons.trending_up_rounded,
+    },
+    {
+      'title': 'Total Expenses',
+      'color': AppColors.expense,
+      'icon': Icons.trending_down_rounded,
+    },
+    {
+      'title': 'Net Balance',
+      'color': null,
+      'icon': null,
+    },
+  ];
   late List<AnimationController> _controllers;
   late List<Animation<double>> _animations;
+
+  Color _getNetBalanceColor(double netBalance) =>
+      netBalance >= 0 ? AppColors.income : AppColors.expense;
+  IconData _getNetBalanceIcon(double netBalance) =>
+      netBalance >= 0 ? Icons.account_balance_wallet_rounded : Icons.warning_rounded;
+  double _getStatAmount(int index) {
+    switch (index) {
+      case 0:
+        return widget.statistics.totalIncome;
+      case 1:
+        return widget.statistics.totalExpenses;
+      case 2:
+        return widget.statistics.netBalance;
+      default:
+        return 0.0;
+    }
+  }
 
   @override
   void initState() {
@@ -81,44 +121,33 @@ class _SummaryStatisticsCardsState extends State<SummaryStatisticsCards>
   @override
   Widget build(BuildContext context) {
     return Row(
-      children: [
-        Expanded(
+      children: List.generate(3, (index) {
+        final config = _cardConfigs[index];
+        final amount = _getStatAmount(index);
+        final color = index == 2
+            ? _getNetBalanceColor(amount)
+            : config['color'] as Color;
+        final icon = index == 2
+            ? _getNetBalanceIcon(amount)
+            : config['icon'] as IconData;
+        final change = index == 0
+            ? widget.incomeChange
+            : index == 1
+                ? widget.expenseChange
+                : widget.netBalanceChange;
+        return Expanded(
           child: _buildStatCard(
-            index: 0,
-            title: 'Total Income',
-            amount: widget.statistics.totalIncome,
-            change: 0.0,
-            color: AppColors.income,
-            icon: Icons.trending_up_rounded,
+            index: index,
+            title: config['title'] as String,
+            amount: amount,
+            change: change,
+            color: color,
+            icon: icon,
           ),
-        ),
-        const SizedBox(width: Spacing.space12),
-        Expanded(
-          child: _buildStatCard(
-            index: 1,
-            title: 'Total Expenses',
-            amount: widget.statistics.totalExpenses,
-            change: 0.0,
-            color: AppColors.expense,
-            icon: Icons.trending_down_rounded,
-          ),
-        ),
-        const SizedBox(width: Spacing.space12),
-        Expanded(
-          child: _buildStatCard(
-            index: 2,
-            title: 'Net Balance',
-            amount: widget.statistics.netAmount,
-            change: 0.0,
-            color: widget.statistics.netAmount >= 0
-                ? AppColors.income
-                : AppColors.expense,
-            icon: widget.statistics.netAmount >= 0
-                ? Icons.account_balance_wallet_rounded
-                : Icons.warning_rounded,
-          ),
-        ),
-      ],
+        );
+      }).expand((widget) => [widget, const SizedBox(width: Spacing.space12)])
+        .toList()
+        ..removeLast(),
     );
   }
 
@@ -287,10 +316,16 @@ class AnimatedNumberCounter extends StatelessWidget {
 /// Responsive summary stats for mobile/desktop
 class ResponsiveSummaryStats extends StatelessWidget {
   final AnalyticsData statistics;
+  final double incomeChange;
+  final double expenseChange;
+  final double netBalanceChange;
 
   const ResponsiveSummaryStats({
     super.key,
     required this.statistics,
+    required this.incomeChange,
+    required this.expenseChange,
+    required this.netBalanceChange,
   });
 
   @override
@@ -299,7 +334,12 @@ class ResponsiveSummaryStats extends StatelessWidget {
       builder: (context, constraints) {
         if (constraints.maxWidth > 600) {
           // Desktop layout - horizontal
-          return SummaryStatisticsCards(statistics: statistics);
+          return SummaryStatisticsCards(
+            statistics: statistics,
+            incomeChange: incomeChange,
+            expenseChange: expenseChange,
+            netBalanceChange: netBalanceChange,
+          );
         } else {
           // Mobile layout - vertical stack
           return Column(
@@ -310,7 +350,7 @@ class ResponsiveSummaryStats extends StatelessWidget {
                     child: _buildCompactStatCard(
                       title: 'Income',
                       amount: statistics.totalIncome,
-                      change: 0.0,
+                      change: incomeChange,
                       color: AppColors.income,
                       icon: Icons.trending_up_rounded,
                     ),
@@ -320,7 +360,7 @@ class ResponsiveSummaryStats extends StatelessWidget {
                     child: _buildCompactStatCard(
                       title: 'Expenses',
                       amount: statistics.totalExpenses,
-                      change: 0.0,
+                      change: expenseChange,
                       color: AppColors.expense,
                       icon: Icons.trending_down_rounded,
                     ),
@@ -330,12 +370,12 @@ class ResponsiveSummaryStats extends StatelessWidget {
               const SizedBox(height: Spacing.space8),
               _buildCompactStatCard(
                 title: 'Net Balance',
-                amount: statistics.netAmount,
-                change: 0.0,
-                color: statistics.netAmount >= 0
+                amount: statistics.netBalance,
+                change: netBalanceChange,
+                color: statistics.netBalance >= 0
                     ? AppColors.income
                     : AppColors.expense,
-                icon: statistics.netAmount >= 0
+                icon: statistics.netBalance >= 0
                     ? Icons.account_balance_wallet_rounded
                     : Icons.warning_rounded,
               ),

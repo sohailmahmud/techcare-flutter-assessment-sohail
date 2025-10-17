@@ -29,6 +29,8 @@ class _SpeedDialFABState extends State<SpeedDialFAB>
   late Animation<double> _scaleAnimation;
   late Animation<double> _rotationAnimation;
   bool _isOpen = false;
+  OverlayEntry? _overlayEntry;
+  final GlobalKey _containerKey = GlobalKey();
 
   @override
   void initState() {
@@ -56,8 +58,10 @@ class _SpeedDialFABState extends State<SpeedDialFAB>
     setState(() {
       _isOpen = !_isOpen;
       if (_isOpen) {
+        _insertOverlay();
         _controller.forward();
       } else {
+        _removeOverlay();
         _controller.reverse();
       }
     });
@@ -67,83 +71,145 @@ class _SpeedDialFABState extends State<SpeedDialFAB>
     if (_isOpen) {
       setState(() {
         _isOpen = false;
+        _removeOverlay();
         _controller.reverse();
       });
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        // Backdrop overlay when expanded - positioned to cover entire screen
-        if (_isOpen)
-          Positioned(
-            // Position to cover entire screen from this widget's position
-            top: -MediaQuery.of(context).size.height,
-            left: -MediaQuery.of(context).size.width,
-            width: MediaQuery.of(context).size.width * 2,
-            height: MediaQuery.of(context).size.height * 2,
+  void _insertOverlay() {
+    if (_overlayEntry != null) return;
+
+  final overlay = Overlay.of(context);
+
+    // Find the global position of the container so we can place the actions there
+    final renderBox = _containerKey.currentContext?.findRenderObject() as RenderBox?;
+    final topLeft = renderBox?.localToGlobal(Offset.zero) ?? Offset.zero;
+
+    _overlayEntry = OverlayEntry(builder: (context) {
+      return Stack(
+        children: [
+          // Fullscreen backdrop that blocks clicks
+          Positioned.fill(
             child: GestureDetector(
               onTap: _close,
-              child: Container(
-                color: Colors.black.withValues(alpha: 0.5),
-              ),
+              behavior: HitTestBehavior.opaque,
+              child: Container(color: Colors.black.withOpacity(0.5)),
             ),
           ),
 
-        // Speed dial content in exact same position
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            // Action buttons
-            ...widget.actions.asMap().entries.map((entry) {
-              final index = entry.key;
-              final action = entry.value;
-              final delay = index * 50;
+          // Re-render the action column at the same global position so actions stay clickable
+          Positioned(
+            left: topLeft.dx,
+            top: topLeft.dy,
+            child: Material(
+              color: Colors.transparent,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  // Action buttons
+                  ...widget.actions.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final action = entry.value;
 
-              return ScaleTransition(
-                scale: CurvedAnimation(
-                  parent: _scaleAnimation,
-                  curve: Interval(
-                    delay / (widget.actions.length * 50),
-                    1.0,
-                    curve: Curves.easeOut,
-                  ),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: Spacing.space16),
-                  child: _SpeedDialActionButton(
-                    action: action,
-                    heroTag: "speed_dial_action_$index",
-                    onPressed: () {
-                      _close();
-                      action.onPressed();
-                    },
-                  ),
-                ),
-              );
-            }),
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: Spacing.space16),
+                      child: _SpeedDialActionButton(
+                        action: action,
+                        heroTag: "speed_dial_action_$index",
+                        onPressed: () {
+                          _close();
+                          action.onPressed();
+                        },
+                      ),
+                    );
+                  }).toList(),
 
-            // Main FAB
-            FloatingActionButton(
-              heroTag: "speed_dial_main_fab",
-              onPressed: _toggle,
-              backgroundColor: widget.backgroundColor ?? AppColors.primary,
-              foregroundColor: widget.foregroundColor ?? Colors.white,
-              elevation: Spacing.elevation6,
-              child: RotationTransition(
-                turns: _rotationAnimation,
-                child: Icon(
-                  _isOpen ? (widget.closeIcon ?? Icons.close) : widget.icon,
-                ),
+                  // Main FAB
+                  FloatingActionButton(
+                    heroTag: "speed_dial_main_fab",
+                    onPressed: _toggle,
+                    backgroundColor: widget.backgroundColor ?? AppColors.primary,
+                    foregroundColor: widget.foregroundColor ?? Colors.white,
+                    elevation: Spacing.elevation6,
+                    child: RotationTransition(
+                      turns: _rotationAnimation,
+                      child: Icon(
+                        _isOpen ? (widget.closeIcon ?? Icons.close) : widget.icon,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
-      ],
+          ),
+        ],
+      );
+    });
+
+    overlay.insert(_overlayEntry!);
+  }
+
+  void _removeOverlay() {
+    try {
+      _overlayEntry?.remove();
+    } catch (_) {}
+    _overlayEntry = null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: _containerKey,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          // If overlay is active we don't render the local actions (they're in the overlay)
+          if (!_isOpen) ...widget.actions.asMap().entries.map((entry) {
+            final index = entry.key;
+            final action = entry.value;
+
+            return ScaleTransition(
+              scale: CurvedAnimation(
+                parent: _scaleAnimation,
+                curve: Interval(
+                  (index * 50) / (widget.actions.length * 50),
+                  1.0,
+                  curve: Curves.easeOut,
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: Spacing.space16),
+                child: _SpeedDialActionButton(
+                  action: action,
+                  heroTag: "speed_dial_action_$index",
+                  onPressed: () {
+                    _close();
+                    action.onPressed();
+                  },
+                ),
+              ),
+            );
+          }).toList(),
+
+          // Main FAB
+          FloatingActionButton(
+            heroTag: "speed_dial_main_fab",
+            onPressed: _toggle,
+            backgroundColor: widget.backgroundColor ?? AppColors.primary,
+            foregroundColor: widget.foregroundColor ?? Colors.white,
+            elevation: Spacing.elevation6,
+            child: RotationTransition(
+              turns: _rotationAnimation,
+              child: Icon(
+                _isOpen ? (widget.closeIcon ?? Icons.close) : widget.icon,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

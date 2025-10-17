@@ -64,8 +64,8 @@ class TransactionFormData extends Equatable {
     );
   }
 
-  factory TransactionFormData.fromTransaction(Transaction transaction) {
-    final category = AppCategories.findById(transaction.categoryId);
+  static Future<TransactionFormData> fromTransaction(Transaction transaction) async {
+    final category = await AppCategories.findById(transaction.categoryId);
     return TransactionFormData(
       id: transaction.id,
       amount: transaction.amount.abs().toString(),
@@ -166,9 +166,7 @@ class TransactionFormData extends Equatable {
     }
 
     final amountValue = double.parse(amount.replaceAll(',', ''));
-    final finalAmount = type == TransactionType.expense
-        ? -amountValue.abs()
-        : amountValue.abs();
+    final finalAmount = amountValue.abs();
 
     final combinedDateTime = DateTime(
       date.year,
@@ -198,8 +196,8 @@ class TransactionFormData extends Equatable {
 
   bool get isEditMode => id != null;
 
-  List<Category> get availableCategories {
-    return AppCategories.getCategoriesFor(type == TransactionType.income);
+  Future<List<Category>> get availableCategories async {
+    return await AppCategories.getCategoriesFor(type == TransactionType.income);
   }
 
   @override
@@ -243,9 +241,10 @@ class TransactionFormState extends Equatable {
     );
   }
 
-  factory TransactionFormState.forEdit(Transaction transaction) {
+  static Future<TransactionFormState> forEdit(Transaction transaction) async {
+    final formData = await TransactionFormData.fromTransaction(transaction);
     return TransactionFormState(
-      formData: TransactionFormData.fromTransaction(transaction),
+      formData: formData,
     );
   }
 

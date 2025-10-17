@@ -57,9 +57,12 @@ class MockApiService {
   Future<Response<Map<String, dynamic>>> getTransactions({
     int page = 1,
     int limit = 20,
-    String? category,
-    String? type,
-    String? search,
+  List<String>? categories,
+  String? type,
+  String? search,
+  String? startDate,
+  String? endDate,
+  Map<String, dynamic>? amountRange,
   }) async {
     await initialize();
     await _simulateDelay();
@@ -67,10 +70,9 @@ class MockApiService {
 
     List<TransactionModel> filteredTransactions = List.from(_transactions);
 
-    // Apply filters
-    if (category != null && category.isNotEmpty) {
-      filteredTransactions =
-          filteredTransactions.where((t) => t.category.id == category).toList();
+    // Category filter (single or multiple)
+    if (categories != null && categories.isNotEmpty) {
+      filteredTransactions = filteredTransactions.where((t) => categories.contains(t.category.id)).toList();
     }
 
     if (type != null && type.isNotEmpty) {
@@ -80,12 +82,40 @@ class MockApiService {
 
     if (search != null && search.isNotEmpty) {
       final searchLower = search.toLowerCase();
-      filteredTransactions = filteredTransactions
-          .where((t) =>
-              t.title.toLowerCase().contains(searchLower) ||
-              (t.description?.toLowerCase().contains(searchLower) ?? false) ||
-              t.category.name.toLowerCase().contains(searchLower))
-          .toList();
+      double? searchAmount;
+      try {
+        searchAmount = double.parse(search);
+      } catch (_) {
+        searchAmount = null;
+      }
+      filteredTransactions = filteredTransactions.where((t) {
+        final matchesText = t.title.toLowerCase().contains(searchLower) ||
+            (t.description?.toLowerCase().contains(searchLower) ?? false) ||
+            t.category.name.toLowerCase().contains(searchLower);
+        final matchesAmount = searchAmount != null && t.amount.abs() == searchAmount;
+        // Also allow partial match for amount as string
+        final matchesAmountString = t.amount.toString().contains(searchLower);
+        return matchesText || matchesAmount || matchesAmountString;
+      }).toList();
+    }
+
+    // Amount range filter
+    if (amountRange != null) {
+      final min = (amountRange['min'] ?? 0.0) as double;
+      final max = (amountRange['max'] ?? double.infinity) as double;
+      filteredTransactions = filteredTransactions.where((t) {
+        final absAmount = t.amount.abs();
+        return absAmount >= min && absAmount <= max;
+      }).toList();
+    }
+
+    // Date filter
+    if (startDate != null && endDate != null) {
+      final start = DateTime.parse(startDate);
+      final end = DateTime.parse(endDate);
+      filteredTransactions = filteredTransactions.where((t) {
+        return !t.date.isBefore(start) && !t.date.isAfter(end);
+      }).toList();
     }
 
     // Sort by date (newest first)

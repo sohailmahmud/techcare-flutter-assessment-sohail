@@ -9,7 +9,6 @@ void main() {
       name: 'Food & Dining',
       icon: Icons.restaurant,
       color: Colors.orange,
-      isIncome: false,
       budget: 500.0,
     );
 
@@ -26,7 +25,6 @@ void main() {
         expect(minimalCategory.name, 'Transportation');
         expect(minimalCategory.icon, Icons.directions_car);
         expect(minimalCategory.color, Colors.blue);
-        expect(minimalCategory.isIncome, isFalse);
         expect(minimalCategory.budget, isNull);
       });
 
@@ -35,7 +33,6 @@ void main() {
         expect(category.name, 'Food & Dining');
         expect(category.icon, Icons.restaurant);
         expect(category.color, Colors.orange);
-        expect(category.isIncome, isFalse);
         expect(category.budget, 500.0);
       });
 
@@ -45,10 +42,7 @@ void main() {
           name: 'Salary',
           icon: Icons.work,
           color: Colors.green,
-          isIncome: true,
         );
-
-        expect(incomeCategory.isIncome, isTrue);
         expect(incomeCategory.budget, isNull);
       });
     });
@@ -96,7 +90,6 @@ void main() {
         // This test verifies that Category is immutable by design
         expect(category.id, 'cat1');
         expect(category.name, 'Food & Dining');
-        expect(category.isIncome, isFalse);
         expect(category.budget, 500.0);
 
         // All fields are final, so they cannot be reassigned
@@ -111,7 +104,6 @@ void main() {
           name: 'Test Category',
           icon: Icons.star,
           color: Colors.blue,
-          isIncome: false,
           budget: 100.0,
         );
 
@@ -120,7 +112,6 @@ void main() {
           name: 'Test Category',
           icon: Icons.star,
           color: Colors.blue,
-          isIncome: false,
           budget: 100.0,
         );
 

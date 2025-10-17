@@ -37,10 +37,12 @@ class TransactionRepositoryImpl implements TransactionRepository {
           final remoteResponse = await _remoteDataSource.getTransactions(
             page: query.page,
             limit: query.limit,
-            categoryId: query.category,
+            categories: query.categories,
             type: query.type?.name,
             startDate: query.startDate?.toIso8601String(),
             endDate: query.endDate?.toIso8601String(),
+            amountRange: query.amountRange,
+            search: query.searchQuery,
           );
 
           // Cache the response by converting back to PaginatedTransactionsResponse

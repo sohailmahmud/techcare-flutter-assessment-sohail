@@ -95,9 +95,10 @@ class AnalyticsDataModel {
       period: TimePeriod.thisMonth,
       totalIncome: summary.totalIncome,
       totalExpenses: summary.totalExpense,
-      netAmount: summary.netBalance,
+      netBalance: summary.netBalance,
+      savingsRate: summary.savingsRate,
       totalTransactions: categoryBreakdown.fold<int>(
-          0, (sum, cat) => sum + cat.transactionCount),
+        0, (sum, cat) => sum + cat.transactionCount),
       averageTransactionAmount: categoryBreakdown.isNotEmpty
           ? categoryBreakdown.map((c) => c.amount).reduce((a, b) => a + b) /
               categoryBreakdown.length
@@ -105,11 +106,12 @@ class AnalyticsDataModel {
       lastUpdated: DateTime.now(),
       categoryBreakdown: categoryBreakdown
           .map((model) => CategoryBreakdown(
-                categoryId: model.category.id,
-                categoryName: model.category.name,
+                category: model.category.toEntity(),
                 amount: model.amount,
                 percentage: model.percentage,
                 transactionCount: model.transactionCount,
+                budget: model.budget,
+                budgetUtilization: model.budgetUtilization,
               ))
           .toList(),
       budgetComparisons: const [], // No budget comparisons in this model
@@ -130,6 +132,7 @@ class AnalyticsDataModel {
                 ))
             .toList(),
       ),
+      categories: categoryBreakdown.map((model) => model.category.toEntity()).toList(),
     );
   }
 

@@ -414,7 +414,8 @@ class LocalDataSourceImpl implements LocalDataSource {
     final params = [
       'page:${query.page}',
       'limit:${query.limit}',
-      if (query.category != null) 'category:${query.category}',
+      if (query.categories != null && query.categories!.isNotEmpty)
+        'categories:${query.categories!.join(",")}',
       if (query.type != null) 'type:${query.type!.name}',
       if (query.startDate != null)
         'start:${query.startDate!.millisecondsSinceEpoch}',

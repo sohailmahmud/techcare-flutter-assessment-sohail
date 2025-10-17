@@ -66,11 +66,34 @@ class _TransactionsPageState extends State<TransactionsPage>
   TransactionFilter _convertToTransactionFilter(Map<String, dynamic>? filters) {
     if (filters == null) return const TransactionFilter();
 
+    DateRange? dateRange;
+    DateRangePreset? datePreset;
+    if (filters['startDate'] != null && filters['endDate'] != null) {
+      dateRange = DateRange(
+        start: DateTime.parse(filters['startDate']),
+        end: DateTime.parse(filters['endDate']),
+      );
+      if (filters['datePreset'] != null) {
+        datePreset = DateRangePreset.values.firstWhere(
+          (e) => e.name == filters['datePreset'],
+          orElse: () => DateRangePreset.custom,
+        );
+      } else {
+        datePreset = DateRangePreset.custom;
+      }
+    }
+
     return TransactionFilter(
       selectedCategories: List<String>.from(filters['categories'] ?? []),
       transactionType: _parseTransactionType(filters['type']),
-      dateRange: filters['dateRange'] as DateRange?,
-      amountRange: filters['amountRange'] as AmountRange?,
+      dateRange: dateRange,
+      datePreset: datePreset,
+      amountRange: filters['amountRange'] != null
+          ? AmountRange(
+              min: (filters['amountRange']['min'] as num).toDouble(),
+              max: (filters['amountRange']['max'] as num).toDouble(),
+            )
+          : null,
     );
   }
 
@@ -95,10 +118,17 @@ class _TransactionsPageState extends State<TransactionsPage>
       filtersMap['type'] = filter.transactionType.name;
     }
     if (filter.dateRange != null) {
-      filtersMap['dateRange'] = filter.dateRange;
+      filtersMap['startDate'] = filter.dateRange!.start.toIso8601String();
+      filtersMap['endDate'] = filter.dateRange!.end.toIso8601String();
+      if (filter.datePreset != null) {
+        filtersMap['datePreset'] = filter.datePreset!.name;
+      }
     }
     if (filter.amountRange != null) {
-      filtersMap['amountRange'] = filter.amountRange;
+      filtersMap['amountRange'] = {
+        'min': filter.amountRange!.min,
+        'max': filter.amountRange!.max,
+      };
     }
 
     return filtersMap;
@@ -130,24 +160,34 @@ class _TransactionsPageState extends State<TransactionsPage>
   }
 
   void _showTransactionDetails(tx.Transaction transaction) {
-    Navigator.of(context).push(
-      PageRouteBuilder(
-        opaque: false,
-        barrierColor: Colors.black.withValues(alpha: 0.5),
-        pageBuilder: (context, animation, secondaryAnimation) =>
-            TransactionDetailsModal(
-          transaction: transaction,
-          heroTag: 'transaction_amount_${transaction.id}_transactions_page',
-          sourcePage: 'transactions',
-        ),
-        transitionDuration: const Duration(milliseconds: 300),
-        reverseTransitionDuration: const Duration(milliseconds: 250),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return FadeTransition(
-            opacity: animation,
-            child: child,
-          );
-        },
+    // Navigator.of(context).push(
+    //   PageRouteBuilder(
+    //     opaque: false,
+    //     barrierColor: Colors.black.withValues(alpha: 0.5),
+    //     pageBuilder: (context, animation, secondaryAnimation) =>
+    //         TransactionDetailsModal(
+    //       transaction: transaction,
+    //       heroTag: 'transaction_amount_${transaction.id}_transactions_page',
+    //       sourcePage: 'transactions',
+    //     ),
+    //     transitionDuration: const Duration(milliseconds: 300),
+    //     reverseTransitionDuration: const Duration(milliseconds: 250),
+    //     transitionsBuilder: (context, animation, secondaryAnimation, child) {
+    //       return FadeTransition(
+    //         opacity: animation,
+    //         child: child,
+    //       );
+    //     },
+    //   ),
+    // );
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useRootNavigator: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => TransactionDetailsModal(
+        transaction: transaction,
+        sourcePage: 'transactions',
       ),
     );
   }
@@ -173,7 +213,9 @@ class _TransactionsPageState extends State<TransactionsPage>
         systemNavigationBarColor: AppColors.background,
         systemNavigationBarIconBrightness: Brightness.dark,
       ),
-      child: Scaffold(
+      child: GestureDetector(
+        onTap:()=>FocusScope.of(context).unfocus(),
+        child: Scaffold(
         backgroundColor: AppColors.background,
         appBar: AppBar(
           title: Text(
@@ -208,17 +250,32 @@ class _TransactionsPageState extends State<TransactionsPage>
           child: const Icon(Icons.add_rounded),
         ),
       ),
+      ),
     );
   }
 
   Widget _buildSearchBar(TransactionsState state) {
+
     String currentQuery = '';
     int activeFilterCount = 0;
     bool isSearching = false;
 
     if (state is TransactionLoaded) {
       currentQuery = state.searchQuery ?? '';
-      activeFilterCount = state.currentFilters?.length ?? 0;
+      final filters = state.currentFilters ?? {};
+      // Count only distinct filter types
+      if ((filters['categories'] as List?)?.isNotEmpty ?? false) {
+        activeFilterCount++;
+      }
+      if ((filters['startDate'] != null && filters['endDate'] != null) || filters['datePreset'] != null) {
+        activeFilterCount++;
+      }
+      if (filters['type'] != null && filters['type'] != 'all') {
+        activeFilterCount++;
+      }
+      if (filters['amountRange'] != null) {
+        activeFilterCount++;
+      }
     }
 
     return TransactionSearchBar(
@@ -236,7 +293,11 @@ class _TransactionsPageState extends State<TransactionsPage>
     }
 
     if (state is TransactionError) {
-      return _buildErrorState(state);
+      return _buildErrorWidget(
+        state.error,
+        onRetry: _onRefresh,
+        title: 'Something went wrong',
+      );
     }
 
     if (state is TransactionLoaded) {
@@ -262,7 +323,8 @@ class _TransactionsPageState extends State<TransactionsPage>
     );
   }
 
-  Widget _buildErrorState(TransactionError state) {
+  Widget _buildErrorWidget(String message,
+      {VoidCallback? onRetry, String? title}) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(Spacing.space32),
@@ -283,15 +345,16 @@ class _TransactionsPageState extends State<TransactionsPage>
               ),
             ),
             const SizedBox(height: Spacing.space20),
+            if (title != null)
+              Text(
+                title,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+            if (title != null) const SizedBox(height: Spacing.space8),
             Text(
-              'Something went wrong',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: Spacing.space8),
-            Text(
-              state.error,
+              message,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color:
                         Theme.of(context).colorScheme.onSurface.withAlpha(153),
@@ -299,17 +362,18 @@ class _TransactionsPageState extends State<TransactionsPage>
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: Spacing.space24),
-            ElevatedButton.icon(
-              onPressed: _onRefresh,
-              icon: const Icon(Icons.refresh_rounded),
-              label: const Text('Try Again'),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: Spacing.space24,
-                  vertical: Spacing.space12,
+            if (onRetry != null)
+              ElevatedButton.icon(
+                onPressed: onRetry,
+                icon: const Icon(Icons.refresh_rounded),
+                label: const Text('Try Again'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: Spacing.space24,
+                    vertical: Spacing.space12,
+                  ),
                 ),
               ),
-            ),
           ],
         ),
       ),

@@ -7,6 +7,7 @@ import '../../../core/theme/spacing.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/common_widgets.dart';
 import '../../../domain/entities/dashboard_summary.dart';
+import '../../../domain/entities/category.dart';
 
 /// Interactive pie chart for spending overview
 class SpendingPieChart extends StatefulWidget {
@@ -30,6 +31,22 @@ class _SpendingPieChartState extends State<SpendingPieChart>
   late AnimationController _animationController;
   late Animation<double> _animation;
   int _touchedIndex = -1;
+  // Precomputed category lookup for color/icon
+  Map<String, Category> _categoryMap = {};
+
+  // Fallback colors if category not found
+  static const List<Color> fallbackColors = [
+    Colors.blue,
+    Colors.red,
+    Colors.green,
+    Colors.orange,
+    Colors.purple,
+    Colors.teal,
+    Colors.amber,
+    Colors.cyan,
+    Colors.indigo,
+    Colors.pink,
+  ];
 
   @override
   void initState() {
@@ -43,6 +60,16 @@ class _SpendingPieChartState extends State<SpendingPieChart>
       curve: Curves.easeOutCubic,
     );
     _animationController.forward();
+
+    // Precompute category map for color lookup
+    _precomputeCategoryMap();
+  }
+
+  Future<void> _precomputeCategoryMap() async {
+    final allCategories = await AppCategories.getAllCategories();
+    setState(() {
+      _categoryMap = {for (var cat in allCategories) cat.id: cat};
+    });
   }
 
   @override
@@ -75,7 +102,7 @@ class _SpendingPieChartState extends State<SpendingPieChart>
   @override
   Widget build(BuildContext context) {
     return GlassMorphicContainer(
-      padding: const EdgeInsets.all(Spacing.space24),
+      padding: const EdgeInsets.symmetric(vertical: Spacing.space16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -92,6 +119,9 @@ class _SpendingPieChartState extends State<SpendingPieChart>
                 GestureDetector(
                   onTap: () {
                     // Reset chart animation and touched index when clearing filter
+                    setState(() {
+                      _touchedIndex = -1;
+                    });
                     _resetChartAnimation();
                     widget.onCategorySelected?.call(null);
                   },
@@ -192,15 +222,18 @@ class _SpendingPieChartState extends State<SpendingPieChart>
   List<PieChartSectionData> _buildPieChartSections() {
     return widget.categories.asMap().entries.map((entry) {
       final index = entry.key;
-      final category = entry.value;
+      final categoryExpense = entry.value;
       final isTouched = index == _touchedIndex;
-      final isSelected = widget.selectedCategory == category.categoryId;
+      final isSelected = widget.selectedCategory == categoryExpense.categoryId;
       final opacity = widget.selectedCategory == null || isSelected ? 1.0 : 0.3;
 
+      final category = _categoryMap[categoryExpense.categoryId];
+      final color = (category?.color ?? fallbackColors[index % fallbackColors.length]).withOpacity(opacity);
+
       return PieChartSectionData(
-        color: _getCategoryColor(index).withValues(alpha: opacity),
-        value: category.percentage * _animation.value,
-        title: isTouched ? '${category.percentage.toStringAsFixed(1)}%' : '',
+        color: color,
+        value: categoryExpense.percentage * _animation.value,
+        title: isTouched ? '${categoryExpense.percentage.toStringAsFixed(1)}%' : '',
         radius: isTouched
             ? Spacing.pieChartTouchedRadius
             : (isSelected
@@ -216,17 +249,23 @@ class _SpendingPieChartState extends State<SpendingPieChart>
   }
 
   List<Widget> _buildLegend() {
-    return widget.categories.asMap().entries.map((entry) {
+    // Sort categories by amount descending
+    final sortedCategories = List.of(widget.categories)
+      ..sort((a, b) => b.amount.compareTo(a.amount));
+    return sortedCategories.asMap().entries.map((entry) {
       final index = entry.key;
-      final category = entry.value;
-      final isSelected = widget.selectedCategory == category.categoryId;
+      final categoryExpense = entry.value;
+      final isSelected = widget.selectedCategory == categoryExpense.categoryId;
       final opacity = widget.selectedCategory == null || isSelected ? 1.0 : 0.5;
+
+      final category = _categoryMap[categoryExpense.categoryId];
+      final color = (category?.color ?? fallbackColors[index % fallbackColors.length]).withOpacity(opacity);
 
       return Padding(
         padding: const EdgeInsets.only(bottom: 8),
         child: GestureDetector(
           onTap: () {
-            final categoryId = isSelected ? null : category.categoryId;
+            final categoryId = isSelected ? null : categoryExpense.categoryId;
             widget.onCategorySelected?.call(categoryId);
           },
           child: Opacity(
@@ -237,7 +276,7 @@ class _SpendingPieChartState extends State<SpendingPieChart>
                   width: 12,
                   height: 12,
                   decoration: BoxDecoration(
-                    color: _getCategoryColor(index),
+                    color: color,
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -247,7 +286,7 @@ class _SpendingPieChartState extends State<SpendingPieChart>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        category.categoryName,
+                        categoryExpense.categoryName,
                         style: AppTypography.labelMedium.copyWith(
                           color: AppColors.textPrimary,
                           fontWeight:
@@ -257,7 +296,7 @@ class _SpendingPieChartState extends State<SpendingPieChart>
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
-                        CurrencyFormatter.format(category.amount),
+                        CurrencyFormatter.format(categoryExpense.amount),
                         style: AppTypography.labelSmall.copyWith(
                           color: AppColors.textSecondary,
                         ),
@@ -306,7 +345,5 @@ class _SpendingPieChartState extends State<SpendingPieChart>
     );
   }
 
-  Color _getCategoryColor(int index) {
-    return AppColors.categoryColors[index % Spacing.maxCategoryColors];
-  }
+  // Removed unused _getCategoryColor
 }

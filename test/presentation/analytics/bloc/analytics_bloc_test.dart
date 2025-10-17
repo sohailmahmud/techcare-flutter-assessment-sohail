@@ -39,7 +39,6 @@ void main() {
           name: 'Salary',
           icon: Icons.work,
           color: Colors.green,
-          isIncome: true,
         ),
         date: DateTime(2025, 10, 9),
       ),
@@ -47,7 +46,7 @@ void main() {
 
     setUp(() {
       mockTransactionsBloc = MockTransactionsBloc();
-      analyticsBloc = AnalyticsBloc(transactionsBloc: mockTransactionsBloc);
+      analyticsBloc = AnalyticsBloc(transactionsBloc: mockTransactionsBloc, categories: []);
     });
 
     tearDown(() {
@@ -136,7 +135,7 @@ void main() {
           if (state is AnalyticsLoaded) {
             expect(state.data.totalIncome, 5000.0);
             expect(state.data.totalExpenses, 100.0);
-            expect(state.data.netAmount, 4900.0);
+            expect(state.data.netBalance, 4900.0);
           }
         },
       );
@@ -258,7 +257,7 @@ void main() {
           if (state is AnalyticsLoaded) {
             expect(state.data.totalIncome, 0.0);
             expect(state.data.totalExpenses, 0.0);
-            expect(state.data.netAmount, 0.0);
+            expect(state.data.netBalance, 0.0);
             expect(state.data.categoryBreakdown, isEmpty);
           }
         },

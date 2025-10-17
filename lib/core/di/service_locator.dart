@@ -107,7 +107,7 @@ Future<void> initializeDependencies() async {
 
   serviceLocator.registerFactory<AnalyticsBloc>(
     () => AnalyticsBloc(
-      transactionsBloc: serviceLocator<TransactionsBloc>(),
+      transactionsBloc: serviceLocator<TransactionsBloc>(), categories: [],
     ),
   );
 

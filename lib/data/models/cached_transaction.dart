@@ -84,16 +84,15 @@ class CachedTransaction extends HiveObject {
     );
   }
 
-  /// Convert to domain entity
-  Transaction toTransaction() {
+  /// Convert to domain entity (async for category lookup)
+  Future<Transaction> toTransaction() async {
     // Find the category by ID, with fallback
-    final category = AppCategories.findById(categoryId) ??
+    final category = (await AppCategories.findById(categoryId)) ??
         Category(
           id: categoryId,
           name: categoryName,
           icon: Icons.category,
           color: Colors.grey,
-          isIncome: type == 0,
         );
 
     return Transaction(

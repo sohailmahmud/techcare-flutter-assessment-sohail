@@ -6,7 +6,6 @@ import '../../../../core/theme/spacing.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/skeleton_loader.dart';
 import '../../../../domain/entities/transaction.dart' as tx;
-import '../../../../domain/entities/transaction.dart';
 import '../bloc/transactions_bloc.dart';
 
 class TransactionsListView extends StatefulWidget {
@@ -176,6 +175,7 @@ class _TransactionsListViewState extends State<TransactionsListView> {
   }
 
   Widget _buildTransactionItem(tx.Transaction transaction, int index) {
+    final isIncome = transaction.type == tx.TransactionType.income;
     return Padding(
       padding: const EdgeInsets.only(bottom: Spacing.space8),
       child: Dismissible(
@@ -186,7 +186,8 @@ class _TransactionsListViewState extends State<TransactionsListView> {
           if (direction == DismissDirection.endToStart) {
             // Delete action
             return await _showDeleteConfirmation(transaction);
-          } else if (direction == DismissDirection.startToEnd) {
+          } 
+          if (direction == DismissDirection.startToEnd) {
             // Edit action
             widget.onEdit?.call(transaction);
             return false; // Don't dismiss
@@ -215,7 +216,7 @@ class _TransactionsListViewState extends State<TransactionsListView> {
             child: Row(
               children: [
                 // Transaction icon
-                _buildTransactionIcon(transaction, transaction.isIncome),
+                _buildTransactionIcon(transaction),
                 const SizedBox(width: 16),
 
                 // Transaction details
@@ -274,9 +275,9 @@ class _TransactionsListViewState extends State<TransactionsListView> {
                       child: Material(
                         color: Colors.transparent,
                         child: Text(
-                          '${transaction.isIncome ? '+' : '-'}${CurrencyFormatter.format(transaction.amount)}',
+                          '${isIncome ? '+' : '-'}${CurrencyFormatter.format(transaction.amount)}',
                           style: AppTypography.bodyLarge.copyWith(
-                            color: transaction.isIncome
+                            color: isIncome
                                 ? AppColors.success
                                 : AppColors.error,
                             fontWeight: FontWeight.w700,
@@ -301,17 +302,18 @@ class _TransactionsListViewState extends State<TransactionsListView> {
     );
   }
 
-  Widget _buildTransactionIcon(Transaction transaction, bool isIncome) {
+  Widget _buildTransactionIcon(tx.Transaction transaction) {
+    final category = transaction.category;
     return Container(
       width: Spacing.transactionIconSize,
       height: Spacing.transactionIconSize,
       decoration: BoxDecoration(
-        color: transaction.category.color.withValues(alpha: 0.1),
+        color: category.color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(Spacing.radiusM),
       ),
       child: Icon(
-        transaction.category.icon,
-        color: transaction.category.color,
+        category.icon,
+        color: category.color,
         size: Spacing.transactionIconSize / 2,
       ),
     );

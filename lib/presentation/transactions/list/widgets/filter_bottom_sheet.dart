@@ -1,5 +1,6 @@
+import 'package:fintrack/core/theme/app_theme.dart';
+import 'package:fintrack/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
-
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/utils/formatters.dart';
@@ -33,6 +34,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
   // Available categories loaded from repository
   List<Category> _availableCategories = [];
 
+  final List<String> _filterTabs = ['Date', 'Category', 'Amount', 'Type'];
+
   @override
   void initState() {
     super.initState();
@@ -43,20 +46,10 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
 
   Future<void> _loadCategories() async {
     try {
-      final result = await widget.categoryRepository.getCategories();
-      result.fold(
-        (failure) {
-          // Handle error - use empty list
-          setState(() {
-            _availableCategories = [];
-          });
-        },
-        (categories) {
-          setState(() {
-            _availableCategories = categories;
-          });
-        },
-      );
+      final categories = await AppCategories.getAllCategories();
+      setState(() {
+        _availableCategories = categories;
+      });
     } catch (e) {
       setState(() {
         _availableCategories = [];
@@ -86,7 +79,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
       _workingFilter = const TransactionFilter();
     });
     widget.onClearFilters();
-    Navigator.of(context).pop();
   }
 
   @override
@@ -157,19 +149,28 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                 borderRadius: BorderRadius.circular(8),
                 color: theme.colorScheme.primary,
               ),
-              labelColor: Colors.white,
+              dividerColor: Colors.transparent,
+              labelColor: AppColors.background,
               unselectedLabelColor: theme.colorScheme.onSurface.withAlpha(153),
-              labelStyle: const TextStyle(
+              labelStyle: AppTypography.bodyMedium.copyWith(
                 fontWeight: FontWeight.w600,
-                fontSize: 12,
               ),
-              indicatorPadding: const EdgeInsets.all(4),
-              tabs: const [
-                Tab(text: 'Date'),
-                Tab(text: 'Category'),
-                Tab(text: 'Amount'),
-                Tab(text: 'Type'),
-              ],
+              padding: EdgeInsets.zero,
+              labelPadding: EdgeInsets.zero,
+              indicatorPadding: const EdgeInsets.symmetric(vertical: Spacing.space4),
+              tabs: _filterTabs
+                  .map((tab) {
+                    return Tab(
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                          left: Spacing.space16,
+                          right: Spacing.space16,
+                        ),
+                        child: Text(tab),
+                      ),
+                    );
+                  })
+                  .toList(growable: false),
             ),
           ),
 
@@ -209,6 +210,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
+                      ),
+                      side: BorderSide(
+                        color: theme.colorScheme.onSurface.withAlpha(120),
                       ),
                     ),
                     child: const Text('Cancel'),
@@ -444,9 +448,14 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                 child: OutlinedButton(
                   onPressed: () {
                     _updateFilter(_workingFilter.copyWith(
-                      selectedCategories: List.from(_availableCategories),
+                      selectedCategories: _availableCategories.map((c) => c.id).toList(),
                     ));
                   },
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(
+                      color: Theme.of(context).colorScheme.onSurface.withAlpha(120),
+                    ),
+                  ),
                   child: const Text('Select All'),
                 ),
               ),
@@ -457,6 +466,11 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                     _updateFilter(
                         _workingFilter.copyWith(selectedCategories: []));
                   },
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(
+                      color: Theme.of(context).colorScheme.onSurface.withAlpha(120),
+                    ),
+                  ),
                   child: const Text('Select None'),
                 ),
               ),
@@ -490,12 +504,12 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                   ),
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? Theme.of(context).colorScheme.primary
+                        ? AppTheme.primaryColor.withAlpha(20)
                         : AppColors.surface,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
                       color: isSelected
-                          ? Theme.of(context).colorScheme.primary
+                          ? AppTheme.primaryColor
                           : AppColors.border,
                     ),
                   ),
@@ -503,7 +517,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                     category.name,
                     style: TextStyle(
                       color: isSelected
-                          ? Colors.white
+                          ? AppTheme.primaryColor
                           : Theme.of(context).colorScheme.onSurface,
                       fontWeight:
                           isSelected ? FontWeight.w600 : FontWeight.normal,
@@ -539,7 +553,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
               if (_workingFilter.amountRange != null)
                 TextButton(
                   onPressed: () {
-                    _updateFilter(_workingFilter.copyWith(amountRange: null));
+                    // amount range to default
+                    _updateFilter(_workingFilter.copyWith(amountRange: const AmountRange(min: 0, max: 100000)));
                   },
                   child: Text(
                     'Clear',
@@ -765,6 +780,7 @@ void showFilterBottomSheet({
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
+    useRootNavigator: true,
     backgroundColor: Colors.transparent,
     builder: (context) => FilterBottomSheet(
       currentFilter: currentFilter,

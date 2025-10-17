@@ -105,7 +105,7 @@ class HiveCacheManager {
   }
 
   /// Get cached transactions with smart filtering
-  Future<List<Transaction>> getCachedTransactions({
+  Future<List<Object>> getCachedTransactions({
     filter.TransactionFilter? filter,
     int? page,
     int? limit,

@@ -69,7 +69,16 @@ class _AmountInputFieldState extends State<AmountInputField>
   void didUpdateWidget(AmountInputField oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.value != oldWidget.value && widget.value != _controller.text) {
+      final oldSelection = _controller.selection;
       _controller.text = widget.value;
+      // Try to restore selection if possible
+      int offset = oldSelection.baseOffset;
+      if (offset > widget.value.length) {
+        offset = widget.value.length;
+      } else if (offset < 0) {
+        offset = 0;
+      }
+      _controller.selection = TextSelection.collapsed(offset: offset);
     }
   }
 
@@ -225,29 +234,42 @@ class _AmountInputFormatter extends TextInputFormatter {
     TextEditingValue newValue,
   ) {
     // Remove any non-digit characters except decimal point and comma
-    String newText = newValue.text.replaceAll(RegExp(r'[^\d.,]'), '');
+    String rawText = newValue.text.replaceAll(RegExp(r'[^\d.,]'), '');
+    int oldOffset = newValue.selection.baseOffset;
 
     // Handle multiple decimal points
-    final parts = newText.split('.');
+    final parts = rawText.split('.');
     if (parts.length > 2) {
-      newText = '${parts[0]}.${parts.sublist(1).join('')}';
+      rawText = '${parts[0]}.${parts.sublist(1).join('')}';
     }
 
     // Limit decimal places to 2
-    if (newText.contains('.')) {
-      final splitText = newText.split('.');
+    if (rawText.contains('.')) {
+      final splitText = rawText.split('.');
       if (splitText.length > 1 && splitText[1].length > 2) {
-        newText = '${splitText[0]}.${splitText[1].substring(0, 2)}';
+        rawText = '${splitText[0]}.${splitText[1].substring(0, 2)}';
       }
     }
 
     // Apply thousand separators
-    newText = _applyThousandSeparators(newText);
+    String formattedText = _applyThousandSeparators(rawText);
+
+    // Calculate new cursor position
+    int newOffset = oldOffset;
+    int numCommasBefore = _countCommas(formattedText.substring(0, newOffset));
+    int numCommasAfter = _countCommas(rawText.substring(0, newOffset));
+    newOffset += (numCommasBefore - numCommasAfter);
+    if (newOffset > formattedText.length) newOffset = formattedText.length;
+    if (newOffset < 0) newOffset = 0;
 
     return TextEditingValue(
-      text: newText,
-      selection: TextSelection.collapsed(offset: newText.length),
+      text: formattedText,
+      selection: TextSelection.collapsed(offset: newOffset),
     );
+  }
+
+  int _countCommas(String text) {
+    return ','.allMatches(text).length;
   }
 
   String _applyThousandSeparators(String text) {

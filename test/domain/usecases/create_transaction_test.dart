@@ -31,7 +31,6 @@ void main() {
       name: 'Food',
       icon: Icons.restaurant,
       color: Colors.orange,
-      isIncome: false,
     );
 
     final testTransaction = Transaction(
@@ -118,7 +117,6 @@ void main() {
         name: 'Salary',
         icon: Icons.payments,
         color: Colors.green,
-        isIncome: true,
       );
 
       final incomeTransaction = Transaction(

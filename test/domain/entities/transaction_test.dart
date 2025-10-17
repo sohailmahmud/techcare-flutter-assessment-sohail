@@ -10,7 +10,6 @@ void main() {
       name: 'Food',
       icon: Icons.restaurant,
       color: Colors.orange,
-      isIncome: false,
     );
 
     final transaction = Transaction(

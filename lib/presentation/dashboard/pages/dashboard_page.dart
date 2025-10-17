@@ -11,6 +11,7 @@ import '../../../core/widgets/common_widgets.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/widgets/speed_dial_fab.dart';
 import '../../../core/router/navigation_extensions.dart';
+import '../../../domain/entities/transaction.dart' as tx;
 import '../../../injection_container.dart' as di;
 import '../../transactions/list/bloc/transactions_bloc.dart';
 import '../../transactions/list/widgets/transaction_details_modal.dart';
@@ -20,7 +21,7 @@ import '../bloc/dashboard_state.dart';
 import '../widgets/balance_card.dart';
 import '../widgets/spending_pie_chart.dart';
 import '../../../domain/entities/transaction.dart';
-import '../widgets/transactions_list.dart';
+import '../widgets/recent_transactions_list.dart';
 
 /// Dashboard page showing user's financial overview with BLoC state management
 class DashboardPage extends StatefulWidget {
@@ -85,11 +86,14 @@ class _DashboardPageState extends State<DashboardPage> {
                     // Show error state
                     if (state is DashboardError) {
                       return Center(
-                        child: _buildErrorCard(state.message, () {
-                          context
+                        child: _buildErrorWidget(
+                          state.message,
+                          onRetry: () => context
                               .read<DashboardBloc>()
-                              .add(const RetryLoadDashboard());
-                        }),
+                              .add(const RetryLoadDashboard()),
+                          iconSize: 32,
+                          title: 'Oops! Something went wrong',
+                        ),
                       );
                     }
 
@@ -175,44 +179,58 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  Widget _buildBalanceSection(DashboardState state) {
+  Widget buildSection({
+    required Widget Function(BuildContext, DashboardState) builder,
+    EdgeInsetsGeometry? padding,
+  }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: Spacing.space16),
+      padding:
+          padding ?? const EdgeInsets.symmetric(horizontal: Spacing.space16),
       child: BlocBuilder<DashboardBloc, DashboardState>(
-        builder: (context, state) {
-          if (state is DashboardLoading) {
-            return DashboardSkeletonLoaders.balanceCard();
-          } else if (state is DashboardLoaded) {
-            return GestureDetector(
-              onTap: () {
-                context
-                    .read<DashboardBloc>()
-                    .add(const ToggleBalanceVisibility());
-              },
-              child: BalanceCard(
-                balance: state.summary.totalBalance,
-                monthlyIncome: state.summary.monthlyIncome,
-                monthlyExpense: state.summary.monthlyExpense,
-                initiallyVisible: state.isBalanceVisible,
-              ),
-            );
-          } else if (state is DashboardError) {
-            return _buildErrorCard(state.message, () {
-              context.read<DashboardBloc>().add(const RetryLoadDashboard());
-            });
-          }
-          return const BalanceCard(
-            balance: 0,
-            monthlyIncome: 0,
-            monthlyExpense: 0,
-          );
-        },
+        builder: builder,
       ),
     );
   }
 
+  Widget _buildBalanceSection(DashboardState state) {
+    return buildSection(
+      builder: (context, state) {
+        if (state is DashboardLoading) {
+          return DashboardSkeletonLoaders.balanceCard();
+        } else if (state is DashboardLoaded) {
+          return GestureDetector(
+            onTap: () {
+              context
+                  .read<DashboardBloc>()
+                  .add(const ToggleBalanceVisibility());
+            },
+            child: BalanceCard(
+              balance: state.summary.totalBalance,
+              monthlyIncome: state.summary.monthlyIncome,
+              monthlyExpense: state.summary.monthlyExpense,
+              initiallyVisible: state.isBalanceVisible,
+            ),
+          );
+        } else if (state is DashboardError) {
+          return _buildErrorWidget(
+            state.message,
+            onRetry: () =>
+                context.read<DashboardBloc>().add(const RetryLoadDashboard()),
+            iconSize: 32,
+            title: 'Oops! Something went wrong',
+          );
+        }
+        return const BalanceCard(
+          balance: 0,
+          monthlyIncome: 0,
+          monthlyExpense: 0,
+        );
+      },
+    );
+  }
+
   Widget _buildSpendingChart(DashboardState state, BuildContext context) {
-    return BlocBuilder<DashboardBloc, DashboardState>(
+    return buildSection(
       builder: (context, state) {
         if (state is DashboardLoaded) {
           return SpendingPieChart(
@@ -227,7 +245,7 @@ class _DashboardPageState extends State<DashboardPage> {
         } else if (state is DashboardLoading) {
           return DashboardSkeletonLoaders.spendingChart();
         } else if (state is DashboardError) {
-          return _buildErrorMessage(state.message);
+          return _buildErrorWidget(state.message, iconSize: 32);
         }
         return SizedBox(
           height: Spacing.pieChartHeight,
@@ -245,28 +263,21 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Widget _buildTransactionsSection(DashboardState state) {
-    return BlocBuilder<DashboardBloc, DashboardState>(
+    return buildSection(
       builder: (context, state) {
         final isLoading = state is DashboardLoading;
         final transactions = state is DashboardLoaded
             ? state.filteredTransactions.cast<Transaction>()
             : <Transaction>[];
 
-        return TransactionsList(
+        return RecentTransactionsList(
           transactions: transactions,
           isLoading: isLoading,
           maxItems: AppConstants.maxRecentTransactions, // Limit for dashboard
           enableLazyLoading: false, // Disable for dashboard - use on full page
-          onEdit: (transactionId) {
-            _showEditTransaction(context, transactionId);
-          },
-          onDelete: (transactionId) {
-            _showDeleteConfirmation(context, transactionId);
-          },
-          onTransactionTap: (transaction) {
-            // Show transaction details as modal
-            _showTransactionDetails(context, transaction);
-          },
+          onEdit: _onEditTransaction,
+          onDelete: _onDeleteTransaction,
+          onTransactionTap: _onTransactionTap,
           onViewAll: () {
             // Navigate to transactions tab using go_router
             context.goToTransactions();
@@ -276,57 +287,40 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  Widget _buildErrorCard(String message, VoidCallback onRetry) {
+  Widget _buildErrorWidget(String message,
+      {VoidCallback? onRetry, double iconSize = 48, String? title}) {
     return GlassMorphicContainer(
       padding: const EdgeInsets.all(Spacing.space24),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
+          Icon(
             Icons.error_outline,
             color: AppColors.error,
-            size: 48,
+            size: iconSize,
           ),
           const SizedBox(height: Spacing.space16),
-          Text(
-            'Oops! Something went wrong',
-            style:
-                AppTypography.titleLarge.copyWith(color: AppColors.textPrimary),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: Spacing.space8),
-          Text(
-            message,
-            style: AppTypography.bodyMedium
-                .copyWith(color: AppColors.textSecondary),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: Spacing.space24),
-          ElevatedButton(
-            onPressed: onRetry,
-            child: const Text('Try Again'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildErrorMessage(String message) {
-    return Center(
-      child: Column(
-        children: [
-          const Icon(
-            Icons.error_outline,
-            color: AppColors.error,
-            size: 32,
-          ),
-          const SizedBox(height: Spacing.space8),
+          if (title != null)
+            Text(
+              title,
+              style: AppTypography.titleLarge
+                  .copyWith(color: AppColors.textPrimary),
+              textAlign: TextAlign.center,
+            ),
+          if (title != null) const SizedBox(height: Spacing.space8),
           Text(
             message,
             style: AppTypography.bodyMedium
                 .copyWith(color: AppColors.textSecondary),
             textAlign: TextAlign.center,
           ),
+          if (onRetry != null) ...[
+            const SizedBox(height: Spacing.space24),
+            ElevatedButton(
+              onPressed: onRetry,
+              child: const Text('Try Again'),
+            ),
+          ],
         ],
       ),
     );
@@ -339,26 +333,28 @@ class _DashboardPageState extends State<DashboardPage> {
         Positioned(
           bottom: 16.0,
           right: 16.0,
-          child: SpeedDialFAB(
-            icon: Icons.add,
-            backgroundColor: AppColors.primary,
-            foregroundColor: Colors.white,
-            actions: [
-              SpeedDialAction(
-                icon: Icons.add,
-                label: 'Add Income',
-                backgroundColor: AppColors.success,
-                onPressed: () =>
-                    _navigateToAddTransaction(TransactionType.income),
-              ),
-              SpeedDialAction(
-                icon: Icons.remove,
-                label: 'Add Expense',
-                backgroundColor: AppColors.error,
-                onPressed: () =>
-                    _navigateToAddTransaction(TransactionType.expense),
-              ),
-            ],
+          child: GestureDetector(
+            child: SpeedDialFAB(
+              icon: Icons.add,
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              actions: [
+                SpeedDialAction(
+                  icon: Icons.add,
+                  label: 'Add Income',
+                  backgroundColor: AppColors.success,
+                  onPressed: () =>
+                      _navigateToAddTransaction(TransactionType.income),
+                ),
+                SpeedDialAction(
+                  icon: Icons.remove,
+                  label: 'Add Expense',
+                  backgroundColor: AppColors.error,
+                  onPressed: () =>
+                      _navigateToAddTransaction(TransactionType.expense),
+                ),
+              ],
+            ),
           ),
         ),
       ],
@@ -367,55 +363,61 @@ class _DashboardPageState extends State<DashboardPage> {
 
   void _navigateToAddTransaction(TransactionType type) {
     // Navigate to add transaction screen using go_router with source page info
-    context.goToAddTransaction(sourcePage: 'dashboard');
+    context.goToAddTransaction(type: type, sourcePage: 'dashboard');
   }
 
-  void _showEditTransaction(BuildContext context, String transactionId) {
-    // For now, navigate to edit screen without transaction data using go_router
+  void _showEditTransaction(tx.Transaction transaction) {
+    // need to route with go_router to keep the back stack correct
     context.goToEditTransaction(
-      transactionId: transactionId,
-      sourcePage: 'dashboard',
+      transaction: transaction,
+      transactionId: transaction.id,
+      sourcePage: 'transactions',
     );
   }
 
-  void _showDeleteConfirmation(BuildContext context, String transactionId) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Transaction'),
-        content:
-            const Text('Are you sure you want to delete this transaction?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              // Handle delete through BLoC if implemented
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Transaction deleted')),
-              );
-            },
-            style: TextButton.styleFrom(foregroundColor: AppColors.error),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showTransactionDetails(BuildContext context, Transaction transaction) {
+  void _showTransactionDetails(tx.Transaction transaction) {
+    // Navigator.of(context).push(
+    //   PageRouteBuilder(
+    //     opaque: false,
+    //     barrierColor: Colors.black.withValues(alpha: 0.5),
+    //     pageBuilder: (context, animation, secondaryAnimation) =>
+    //         TransactionDetailsModal(
+    //       transaction: transaction,
+    //       heroTag: 'transaction_amount_${transaction.id}_transactions_page',
+    //       sourcePage: 'transactions',
+    //     ),
+    //     transitionDuration: const Duration(milliseconds: 300),
+    //     reverseTransitionDuration: const Duration(milliseconds: 250),
+    //     transitionsBuilder: (context, animation, secondaryAnimation, child) {
+    //       return FadeTransition(
+    //         opacity: animation,
+    //         child: child,
+    //       );
+    //     },
+    //   ),
+    // );
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useRootNavigator: true,
       backgroundColor: Colors.transparent,
       builder: (context) => TransactionDetailsModal(
         transaction: transaction,
-        sourcePage: 'dashboard',
+        sourcePage: 'transactions',
       ),
     );
+  }
+
+  void _onDeleteTransaction(tx.Transaction transaction) {
+    context.read<TransactionsBloc>().add(DeleteTransaction(transaction.id));
+  }
+
+  void _onEditTransaction(tx.Transaction transaction) {
+    _showEditTransaction(transaction);
+  }
+
+  void _onTransactionTap(tx.Transaction transaction) {
+    _showTransactionDetails(transaction);
   }
 }
 
@@ -670,8 +672,8 @@ class _ParallaxHeaderDelegate extends SliverPersistentHeaderDelegate {
             child: Padding(
               padding: EdgeInsets.only(
                 top: statusBarHeight,
-                left: 16,
-                right: 16,
+                left: Spacing.space16,
+                right: Spacing.space16,
               ),
               child: SizedBox(
                 height: kToolbarHeight,
@@ -696,8 +698,33 @@ class _ParallaxHeaderDelegate extends SliverPersistentHeaderDelegate {
                       children: [
                         Transform.scale(
                           scale: 0.85,
-                          child: _buildNotificationBadge(
-                              context: context, count: 3),
+                          child: BlocBuilder<DashboardBloc, DashboardState>(
+                            builder: (context, state) {
+                              int notificationCount = 0;
+                              if (state is DashboardLoaded) {
+                                notificationCount = state.filteredTransactions
+                                    .where((t) => DateTime.now()
+                                        .difference(t.date)
+                                        .inDays <=
+                                    3)
+                                    .length;
+
+                                if (notificationCount == 0 &&
+                                    state.filteredTransactions.isNotEmpty) {
+                                  notificationCount = state.filteredTransactions
+                                      .length
+                                      .clamp(1, 5);
+                                }
+                              }
+
+                              return _buildNotificationBadge(
+                                context: context,
+                                count: notificationCount > 0
+                                    ? notificationCount
+                                    : 3, // fallback for demo parity
+                              );
+                            },
+                          ),
                         ),
                         const SizedBox(width: 8),
                         Transform.scale(
@@ -914,44 +941,4 @@ class _HeaderPatternPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-/// Wrapper widget that provides backdrop overlay functionality for SpeedDialFAB
-class _SpeedDialOverlayWrapper extends StatefulWidget {
-  final Widget child;
-
-  const _SpeedDialOverlayWrapper({required this.child});
-
-  @override
-  State<_SpeedDialOverlayWrapper> createState() =>
-      _SpeedDialOverlayWrapperState();
-}
-
-class _SpeedDialOverlayWrapperState extends State<_SpeedDialOverlayWrapper> {
-  bool _isSpeedDialOpen = false;
-
-  void _toggleSpeedDial(bool isOpen) {
-    setState(() {
-      _isSpeedDialOpen = isOpen;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        widget.child,
-        // Backdrop overlay
-        if (_isSpeedDialOpen)
-          Positioned.fill(
-            child: GestureDetector(
-              onTap: () => _toggleSpeedDial(false),
-              child: Container(
-                color: AppColors.scrim,
-              ),
-            ),
-          ),
-      ],
-    );
-  }
 }

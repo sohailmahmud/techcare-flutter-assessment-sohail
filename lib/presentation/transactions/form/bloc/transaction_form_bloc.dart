@@ -183,12 +183,12 @@ class TransactionFormBloc
     on<ResetForm>(_onResetForm);
   }
 
-  void _onInitializeForm(
+  Future<void> _onInitializeForm(
     InitializeForm event,
     Emitter<TransactionFormBlocState> emit,
-  ) {
+  ) async {
     final formData = event.transaction != null
-        ? TransactionFormData.fromTransaction(event.transaction!)
+        ? await TransactionFormData.fromTransaction(event.transaction!)
         : TransactionFormData.initial();
 
     emit(TransactionFormReady(formData: formData));
