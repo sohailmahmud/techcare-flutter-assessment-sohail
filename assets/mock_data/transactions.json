@@ -279,6 +279,216 @@
       },
       "date": "2025-09-13T09:00:00Z",
       "description": "Quarterly performance bonus"
+    },
+    {
+      "id": "txn_021",
+      "title": "Bonus Payment",
+      "amount": 25000.00,
+      "type": "income",
+      "category": {
+        "id": "cat_income",
+        "name": "Salary",
+        "icon": "payments",
+        "color": "#00C853"
+      },
+      "date": "2025-10-02T09:00:00Z",
+      "description": "Quarterly performance bonus"
+    },
+    {
+      "id": "txn_022",
+      "title": "Gadget Purchase",
+      "amount": 15000.00,
+      "type": "expense",
+      "category": {
+        "id": "cat_003",
+        "name": "Shopping",
+        "icon": "shopping_bag",
+        "color": "#FFD93D"
+      },
+      "date": "2025-10-03T15:00:00Z",
+      "description": "New headphones from TechShop"
+    },
+    {
+      "id": "txn_023",
+      "title": "Lunch with Friends",
+      "amount": 1200.00,
+      "type": "expense",
+      "category": {
+        "id": "cat_001",
+        "name": "Food & Dining",
+        "icon": "restaurant",
+        "color": "#FF6B6B"
+      },
+      "date": "2025-10-04T13:00:00Z",
+      "description": "Lunch at Cafe Coffee Day"
+    },
+    {
+      "id": "txn_024",
+      "title": "Bookstore Purchase",
+      "amount": 900.00,
+      "type": "expense",
+      "category": {
+        "id": "cat_007",
+        "name": "Education",
+        "icon": "school",
+        "color": "#FF9800"
+      },
+      "date": "2025-10-05T11:30:00Z",
+      "description": "Books from Bookworm"
+    },
+    {
+      "id": "txn_025",
+      "title": "Yoga Class",
+      "amount": 1500.00,
+      "type": "expense",
+      "category": {
+        "id": "cat_006",
+        "name": "Health & Fitness",
+        "icon": "fitness_center",
+        "color": "#9C27B0"
+      },
+      "date": "2025-10-06T07:30:00Z",
+      "description": "Morning yoga session"
+    },
+    {
+      "id": "txn_026",
+      "title": "Concert Tickets",
+      "amount": 4000.00,
+      "type": "expense",
+      "category": {
+        "id": "cat_004",
+        "name": "Entertainment",
+        "icon": "movie",
+        "color": "#95E1D3"
+      },
+      "date": "2025-10-07T19:00:00Z",
+      "description": "Live concert tickets"
+    },
+    {
+      "id": "txn_027",
+      "title": "Car Maintenance",
+      "amount": 6000.00,
+      "type": "expense",
+      "category": {
+        "id": "cat_002",
+        "name": "Transportation",
+        "icon": "directions_car",
+        "color": "#4ECDC4"
+      },
+      "date": "2025-10-08T10:00:00Z",
+      "description": "Routine car service"
+    },
+    {
+      "id": "txn_028",
+      "title": "Dinner Date",
+      "amount": 2200.00,
+      "type": "expense",
+      "category": {
+        "id": "cat_001",
+        "name": "Food & Dining",
+        "icon": "restaurant",
+        "color": "#FF6B6B"
+      },
+      "date": "2025-10-09T20:00:00Z",
+      "description": "Dinner at Olive Garden"
+    },
+    {
+      "id": "txn_029",
+      "title": "Stock Investment",
+      "amount": 10000.00,
+      "type": "income",
+      "category": {
+        "id": "cat_investment",
+        "name": "Investment",
+        "icon": "trending_up",
+        "color": "#00C853"
+      },
+      "date": "2025-10-10T09:30:00Z",
+      "description": "Profit from stock sale"
+    },
+    {
+      "id": "txn_030",
+      "title": "Pharmacy Purchase",
+      "amount": 700.00,
+      "type": "expense",
+      "category": {
+        "id": "cat_006",
+        "name": "Health & Fitness",
+        "icon": "fitness_center",
+        "color": "#9C27B0"
+      },
+      "date": "2025-10-11T12:00:00Z",
+      "description": "Medicines from HealthPlus"
+    },
+    {
+      "id": "txn_031",
+      "title": "Weekend Getaway",
+      "amount": 12000.00,
+      "type": "expense",
+      "category": {
+        "id": "cat_004",
+        "name": "Entertainment",
+        "icon": "movie",
+        "color": "#95E1D3"
+      },
+      "date": "2025-10-12T08:00:00Z",
+      "description": "Trip to Cox's Bazar"
+    },
+    {
+      "id": "txn_032",
+      "title": "Coffee with Colleagues",
+      "amount": 500.00,
+      "type": "expense",
+      "category": {
+        "id": "cat_001",
+        "name": "Food & Dining",
+        "icon": "restaurant",
+        "color": "#FF6B6B"
+      },
+      "date": "2025-10-13T10:30:00Z",
+      "description": "Coffee at Gloria Jean's"
+    },
+    {
+      "id": "txn_033",
+      "title": "Tech Conference",
+      "amount": 8000.00,
+      "type": "expense",
+      "category": {
+        "id": "cat_007",
+        "name": "Education",
+        "icon": "school",
+        "color": "#FF9800"
+      },
+      "date": "2025-10-14T09:00:00Z",
+      "description": "Registration for Flutter conference"
+    },
+    {
+      "id": "txn_034",
+      "title": "Public Transport",
+      "amount": 300.00,
+      "type": "expense",
+      "category": {
+        "id": "cat_002",
+        "name": "Transportation",
+        "icon": "directions_car",
+        "color": "#4ECDC4"
+      },
+      "date": "2025-10-15T08:30:00Z",
+      "description": "Bus fare to work"
+    },
+    {
+      "id": "txn_035",
+      "title": "Birthday Gift",
+      "amount": 2500.00,
+      "type": "expense",
+      "category": {
+        "id": "cat_003",
+        "name": "Shopping",
+        "icon": "shopping_bag",
+        "color": "#FFD93D"
+      },
+      "date": "2025-10-16T14:00:00Z",
+      "description": "Gift for friend's birthday"
     }
   ],
   "meta": {
