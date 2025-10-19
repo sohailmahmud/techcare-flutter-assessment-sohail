@@ -99,8 +99,10 @@ class PaginatedResponse<T> {
 abstract class TransactionRepository {
   /// Get paginated transactions with filtering
   Future<Either<Failure, PaginatedResponse<Transaction>>> getTransactions(
-    TransactionQuery query,
-  );
+    TransactionQuery query, {
+    // Optional Dio cancellation token to allow cancelling outdated requests.
+    dynamic cancelToken,
+  });
 
   /// Get a single transaction by ID
   Future<Either<Failure, Transaction>> getTransaction(String id);
@@ -122,6 +124,66 @@ abstract class TransactionRepository {
   /// Clear transaction cache
   Future<Either<Failure, void>> clearCache();
 
-  /// Sync offline changes when connection is restored
-  Future<Either<Failure, void>> syncOfflineChanges();
+  /// Result of syncing a single queued item
+  /// Used to report per-item success/failure when syncing offline operations
+  // Simple data holder for an item that failed or succeeded during sync
+  // Keeping this in the repository contract keeps the domain layer aware of
+  // partial-sync semantics.
+  // Note: callers should inspect `failed` to determine if any items failed.
+  Future<Either<Failure, SyncResult>> syncOfflineChanges();
+
+  /// Retry a set of previously failed sync items.
+  ///
+  /// Accepts the failed items (with operation data) and attempts to re-enqueue
+  /// and resync them. Returns a SyncResult describing the outcome of the retry.
+  Future<Either<Failure, SyncResult>> retryOperations(
+      List<ItemSyncResult> failedItems);
+}
+
+/// Summary result of a sync run containing succeeded operation ids and
+/// failed items with error details.
+class SyncResult {
+  final List<String> succeededOperationIds;
+  final List<ItemSyncResult> failed;
+  final Map<String, String> idMap; // tempId -> serverId
+
+  const SyncResult({required this.succeededOperationIds, required this.failed, this.idMap = const {}});
+
+  bool get hasFailures => failed.isNotEmpty;
+
+  Map<String, dynamic> toJson() {
+    return {
+      'succeededOperationIds': succeededOperationIds,
+      'failed': failed.map((f) => f.toJson()).toList(),
+    };
+  }
+}
+
+class ItemSyncResult {
+  final String operationId;
+  final String operationType;
+  final String resourceType;
+  final Map<String, dynamic> data;
+  final String errorMessage;
+  final int retryCount;
+
+  const ItemSyncResult({
+    required this.operationId,
+    required this.operationType,
+    required this.resourceType,
+    required this.data,
+    required this.errorMessage,
+    required this.retryCount,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'operationId': operationId,
+      'operationType': operationType,
+      'resourceType': resourceType,
+      'data': data,
+      'errorMessage': errorMessage,
+      'retryCount': retryCount,
+    };
+  }
 }

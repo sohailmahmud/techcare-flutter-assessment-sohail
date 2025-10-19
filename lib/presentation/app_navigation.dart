@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import '../core/theme/app_colors.dart';
 import '../core/router/app_routes.dart';
@@ -8,10 +9,7 @@ import '../core/router/app_routes.dart';
 class AppNavigationPage extends StatefulWidget {
   final Widget child;
 
-  const AppNavigationPage({
-    super.key,
-    required this.child,
-  });
+  const AppNavigationPage({super.key, required this.child});
 
   @override
   State<AppNavigationPage> createState() => _AppNavigationPageState();
@@ -27,27 +25,39 @@ class _AppNavigationPageState extends State<AppNavigationPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: widget.child,
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
-              blurRadius: 8,
-              offset: const Offset(0, -2),
-            ),
-          ],
-        ),
-        child: NavigationBar(
-          selectedIndex: _calculateSelectedIndex,
-          onDestinationSelected: _onDestinationSelected,
-          backgroundColor: Colors.transparent,
-          indicatorColor: AppColors.primary.withValues(alpha: 0.12),
-          elevation: 0,
-          height: 80,
-          destinations: _buildNavigationDestinations(),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult:(didPop, result){
+        if(didPop) return;
+        final router = GoRouter.of(context);
+          if (router.state.matchedLocation != '/') {
+            router.go('/');
+          } else {
+            SystemNavigator.pop(); // exit app
+          }
+      },
+      child: Scaffold(
+        body: widget.child,
+        bottomNavigationBar: Container(
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.08),
+                blurRadius: 8,
+                offset: const Offset(0, -2),
+              ),
+            ],
+          ),
+          child: NavigationBar(
+            selectedIndex: _calculateSelectedIndex,
+            onDestinationSelected: _onDestinationSelected,
+            backgroundColor: Colors.transparent,
+            indicatorColor: AppColors.primary.withValues(alpha: 0.12),
+            elevation: 0,
+            height: 80,
+            destinations: _buildNavigationDestinations(),
+          ),
         ),
       ),
     );
@@ -73,37 +83,31 @@ class _AppNavigationPageState extends State<AppNavigationPage> {
       NavigationDestination(
         icon: Icon(
           Icons.dashboard_outlined,
-          color:
-              selectedIndex == 0 ? AppColors.primary : AppColors.textSecondary,
+          color: selectedIndex == 0
+              ? AppColors.primary
+              : AppColors.textSecondary,
         ),
-        selectedIcon: const Icon(
-          Icons.dashboard,
-          color: AppColors.primary,
-        ),
+        selectedIcon: const Icon(Icons.dashboard, color: AppColors.primary),
         label: 'Dashboard',
       ),
       NavigationDestination(
         icon: Icon(
           Icons.receipt_long_outlined,
-          color:
-              selectedIndex == 1 ? AppColors.primary : AppColors.textSecondary,
+          color: selectedIndex == 1
+              ? AppColors.primary
+              : AppColors.textSecondary,
         ),
-        selectedIcon: const Icon(
-          Icons.receipt_long,
-          color: AppColors.primary,
-        ),
+        selectedIcon: const Icon(Icons.receipt_long, color: AppColors.primary),
         label: 'Transactions',
       ),
       NavigationDestination(
         icon: Icon(
           Icons.analytics_outlined,
-          color:
-              selectedIndex == 2 ? AppColors.primary : AppColors.textSecondary,
+          color: selectedIndex == 2
+              ? AppColors.primary
+              : AppColors.textSecondary,
         ),
-        selectedIcon: const Icon(
-          Icons.analytics,
-          color: AppColors.primary,
-        ),
+        selectedIcon: const Icon(Icons.analytics, color: AppColors.primary),
         label: 'Analytics',
       ),
     ];

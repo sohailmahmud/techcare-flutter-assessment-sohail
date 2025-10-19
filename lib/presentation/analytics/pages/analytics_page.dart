@@ -7,6 +7,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/spacing.dart';
 import '../../../injection_container.dart' as di;
+import '../../../domain/repositories/category_repository.dart';
 import '../../transactions/list/bloc/transactions_bloc.dart';
 import '../bloc/analytics_bloc.dart';
 import '../../../domain/entities/analytics.dart';
@@ -95,15 +96,41 @@ class _AnalyticsPageState extends State<AnalyticsPage>
   }
 
   Future<List<Category>> _loadCategories() async {
-    // Load categories from category entity
+    // Prefer loading categories from repository (ensures single source of truth)
+    try {
+      final CategoryRepository categoryRepo = di.sl<CategoryRepository>();
+      final result = await categoryRepo.getCategories();
+
+      // If repository returned categories, use them when non-empty
+      if (result.isRight()) {
+        final cats = result.getOrElse(() => <Category>[]);
+        if (cats.isNotEmpty) return cats;
+      }
+
+      // If repo returned Left or empty list, try cached categories from repository
+      try {
+        final cachedRes = await categoryRepo.getCachedCategories();
+        if (cachedRes.isRight()) {
+          final cached = cachedRes.getOrElse(() => <Category>[]);
+          if (cached.isNotEmpty) return cached;
+        }
+      } catch (_) {
+        // ignore and fallback to asset
+      }
+
+      // Fallback to asset data if repository didn't provide categories
+    } catch (e) {
+      // In case of an exception using the repository, fall back to asset below
+    }
+
     final AssetDataSource assetDataSource = AssetDataSource();
     final categoriesResponse = await assetDataSource.getCategories();
     if (categoriesResponse.categories.isNotEmpty) {
-      return categoriesResponse.categories
-          .map((model) => model.toEntity())
-          .toList();
+      return categoriesResponse.categories.map((model) => model.toEntity()).toList();
     }
-    return [];
+
+    return <Category>[];
+    
   }
 
   Widget _buildScaffold({required Widget body}) {

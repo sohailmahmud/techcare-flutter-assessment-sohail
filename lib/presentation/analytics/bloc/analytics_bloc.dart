@@ -410,52 +410,71 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
   }
 
   List<BudgetComparison> _calculateBudgetProgress(List<tx.Transaction> transactions) {
-    // DEBUG: Print normalized budget keys and injected category names
-    debugPrint('>>> ENTERED _calculateBudgetProgress');
-    debugPrint('--- Budget Category Keys (normalized) ---');
-    for (final key in _defaultBudgets.keys) {
-      debugPrint('Budget Key: ' + key.trim().toLowerCase());
-    }
-    debugPrint('Injected categories list length: ${categories.length}');
-    debugPrint('Injected categories list: $categories');
-    debugPrint('--- Injected Category Names (normalized) ---');
-    for (final cat in categories) {
-      debugPrint('Category: ${cat.name.trim().toLowerCase()} | icon: ${cat.icon} | color: ${cat.color}');
-    }
-    debugPrint('--- End of Category Debug ---');
-    debugPrint('<<< EXITING _calculateBudgetProgress');
-
+    // Build totals per category name (from transactions)
     final categoryTotals = <String, double>{};
-
     for (final transaction in transactions.where((t) => t.type == tx.TransactionType.expense)) {
-      final categoryName = transaction.categoryName;
+      final categoryName = transaction.categoryName.trim();
       categoryTotals[categoryName] = (categoryTotals[categoryName] ?? 0) + transaction.amount;
     }
 
-    // Build a lookup map for category name -> Category entity
-    final categoryNameMap = {
-      for (final cat in categories)
-        cat.name.trim().toLowerCase(): cat
-    };
+    // Build lookups for categories by id and by normalized name
+    String normalize(String s) {
+      return s
+          .trim()
+          .toLowerCase()
+          .replaceAll('&', 'and')
+          .replaceAll(RegExp(r"[^a-z0-9\s]"), '')
+          .replaceAll(RegExp('\\s+'), ' ');
+    }
 
-    return _defaultBudgets.entries.map((entry) {
-      final normalizedName = entry.key.trim().toLowerCase();
-      final category = categoryNameMap[normalizedName] ?? Category(
-        id: '',
-        name: entry.key,
-        icon: Icons.category,
-        color: Colors.grey,
-      );
+  final byName = {for (final c in categories) normalize(c.name): c};
 
-      final actualAmount = categoryTotals[entry.key] ?? 0.0;
+    List<BudgetComparison> results = [];
 
-      return BudgetComparison.fromAmounts(
+    for (final entry in _defaultBudgets.entries) {
+      final budgetKey = entry.key;
+  final normalizedKey = normalize(budgetKey);
+
+      // Try exact name match first
+      Category? matched;
+      matched = byName[normalizedKey];
+
+      // Try contains/partial match
+      matched ??= categories.firstWhere(
+          (c) => normalize(c.name).contains(normalizedKey) || normalizedKey.contains(normalize(c.name)),
+          orElse: () => Category(
+            id: '',
+            name: budgetKey,
+            icon: Icons.category,
+            color: Colors.grey,
+          ),
+        );
+
+      // If still defaulted, matched.id may be empty
+      final category = matched;
+
+      // Look up actual amount using budgetKey or normalized category name variants
+      double actualAmount = 0.0;
+      // Try exact budget key
+      actualAmount = categoryTotals[budgetKey] ?? 0.0;
+      if (actualAmount == 0.0) {
+        // Try normalized matches
+        final foundKey = categoryTotals.keys.firstWhere(
+          (k) => normalize(k) == normalizedKey || normalize(k).contains(normalizedKey) || normalizedKey.contains(normalize(k)),
+          orElse: () => '',
+        );
+        actualAmount = (foundKey.isNotEmpty) ? (categoryTotals[foundKey] ?? 0.0) : actualAmount;
+      }
+
+      results.add(BudgetComparison.fromAmounts(
         categoryId: category.id,
         categoryName: category.name,
         budgetAmount: entry.value,
         actualAmount: actualAmount,
         category: category,
-      );
-    }).toList();
+      ));
+    }
+
+    return results;
   }
 }

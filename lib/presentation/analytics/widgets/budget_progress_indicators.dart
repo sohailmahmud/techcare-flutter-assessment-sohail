@@ -527,11 +527,13 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
 /// Compact budget progress widget for smaller spaces
 class CompactBudgetProgress extends StatelessWidget {
   final List<BudgetComparison> budgetData;
+  final List<Category>? categories;
   final int maxItems;
 
   const CompactBudgetProgress({
     super.key,
     required this.budgetData,
+    this.categories,
     this.maxItems = 3,
   });
 
@@ -543,75 +545,87 @@ class CompactBudgetProgress extends StatelessWidget {
       children: displayData.map((budget) {
         final status = _getBudgetStatus(budget);
         final statusColor = _getStatusColor(status);
-        return FutureBuilder<Category?>(
-          future: AppCategories.findById(budget.categoryId),
-          builder: (context, snapshot) {
-            final category = snapshot.data;
-            final categoryColor = category?.color ?? Colors.grey;
-            final categoryIcon = category?.icon ?? Icons.category;
-            return Container(
-              margin: const EdgeInsets.only(bottom: Spacing.space8),
-              padding: const EdgeInsets.all(Spacing.space12),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: statusColor.withValues(alpha: 0.2),
+
+        // Try to resolve category from injected list
+        Category? resolved;
+        if (categories != null) {
+          resolved = categories!.firstWhere(
+            (c) => c.id == budget.categoryId || c.name.trim().toLowerCase() == budget.categoryName.trim().toLowerCase(),
+            orElse: () => Category(
+              id: '',
+              name: budget.categoryName,
+              icon: Icons.category,
+              color: Colors.grey,
+            ),
+          );
+        }
+
+        final category = resolved;
+        final categoryColor = category?.color ?? Colors.grey;
+        final categoryIcon = category?.icon ?? Icons.category;
+        final categoryName = category?.name ?? budget.categoryName;
+
+        return Container(
+          margin: const EdgeInsets.only(bottom: Spacing.space8),
+          padding: const EdgeInsets.all(Spacing.space12),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: statusColor.withValues(alpha: 0.2),
+            ),
+          ),
+          child: Row(
+            children: [
+              // Category icon
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: categoryColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  categoryIcon,
+                  color: categoryColor,
+                  size: 16,
                 ),
               ),
-              child: Row(
-                children: [
-                  // Category icon
-                  Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: categoryColor.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
+              const SizedBox(width: Spacing.space12),
+              // Category name and progress
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      categoryName,
+                      style: AppTypography.bodySmall.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
                     ),
-                    child: Icon(
-                      categoryIcon,
-                      color: categoryColor,
-                      size: 16,
+                    const SizedBox(height: Spacing.space4),
+                    LinearProgressIndicator(
+                      value: budget.percentage / 100,
+                      backgroundColor: AppColors.border,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        statusColor,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: Spacing.space12),
-                  // Category name and progress
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          category?.name ?? budget.categoryName,
-                          style: AppTypography.bodySmall.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        const SizedBox(height: Spacing.space4),
-                        LinearProgressIndicator(
-                          value: budget.percentage / 100,
-                          backgroundColor: AppColors.border,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            statusColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: Spacing.space12),
-                  // Percentage
-                  Text(
-                    '${budget.percentage.toInt()}%',
-                    style: AppTypography.labelMedium.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: statusColor,
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            );
-          },
+              const SizedBox(width: Spacing.space12),
+              // Percentage
+              Text(
+                '${budget.percentage.toInt()}%',
+                style: AppTypography.labelMedium.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: statusColor,
+                ),
+              ),
+            ],
+          ),
         );
       }).toList(),
     );

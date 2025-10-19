@@ -228,12 +228,13 @@ class _SpendingPieChartState extends State<SpendingPieChart>
       final opacity = widget.selectedCategory == null || isSelected ? 1.0 : 0.3;
 
       final category = _categoryMap[categoryExpense.categoryId];
-      final color = (category?.color ?? fallbackColors[index % fallbackColors.length]).withOpacity(opacity);
+      final color = (category?.color ?? fallbackColors[index % fallbackColors.length]).withValues(alpha:opacity);
 
       return PieChartSectionData(
         color: color,
         value: categoryExpense.percentage * _animation.value,
-        title: isTouched ? '${categoryExpense.percentage.toStringAsFixed(1)}%' : '',
+        // Always show percentage on slice
+        title: '${(categoryExpense.percentage).toStringAsFixed(1)}%',
         radius: isTouched
             ? Spacing.pieChartTouchedRadius
             : (isSelected
@@ -259,7 +260,7 @@ class _SpendingPieChartState extends State<SpendingPieChart>
       final opacity = widget.selectedCategory == null || isSelected ? 1.0 : 0.5;
 
       final category = _categoryMap[categoryExpense.categoryId];
-      final color = (category?.color ?? fallbackColors[index % fallbackColors.length]).withOpacity(opacity);
+      final color = (category?.color ?? fallbackColors[index % fallbackColors.length]).withValues(alpha:opacity);
 
       return Padding(
         padding: const EdgeInsets.only(bottom: 8),

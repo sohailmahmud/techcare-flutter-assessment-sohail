@@ -302,14 +302,18 @@ void main() {
     group('Offline Sync', () {
       test('should sync offline changes successfully', () async {
         // Arrange
+        const successResult = SyncResult(succeededOperationIds: ['op1'], failed: []);
         when(() => mockRepository.syncOfflineChanges())
-            .thenAnswer((_) async => const Right(null));
+            .thenAnswer((_) async => const Right(successResult));
 
         // Act
         final result = await mockRepository.syncOfflineChanges();
 
         // Assert
-        expect(result, const Right(null));
+        expect(result.isRight(), true);
+        final value = result.fold((l) => null, (r) => r);
+        expect(value, isA<SyncResult>());
+        expect(value?.succeededOperationIds, contains('op1'));
         verify(() => mockRepository.syncOfflineChanges()).called(1);
       });
 

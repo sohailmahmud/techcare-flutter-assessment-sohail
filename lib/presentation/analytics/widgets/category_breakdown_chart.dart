@@ -230,8 +230,8 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart> with Ti
   }
 
   Widget _buildChart() {
-    final barHeight = 60.0;
-    final maxVisibleBars = 5;
+    const barHeight = 60.0;
+    const maxVisibleBars = 5;
     final totalBars = widget.categoryData.length;
     final showAllBars = totalBars <= maxVisibleBars;
     final chartHeight = showAllBars ? totalBars * barHeight : maxVisibleBars * barHeight;
@@ -498,7 +498,7 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart> with Ti
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: cat.color.withOpacity(0.1),
+                      color: cat.color.withValues(alpha:0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(

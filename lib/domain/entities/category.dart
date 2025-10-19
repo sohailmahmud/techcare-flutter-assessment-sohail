@@ -21,7 +21,7 @@ class Category extends Equatable {
 
   // Helper methods for API integration
   String get iconName => _getIconName(icon);
-  String get colorHex => '#${color.value.toRadixString(16).substring(2).toUpperCase()}';
+  String get colorHex => '#${color.toARGB32().toRadixString(16).substring(2).toUpperCase()}';
 
   static String _getIconName(IconData icon) {
     // Map common icons to string names for API
