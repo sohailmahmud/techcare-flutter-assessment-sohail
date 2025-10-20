@@ -15,11 +15,12 @@ void main() {
     late AnalyticsBloc analyticsBloc;
     late MockTransactionsBloc mockTransactionsBloc;
 
+    final now = DateTime.now();
     final mockTransactions = [
       tx.Transaction(
         id: '1',
         title: 'Grocery',
-        amount: -100.0,
+        amount: 100.0,
         type: tx.TransactionType.expense,
         category: const Category(
           id: 'food',
@@ -27,7 +28,7 @@ void main() {
           icon: Icons.restaurant,
           color: Colors.orange,
         ),
-        date: DateTime(2025, 10, 8),
+        date: now,
       ),
       tx.Transaction(
         id: '2',
@@ -40,12 +41,14 @@ void main() {
           icon: Icons.work,
           color: Colors.green,
         ),
-        date: DateTime(2025, 10, 9),
+        date: now,
       ),
     ];
 
     setUp(() {
       mockTransactionsBloc = MockTransactionsBloc();
+      // Default stub: return the mockTransactions list for the allUnfilteredTransactions getter
+      when(() => mockTransactionsBloc.allUnfilteredTransactions).thenReturn(mockTransactions);
       analyticsBloc = AnalyticsBloc(transactionsBloc: mockTransactionsBloc, categories: []);
     });
 
@@ -69,6 +72,7 @@ void main() {
               currentPage: 1,
             ),
           );
+          when(() => mockTransactionsBloc.allUnfilteredTransactions).thenReturn(mockTransactions);
         },
         act: (bloc) => bloc.add(const ChangePeriod(TimePeriod.thisWeek)),
         expect: () => [
@@ -88,6 +92,7 @@ void main() {
               currentPage: 1,
             ),
           );
+          when(() => mockTransactionsBloc.allUnfilteredTransactions).thenReturn(mockTransactions);
         },
         act: (bloc) => bloc.add(const ChangePeriod(TimePeriod.thisMonth)),
         expect: () => [
@@ -109,6 +114,7 @@ void main() {
               currentPage: 1,
             ),
           );
+          when(() => mockTransactionsBloc.allUnfilteredTransactions).thenReturn(mockTransactions);
         },
         act: (bloc) => bloc.add(const LoadAnalytics()),
         expect: () => [
@@ -128,6 +134,7 @@ void main() {
               currentPage: 1,
             ),
           );
+          when(() => mockTransactionsBloc.allUnfilteredTransactions).thenReturn(mockTransactions);
         },
         act: (bloc) => bloc.add(const LoadAnalytics()),
         verify: (bloc) {
@@ -153,6 +160,7 @@ void main() {
               currentPage: 1,
             ),
           );
+          when(() => mockTransactionsBloc.allUnfilteredTransactions).thenReturn(mockTransactions);
         },
         act: (bloc) => bloc.add(const RefreshAnalytics()),
         expect: () => [
@@ -224,6 +232,8 @@ void main() {
           when(() => mockTransactionsBloc.state).thenReturn(
             const TransactionError(error: 'Failed to load transactions'),
           );
+          // Simulate failure to provide transactions via the getter
+          when(() => mockTransactionsBloc.allUnfilteredTransactions).thenThrow(Exception('Failed to load transactions'));
         },
         act: (bloc) => bloc.add(const LoadAnalytics()),
         expect: () => [
@@ -246,6 +256,7 @@ void main() {
               currentPage: 1,
             ),
           );
+          when(() => mockTransactionsBloc.allUnfilteredTransactions).thenReturn([]);
         },
         act: (bloc) => bloc.add(const LoadAnalytics()),
         expect: () => [

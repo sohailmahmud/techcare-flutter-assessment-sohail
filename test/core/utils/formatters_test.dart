@@ -58,19 +58,20 @@ void main() {
         expect(DateFormatter.formatApi(date), equals('2025-10-09'));
       });
 
-      test('should format date grouping', () {
-        final today = DateTime(2025, 10, 9, 10);
-        final yesterday = DateTime(2025, 10, 8);
-        final thisYear = DateTime(2025, 8, 15);
-        final lastYear = DateTime(2024, 8, 15);
+    test('should format date grouping', () {
+    final referenceNow = DateTime(2025, 10, 9, 10);
+    final today = DateTime(2025, 10, 9, 10);
+    final yesterday = DateTime(2025, 10, 8);
+    final thisYear = DateTime(2025, 8, 15);
+    final lastYear = DateTime(2024, 8, 15);
 
-        expect(DateFormatter.formatDateGrouping(today), equals('Today'));
-        expect(
-            DateFormatter.formatDateGrouping(yesterday), equals('Yesterday'));
-        expect(DateFormatter.formatDateGrouping(thisYear), equals('Aug 15'));
-        expect(
-            DateFormatter.formatDateGrouping(lastYear), equals('Aug 15, 2024'));
-      });
+    expect(DateFormatter.formatDateGrouping(today, now: referenceNow), equals('Today'));
+    expect(
+      DateFormatter.formatDateGrouping(yesterday, now: referenceNow), equals('Yesterday'));
+    expect(DateFormatter.formatDateGrouping(thisYear, now: referenceNow), equals('Aug 15'));
+    expect(
+      DateFormatter.formatDateGrouping(lastYear, now: referenceNow), equals('Aug 15, 2024'));
+    });
 
       test('should format relative time', () {
         // Note: This test may be flaky due to time dependencies

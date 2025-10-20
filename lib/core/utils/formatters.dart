@@ -73,9 +73,9 @@ class DateFormatter {
   }
 
   /// Format date for grouping transactions (e.g., "Today", "Yesterday", "Jan 15")
-  static String formatDateGrouping(DateTime date) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
+  static String formatDateGrouping(DateTime date, {DateTime? now}) {
+    final reference = now ?? DateTime.now();
+    final today = DateTime(reference.year, reference.month, reference.day);
     final yesterday = today.subtract(const Duration(days: 1));
     final transactionDate = DateTime(date.year, date.month, date.day);
 
@@ -83,7 +83,7 @@ class DateFormatter {
       return 'Today';
     } else if (transactionDate.isAtSameMomentAs(yesterday)) {
       return 'Yesterday';
-    } else if (date.year == now.year) {
+    } else if (date.year == reference.year) {
       // Same year: show only month and day
       return DateFormat('MMM dd').format(date);
     } else {

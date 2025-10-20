@@ -32,6 +32,4 @@ CategoriesResponse _$CategoriesResponseFromJson(Map<String, dynamic> json) =>
     );
 
 Map<String, dynamic> _$CategoriesResponseToJson(CategoriesResponse instance) =>
-    <String, dynamic>{
-      'categories': instance.categories,
-    };
+    <String, dynamic>{'categories': instance.categories};

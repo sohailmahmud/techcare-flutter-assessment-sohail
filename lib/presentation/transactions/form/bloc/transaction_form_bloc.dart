@@ -5,6 +5,9 @@ import '../../../../domain/entities/transaction.dart';
 import '../../../../domain/entities/category.dart';
 import '../../list/bloc/transactions_bloc.dart';
 import '../models/transaction_form_models.dart';
+import '../../../../core/di/service_locator.dart';
+import '../../../../domain/repositories/transaction_repository.dart';
+import '../../../../../core/utils/id_utils.dart';
 
 // Events
 abstract class TransactionFormEvent extends Equatable {
@@ -359,17 +362,36 @@ class TransactionFormBloc
         submissionStatus: FormSubmissionStatus.inProgress));
 
     try {
-      final transaction = currentState.formData.toTransaction();
+      var transaction = currentState.formData.toTransaction();
 
-      emit(currentState.copyWith(
-          submissionStatus: FormSubmissionStatus.success));
-
-      if (currentState.isEditMode) {
-        _transactionsBloc.add(
-            UpdateTransaction(id: transaction.id, transaction: transaction));
-      } else {
-        _transactionsBloc.add(AddTransaction(transaction));
+      // Ensure a stable temporary id exists for optimistic UI and caching.
+      if (transaction.id.isEmpty) {
+        final tempId = generateTempId();
+        transaction = transaction.copyWith(id: tempId);
       }
+
+      // Centralized persistence: call repository to create (this will cache
+      // optimistically and/or queue for sync as needed). Only dispatch the
+      // AddTransaction event after repository call succeeds to avoid double writes.
+      final repo = serviceLocator<TransactionRepository>();
+      final result = await repo.createTransaction(transaction);
+
+      result.fold((failure) {
+        emit(currentState.copyWith(
+          submissionStatus: FormSubmissionStatus.failure,
+          submissionError: failure.message,
+        ));
+      }, (createdTransaction) {
+        emit(currentState.copyWith(
+            submissionStatus: FormSubmissionStatus.success));
+
+        if (currentState.isEditMode) {
+          _transactionsBloc.add(
+              UpdateTransaction(id: createdTransaction.id, transaction: createdTransaction));
+        } else {
+          _transactionsBloc.add(AddTransaction(createdTransaction));
+        }
+      });
     } catch (e) {
       emit(currentState.copyWith(
         submissionStatus: FormSubmissionStatus.failure,
@@ -377,6 +399,8 @@ class TransactionFormBloc
       ));
     }
   }
+
+  // temp id generator moved to `lib/core/utils/id_utils.dart`
 
   void _onResetForm(
     ResetForm event,
@@ -429,11 +453,4 @@ class TransactionFormBloc
 }
 
 // Add Transaction Event (if not already defined in TransactionsBloc)
-class AddTransaction extends TransactionsEvent {
-  final Transaction transaction;
 
-  const AddTransaction(this.transaction);
-
-  @override
-  List<Object> get props => [transaction];
-}

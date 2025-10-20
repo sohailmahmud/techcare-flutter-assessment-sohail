@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../theme/app_colors.dart';
 import '../theme/spacing.dart';
 
@@ -48,10 +49,57 @@ class _SpeedDialFABState extends State<SpeedDialFAB>
     );
   }
 
+  GoRouter? _router;
+  Listenable? _routerDelegateListener;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final router = GoRouter.of(context);
+    if (_router != router) {
+      // remove previous listener
+      _routerDelegateListener?.removeListener(_onRouteChanged);
+      _router = router;
+      _routerDelegateListener = router.routerDelegate as Listenable?;
+      _routerDelegateListener?.addListener(_onRouteChanged);
+    }
+  }
+
+  void _onRouteChanged() {
+    // Close any open overlay when navigation changes
+    _forceCloseOverlay();
+  }
+
   @override
   void dispose() {
+    // Make sure any overlay entry is removed when the widget is disposed
+    // remove router listener
+  _routerDelegateListener?.removeListener(_onRouteChanged);
+    _forceCloseOverlay();
     _controller.dispose();
     super.dispose();
+  }
+
+  @override
+  void deactivate() {
+    // If the widget is removed from the tree (e.g., navigate away), ensure overlay is removed
+    _forceCloseOverlay();
+    super.deactivate();
+  }
+
+  // Force-close overlay without calling setState to avoid calling during dispose/deactivate
+  void _forceCloseOverlay() {
+    if (_overlayEntry != null) {
+      try {
+        _overlayEntry?.remove();
+      } catch (_) {}
+      _overlayEntry = null;
+      // keep controller state consistent
+      try {
+        _controller.reverse();
+      } catch (_) {}
+      _isOpen = false;
+    }
   }
 
   void _toggle() {
@@ -94,7 +142,7 @@ class _SpeedDialFABState extends State<SpeedDialFAB>
             child: GestureDetector(
               onTap: _close,
               behavior: HitTestBehavior.opaque,
-              child: Container(color: Colors.black.withOpacity(0.5)),
+              child: Container(color: Colors.black.withValues(alpha:0.5)),
             ),
           ),
 

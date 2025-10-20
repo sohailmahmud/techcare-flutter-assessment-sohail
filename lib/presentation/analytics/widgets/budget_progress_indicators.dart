@@ -45,7 +45,7 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
     final itemCount = math.min(widget.budgetData.length,
         12); // Allow up to 12 animations for better performance
     _controllers = List.generate(
-      itemCount,
+          itemCount,
       (index) => AnimationController(
         duration: Duration(
             milliseconds: 1000 + (index * 50)), // Reduced delay for more items
@@ -309,8 +309,15 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
     return LayoutBuilder(
       builder: (context, constraints) {
         final availableWidth = constraints.maxWidth > 0 ? constraints.maxWidth : 300.0;
-        final crossAxisCount = availableWidth > 500 && displayData.length > 4 ? 3 : 2;
-        final aspectRatio = displayData.length <= 2 ? 1.1 : 1.0;
+        // Determine cross axis count based on available width and desired min item width
+  const minItemWidth = 160.0; // desired minimum card width
+        int crossAxisCount = (availableWidth / minItemWidth).floor();
+        if (crossAxisCount < 1) crossAxisCount = 1;
+        if (crossAxisCount > 3) crossAxisCount = 3; // cap columns
+
+        final itemWidth = availableWidth / crossAxisCount;
+  const baseItemHeight = 200.0; // desired base height for card
+        final childAspectRatio = itemWidth / baseItemHeight;
 
         return ClipRRect(
           borderRadius: BorderRadius.circular(Spacing.radiusS),
@@ -321,7 +328,7 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
               crossAxisCount: crossAxisCount,
               crossAxisSpacing: Spacing.space12,
               mainAxisSpacing: Spacing.space12,
-              childAspectRatio: aspectRatio,
+              childAspectRatio: childAspectRatio,
             ),
             itemCount: displayData.length,
             itemBuilder: (context, index) {
@@ -389,7 +396,7 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
     return Container(
       padding: const EdgeInsets.all(Spacing.space16),
       decoration: BoxDecoration(
-        color: AppColors.background,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: statusColor.withValues(alpha: 0.2),
@@ -472,28 +479,33 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
             ),
           ),
           const SizedBox(height: Spacing.space8),
-          Column(
-            children: [
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  CurrencyFormatter.formatCompact(budget.actualAmount),
-                  style: AppTypography.bodyMedium.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+          // Reserve a fixed area for amounts so they don't overflow when card height is constrained
+          SizedBox(
+            height: 44,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    CurrencyFormatter.formatCompact(budget.actualAmount),
+                    style: AppTypography.bodyMedium.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                 ),
-              ),
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  'of ${CurrencyFormatter.formatCompact(budget.budgetAmount)}',
-                  style: AppTypography.labelSmall.copyWith(
-                    color: AppColors.textSecondary,
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    'of ${CurrencyFormatter.formatCompact(budget.budgetAmount)}',
+                    style: AppTypography.labelSmall.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
