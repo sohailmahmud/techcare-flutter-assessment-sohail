@@ -7,6 +7,7 @@ import '../../domain/entities/transaction_filter.dart' as filter
 import '../../domain/entities/transaction_filter.dart';
 import '../models/cached_transaction.dart';
 import '../models/cache_metadata.dart';
+import '../../core/config/cache_config.dart';
 
 /// Comprehensive cache manager using Hive with proper invalidation strategies
 class HiveCacheManager {
@@ -15,7 +16,7 @@ class HiveCacheManager {
   static const String _configBoxName = 'cache_config';
 
   // Cache configuration
-  static const Duration _defaultTTL = Duration(hours: 24);
+  static const Duration _defaultTTL = kDefaultCacheTTL;
   // static const Duration _maxCacheAge = Duration(days: 7); // Reserved for future TTL features
   static const int _maxCacheSize = 5000; // Maximum cached transactions
   static const Duration _cleanupInterval = Duration(hours: 6);
@@ -32,8 +33,14 @@ class HiveCacheManager {
     if (_isInitialized) return;
 
     try {
-      // Initialize Hive Flutter
-      await Hive.initFlutter();
+      // Initialize Hive Flutter (may fail in test env where path_provider isn't
+      // available). If it fails, continue since tests call Hive.init with a
+      // temp directory.
+      try {
+        await Hive.initFlutter();
+      } catch (e) {
+        dev.log('Hive.initFlutter() skipped (test/dev env): $e');
+      }
 
       // Register adapters if not already registered
       if (!Hive.isAdapterRegistered(0)) {
@@ -413,8 +420,9 @@ class HiveCacheManager {
 
     // Amount range filter
     if (filter.amountRange != null) {
-      if (transaction.amount < filter.amountRange!.min ||
-          transaction.amount > filter.amountRange!.max) {
+      final absAmount = transaction.amount.abs();
+      if (absAmount < filter.amountRange!.min ||
+          absAmount > filter.amountRange!.max) {
         return false;
       }
     }
@@ -446,11 +454,14 @@ class HiveCacheManager {
 
   Future<void> _updateCacheMetadata(
       String cacheKey, int itemCount, filter.TransactionFilter? filter) async {
-    final metadata = _metadataBox.get(cacheKey) ??
-        CacheMetadata(
-          key: cacheKey,
-          lastUpdated: DateTime.now(),
-        );
+    var metadata = _metadataBox.get(cacheKey);
+    if (metadata == null) {
+      metadata = CacheMetadata(
+        key: cacheKey,
+        lastUpdated: DateTime.now(),
+      );
+      await _metadataBox.put(cacheKey, metadata);
+    }
 
     metadata.updateMetadata(
       totalItems: itemCount,

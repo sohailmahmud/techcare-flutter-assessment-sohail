@@ -10,6 +10,7 @@ import 'asset_data_source.dart';
 class MockApiService {
   final AssetDataSource _assetDataSource = AssetDataSource();
   final math.Random _random = math.Random();
+  final double _failureChance; // failure probability (0.0 - 1.0)
 
   // In-memory storage for CRUD operations
   List<TransactionModel> _transactions = [];
@@ -17,6 +18,16 @@ class MockApiService {
   AnalyticsDataModel? _analytics;
 
   bool _isInitialized = false;
+  // Optional forced error for the next API call (test-only)
+  DioException? _forcedNextError;
+
+  /// Test-only: force the next API call to throw [error]. Pass null to clear.
+  void setNextError(DioException? error) {
+    _forcedNextError = error;
+  }
+
+  /// Create the MockApiService
+  MockApiService({double failureChance = 0.10}) : _failureChance = failureChance;
 
   /// Initialize service with JSON data loading
   Future<void> initialize() async {
@@ -44,13 +55,91 @@ class MockApiService {
 
   /// Simulate network delay
   Future<void> _simulateDelay() async {
-    final delay = 300 + _random.nextInt(700); // 300-1000ms delay
+    // Delay between 500ms and 1000ms (inclusive) to simulate API latency
+    final delay = 500 + _random.nextInt(501); // 500..1000 ms
     await Future.delayed(Duration(milliseconds: delay));
   }
 
   /// Simulate network error (disabled for debugging)
   void _simulateNetworkError() {
-    // Disabled completely for debugging
+    // If a forced error was provided (from tests), throw it and clear the
+    // forced error so subsequent calls behave normally.
+    if (_forcedNextError != null) {
+      final err = _forcedNextError!;
+      _forcedNextError = null;
+      throw err;
+    }
+    // Inject a random failure to help test error handling in the app.
+    // This uses a 1-in-N integer sampling derived from _failureChance so that
+    // when _failureChance == 0.1 the behavior is equivalent to
+    // `Random().nextInt(10) == 0` (approx. 10% chance).
+    if (_failureChance <= 0.0) return;
+
+    if (_failureChance >= 1.0) {
+      // Always fail - throw one of the simulated errors
+    } else {
+      // Derive an integer denominator from the failure chance. For common
+      // fractions like 0.10 this will produce denom=10 and simulate
+      // `nextInt(10) == 0`.
+      final denom = (_failureChance > 0) ? (1 / _failureChance).round() : 0;
+      if (denom <= 1) {
+        // denom <= 1 means always fail
+      } else {
+        final shouldFail = _random.nextInt(denom) == 0;
+        if (!shouldFail) return;
+      }
+    }
+
+    Logger.w('MockApiService: Simulating network error (failureChance=$_failureChance)');
+
+    // Choose an error class to simulate (same weighted distribution as before)
+    final choice = _random.nextDouble();
+    if (choice < 0.25) {
+      // Simulate a connection error (no internet)
+      throw DioException(
+        requestOptions: RequestOptions(path: ''),
+        type: DioExceptionType.connectionError,
+        message: 'Simulated connection error (no internet)',
+      );
+    } else if (choice < 0.50) {
+      // Simulate a timeout
+      throw DioException(
+        requestOptions: RequestOptions(path: ''),
+        type: DioExceptionType.receiveTimeout,
+        message: 'Simulated timeout',
+      );
+    } else if (choice < 0.70) {
+      // Simulate a 500 server error
+      throw DioException(
+        requestOptions: RequestOptions(path: ''),
+        type: DioExceptionType.badResponse,
+        response: Response(requestOptions: RequestOptions(path: ''), statusCode: 500, data: {'message': 'Simulated server error'}),
+        message: 'Simulated server error',
+      );
+    } else if (choice < 0.85) {
+      // Simulate a 400 validation error
+      throw DioException(
+        requestOptions: RequestOptions(path: ''),
+        type: DioExceptionType.badResponse,
+        response: Response(requestOptions: RequestOptions(path: ''), statusCode: 400, data: {'message': 'Simulated validation error'}),
+        message: 'Simulated validation error',
+      );
+    } else if (choice < 0.95) {
+      // Simulate authentication error
+      throw DioException(
+        requestOptions: RequestOptions(path: ''),
+        type: DioExceptionType.badResponse,
+        response: Response(requestOptions: RequestOptions(path: ''), statusCode: 401, data: {'message': 'Simulated unauthorized'}),
+        message: 'Simulated unauthorized',
+      );
+    } else {
+      // Unknown / network hiccup
+      throw DioException(
+        requestOptions: RequestOptions(path: ''),
+        type: DioExceptionType.unknown,
+        message: 'Simulated unknown network error',
+      );
+    }
   }
 
   /// Get transactions with pagination and filtering
@@ -60,6 +149,7 @@ class MockApiService {
   List<String>? categories,
   String? type,
   String? search,
+  dynamic cancelToken,
   String? startDate,
   String? endDate,
   Map<String, dynamic>? amountRange,
@@ -169,7 +259,9 @@ class MockApiService {
   }
 
   /// Get analytics
-  Future<Response<Map<String, dynamic>>> getAnalytics() async {
+  Future<Response<Map<String, dynamic>>> getAnalytics({
+    dynamic cancelToken,
+  }) async {
     await initialize();
     await _simulateDelay();
     _simulateNetworkError();
@@ -196,7 +288,7 @@ class MockApiService {
 
   /// Create transaction
   Future<Response<Map<String, dynamic>>> createTransaction(
-      TransactionModel transaction) async {
+    TransactionModel transaction, {dynamic cancelToken}) async {
     await initialize();
     await _simulateDelay();
     _simulateNetworkError();
@@ -231,7 +323,8 @@ class MockApiService {
 
   /// Update transaction
   Future<Response<Map<String, dynamic>>> updateTransaction(
-      String id, TransactionModel transaction) async {
+    String id, TransactionModel transaction,
+    {dynamic cancelToken}) async {
     await initialize();
     await _simulateDelay();
     _simulateNetworkError();
@@ -275,7 +368,8 @@ class MockApiService {
   }
 
   /// Delete transaction
-  Future<Response<Map<String, dynamic>>> deleteTransaction(String id) async {
+  Future<Response<Map<String, dynamic>>> deleteTransaction(String id,
+      {dynamic cancelToken}) async {
     await initialize();
     await _simulateDelay();
     _simulateNetworkError();
@@ -308,7 +402,8 @@ class MockApiService {
   }
 
   /// Get single transaction
-  Future<Response<Map<String, dynamic>>> getTransaction(String id) async {
+  Future<Response<Map<String, dynamic>>> getTransaction(String id,
+      {dynamic cancelToken}) async {
     await initialize();
     await _simulateDelay();
     _simulateNetworkError();

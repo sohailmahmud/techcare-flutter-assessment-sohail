@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:hive_ce/hive.dart';
+import '../../core/config/cache_config.dart';
 import '../models/transaction_model.dart';
 import '../models/category_model.dart';
 import '../models/analytics_model.dart';
@@ -72,7 +73,7 @@ class PendingOperation {
 extension HiveKeyValueExtension on HiveKeyValue {
   /// Check if this cached value is still valid
   bool isValid({Duration? maxAge}) {
-    maxAge ??= const Duration(minutes: 30);
+    maxAge ??= kDefaultCacheTTL;
     if (timestamp == null) return false;
     final cacheTime = DateTime.fromMillisecondsSinceEpoch(timestamp!);
     return DateTime.now().difference(cacheTime) < maxAge;
@@ -110,6 +111,10 @@ abstract class LocalDataSource {
   Future<void> removePendingOperation(String operationId);
   Future<void> clearPendingOperations();
 
+  // Replace temporary IDs with server-provided IDs across caches and
+  // pending operations. The map keys are temp IDs and values are server IDs.
+  Future<void> replaceTempIds(Map<String, String> idMap);
+
   // Cache management
   Future<bool> isCacheValid(String key, {Duration? maxAge});
   Future<void> clearAllCache();
@@ -123,7 +128,7 @@ class LocalDataSourceImpl implements LocalDataSource {
   static const String _analyticsCachePrefix = 'analytics_cache_';
   static const String _pendingOperationsKey = 'pending_operations';
 
-  static const Duration _defaultCacheExpiry = Duration(minutes: 5);
+  static const Duration _defaultCacheExpiry = kDefaultCacheTTL;
 
   late final Box<HiveKeyValue> _cacheBox;
   bool _isInitialized = false;
@@ -227,6 +232,77 @@ class LocalDataSourceImpl implements LocalDataSource {
           value: json,
           timestamp: DateTime.now().millisecondsSinceEpoch,
         ));
+    // Also update any cached transaction list pages so the UI sees the
+    // newly created/updated transaction immediately in lists.
+    try {
+      final now = DateTime.now().millisecondsSinceEpoch;
+      final listKeys = _cacheBox.keys
+          .where((k) => k.toString().startsWith(_transactionsCachePrefix))
+          .toList();
+
+      for (final listKey in listKeys) {
+        final cached = _cacheBox.get(listKey);
+        if (cached == null) continue;
+
+        try {
+          final map = jsonDecode(cached.value) as Map<String, dynamic>;
+
+          final originalData = (map['data'] as List<dynamic>?)
+                  ?.map((e) => e as Map<String, dynamic>)
+                  .toList() ??
+              <Map<String, dynamic>>[];
+
+          final existed = originalData.any((m) => m['id'] == transaction.id);
+
+          // Remove any prior occurrence of this transaction
+          final newData = originalData.where((m) => m['id'] != transaction.id).toList();
+
+          // Insert at the top so newest appear first
+          newData.insert(0, transaction.toJson());
+
+          // Update meta
+          final meta = (map['meta'] as Map<String, dynamic>?) ?? {};
+          final itemsPerPage = (meta['itemsPerPage'] is int)
+              ? meta['itemsPerPage'] as int
+              : (meta['itemsPerPage'] is String ? int.tryParse(meta['itemsPerPage']) ?? newData.length : newData.length);
+
+          int totalItems = (meta['totalItems'] is int)
+              ? meta['totalItems'] as int
+              : (meta['totalItems'] is String ? int.tryParse(meta['totalItems']) ?? originalData.length : originalData.length);
+
+          if (!existed) {
+            totalItems = totalItems + 1;
+          }
+
+          final totalPages = (itemsPerPage > 0) ? ((totalItems / itemsPerPage).ceil()) : 1;
+
+          final newMap = {
+            'data': newData,
+            'meta': {
+              'currentPage': meta['currentPage'] ?? 1,
+              'totalPages': totalPages,
+              'totalItems': totalItems,
+              'itemsPerPage': itemsPerPage,
+              'hasMore': (meta['hasMore'] ?? false),
+            }
+          };
+
+          await _cacheBox.put(
+            listKey,
+            HiveKeyValue(
+              key: listKey.toString(),
+              value: jsonEncode(newMap),
+              timestamp: now,
+            ),
+          );
+        } catch (_) {
+          // If parsing/updating a cached page fails, ignore and continue
+          continue;
+        }
+      }
+    } catch (_) {
+      // Swallow any errors while updating list caches
+    }
   }
 
   @override
@@ -411,15 +487,41 @@ class LocalDataSourceImpl implements LocalDataSource {
 
   // Helper methods
   String _getTransactionsCacheKey(TransactionQuery query) {
+    // Ensure categories are in a deterministic order when building the key
+    String? categoriesPart;
+    if (query.categories != null && query.categories!.isNotEmpty) {
+      final sorted = List<String>.from(query.categories!);
+      sorted.sort();
+      categoriesPart = sorted.join(",");
+    }
+
+    // Prepare amount range part if present
+    String? amountPart;
+    if (query.amountRange != null) {
+      final minValRaw = query.amountRange!['min'];
+      final maxValRaw = query.amountRange!['max'];
+      double? minVal;
+      double? maxVal;
+      if (minValRaw is num) minVal = minValRaw.toDouble();
+      if (maxValRaw is num) maxVal = maxValRaw.toDouble();
+      if (minVal != null && maxVal != null) {
+        amountPart = 'amount:$minVal-$maxVal';
+      }
+    }
+
     final params = [
       'page:${query.page}',
       'limit:${query.limit}',
-      if (query.categories != null && query.categories!.isNotEmpty)
-        'categories:${query.categories!.join(",")}',
+      if (categoriesPart != null) 'categories:$categoriesPart',
       if (query.type != null) 'type:${query.type!.name}',
       if (query.startDate != null)
         'start:${query.startDate!.millisecondsSinceEpoch}',
       if (query.endDate != null) 'end:${query.endDate!.millisecondsSinceEpoch}',
+      // Include amount range so different amount filters map to different cache keys
+      if (amountPart != null) amountPart,
+      // Include search query if provided
+      if (query.searchQuery != null && query.searchQuery!.isNotEmpty)
+        'search:${query.searchQuery}',
     ].join('_');
     return '$_transactionsCachePrefix$params';
   }
@@ -430,5 +532,130 @@ class LocalDataSourceImpl implements LocalDataSource {
       'end:${query.endDate.millisecondsSinceEpoch}',
     ].join('_');
     return '$_analyticsCachePrefix$params';
+  }
+
+  @override
+  Future<void> replaceTempIds(Map<String, String> idMap) async {
+    if (idMap.isEmpty) return;
+    await _ensureInitialized();
+
+    // Helper to recursively replace id strings in nested maps/lists
+    dynamic replaceIdsInValue(dynamic value, Map<String, String> map) {
+      if (value is Map<String, dynamic>) {
+        final newMap = <String, dynamic>{};
+        value.forEach((k, v) {
+          newMap[k] = replaceIdsInValue(v, map);
+        });
+        return newMap;
+      } else if (value is List) {
+        return value.map((e) => replaceIdsInValue(e, map)).toList();
+      } else if (value is String) {
+        return map.containsKey(value) ? map[value] : value;
+      }
+      return value;
+    }
+
+    final now = DateTime.now().millisecondsSinceEpoch;
+
+    // 1) Update individual transaction caches
+    for (final entry in idMap.entries) {
+      final tempId = entry.key;
+      final serverId = entry.value;
+      final oldKey = '$_transactionCachePrefix$tempId';
+      final newKey = '$_transactionCachePrefix$serverId';
+
+      final cached = _cacheBox.get(oldKey);
+      if (cached != null) {
+        try {
+          final json = jsonDecode(cached.value) as Map<String, dynamic>;
+          json['id'] = serverId;
+          await _cacheBox.put(
+            newKey,
+            HiveKeyValue(key: newKey, value: jsonEncode(json), timestamp: now),
+          );
+          await _cacheBox.delete(oldKey);
+        } catch (_) {
+          // ignore parse errors
+        }
+      }
+    }
+
+    // 2) Update transaction list caches
+    final listKeys = _cacheBox.keys
+        .where((k) => k.toString().startsWith(_transactionsCachePrefix))
+        .toList();
+
+    for (final listKey in listKeys) {
+      final cached = _cacheBox.get(listKey);
+      if (cached == null) continue;
+      try {
+        final map = jsonDecode(cached.value) as Map<String, dynamic>;
+        final data = (map['data'] as List<dynamic>?) ?? [];
+        // Replace ids and dedupe if necessary
+        final seen = <String>{};
+        final newData = <dynamic>[];
+        for (final item in data) {
+          if (item is Map<String, dynamic>) {
+            final idVal = item['id'] as String?;
+            final replacedId = (idVal != null && idMap.containsKey(idVal)) ? idMap[idVal] : idVal;
+            if (replacedId != null) {
+              item['id'] = replacedId;
+            }
+            final finalId = item['id'] as String?;
+            if (finalId != null && !seen.contains(finalId)) {
+              seen.add(finalId);
+              newData.add(item);
+            }
+          } else {
+            newData.add(item);
+          }
+        }
+
+  map['data'] = newData;
+        // totalItems should reflect unique seen count if changed
+        final meta = (map['meta'] as Map<String, dynamic>?) ?? {};
+        final itemsPerPage = (meta['itemsPerPage'] is int)
+            ? meta['itemsPerPage'] as int
+            : (meta['itemsPerPage'] is String ? int.tryParse(meta['itemsPerPage']) ?? newData.length : newData.length);
+        final totalItems = seen.length;
+        final totalPages = (itemsPerPage > 0) ? ((totalItems / itemsPerPage).ceil()) : 1;
+
+        map['meta'] = {
+          'currentPage': meta['currentPage'] ?? 1,
+          'totalPages': totalPages,
+          'totalItems': totalItems,
+          'itemsPerPage': itemsPerPage,
+          'hasMore': meta['hasMore'] ?? false,
+        };
+
+        await _cacheBox.put(
+          listKey,
+          HiveKeyValue(key: listKey.toString(), value: jsonEncode(map), timestamp: now),
+        );
+      } catch (_) {
+        continue;
+      }
+    }
+
+    // 3) Update pending operations
+    try {
+      final pending = await getPendingOperations();
+      final updated = <PendingOperation>[];
+      for (final op in pending) {
+        final data = op.data;
+        // Recursively replace ids in the operation data
+        final newData = replaceIdsInValue(data, idMap) as Map<String, dynamic>;
+        final updatedOp = op.copyWith(data: newData);
+        updated.add(updatedOp);
+      }
+
+      final json = jsonEncode(updated.map((op) => op.toJson()).toList());
+      await _cacheBox.put(
+        _pendingOperationsKey,
+        HiveKeyValue(key: _pendingOperationsKey, value: json, timestamp: now),
+      );
+    } catch (_) {
+      // ignore errors updating pending operations
+    }
   }
 }

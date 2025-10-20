@@ -1,4 +1,5 @@
 import 'package:hive_ce/hive.dart';
+import '../../core/config/cache_config.dart';
 
 part 'hive_key_value.g.dart';
 
@@ -30,7 +31,7 @@ class HiveKeyValue extends HiveObject {
     if (timestamp == null) return false;
 
     final age = DateTime.now().millisecondsSinceEpoch - timestamp!;
-    final maxAgeMs = (maxAge ?? const Duration(minutes: 5)).inMilliseconds;
+  final maxAgeMs = (maxAge ?? kDefaultCacheTTL).inMilliseconds;
 
     return age <= maxAgeMs;
   }
