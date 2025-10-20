@@ -489,6 +489,104 @@
       },
       "date": "2025-10-16T14:00:00Z",
       "description": "Gift for friend's birthday"
+    },
+    {
+      "id": "txn_036",
+      "title": "Birthday Party",
+      "amount": 2500.00,
+      "type": "expense",
+      "category": {
+        "id": "cat_003",
+        "name": "Shopping",
+        "icon": "shopping_bag",
+        "color": "#FFD93D"
+      },
+      "date": "2025-10-16T14:00:00Z",
+      "description": "Gift for friend's birthday"
+    },
+    {
+      "id": "txn_037",
+      "title": "Lunch Meeting",
+      "amount": 1300.00,
+      "type": "expense",
+      "category": {
+        "id": "cat_001",
+        "name": "Food & Dining",
+        "icon": "restaurant",
+        "color": "#FF6B6B"
+      },
+      "date": "2025-10-17T13:00:00Z",
+      "description": "Business lunch at Mainland China"
+    },
+    {
+      "id": "txn_038",
+      "title": "Movie Night",
+      "amount": 2000.00,
+      "type": "expense",
+      "category": {
+        "id": "cat_004",
+        "name": "Entertainment",
+        "icon": "movie",
+        "color": "#95E1D3"
+      },
+      "date": "2025-10-18T11:00:00Z",
+      "description": "Donation to local NGO"
+    },
+    {
+      "id": "txn_039",
+      "title": "Water Bill",
+      "amount": 900.00,
+      "type": "expense",
+      "category": {
+        "id": "cat_005",
+        "name": "Bills & Utilities",
+        "icon": "receipt",
+        "color": "#F38181"
+      },
+      "date": "2025-10-19T09:30:00Z",
+      "description": "Monthly water bill"
+    },
+    {
+      "id": "txn_040",
+      "title": "Side Hustle Income",
+      "amount": 7000.00,
+      "type": "income",
+      "category": {
+        "id": "cat_freelance",
+        "name": "Freelance",
+        "icon": "work",
+        "color": "#00C853"
+      },
+      "date": "2025-10-20T15:00:00Z",
+      "description": "Earnings from side project"
+    },
+    {
+      "id": "txn_041",
+      "title": "Gas Bill",
+      "amount": 1000.00,
+      "type": "expense",
+      "category": {
+        "id": "cat_005",
+        "name": "Bills & Utilities",
+        "icon": "receipt",
+        "color": "#F38181"
+      },
+      "date": "2025-10-20T10:00:00Z",
+      "description": "Donation to local NGO"
+    },
+    {
+      "id": "txn_042",
+      "title": "Amazon Prime Membership",
+      "amount": 2500.00,
+      "type": "expense",
+      "category": {
+        "id": "cat_004",
+        "name": "Entertainment",
+        "icon": "movie",
+        "color": "#95E1D3"
+      },
+      "date": "2025-10-20T14:00:00Z",
+      "description": "Donation to local NGO"
     }
   ],
   "meta": {
