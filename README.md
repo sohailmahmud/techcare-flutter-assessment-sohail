@@ -42,11 +42,49 @@ This app follows Clean Architecture principles with clear separation between lay
 
 ### Project Structure
 ```
-lib/
-├── core/                   # Shared utilities and components
-├── data/                   # Data access and storage
-├── domain/                 # Business logic and entities
-└── presentation/           # UI components and screens
+.
+├── .github/                    # GitHub workflows and config
+├── android/                    # Android project files
+├── ios/                        # iOS project files
+├── assets/                     # Images and static assets
+│   ├── mock_data/              # Mock JSON used by the mock API
+│   └── screenshots/            # App screenshots used in README
+├── scripts/                    # Utility scripts
+├── test/                       # Unit, widget and integration tests
+├── pubspec.yaml                # Dart/Flutter package config
+├── pubspec.lock
+├── analysis_options.yaml       # Lint and analyzer rules
+├── README.md
+└── lib/                        # Dart source
+  ├── core/                     # Core utilities and configurations
+  │   ├── bloc/
+  │   ├── constants/
+  │   ├── di/
+  │   ├── errors/
+  │   ├── network/
+  │   ├── router/
+  │   ├── theme/
+  │   ├── usecases/
+  │   ├── utils/
+  │   └── widgets/
+  ├── data/                     # Data access, sources and models
+  │   ├── cache/
+  │   ├── datasources/
+  │   ├── models/
+  │   └── repositories/
+  ├── domain/                   # Business logic and entities
+  │   ├── entities/
+  │   ├── repositories/
+  │   └── usecases/
+  ├── presentation/             # Features based bloc, UI components and screens  
+  │   ├── analytics/
+  │   ├── categories/
+  │   ├── dashboard/
+  │   ├── transactions/
+  │   └── app_navigation.dart   # App navigation setup
+  ├── hive_registrar.g.dart
+  ├── injection_container.dart  # Dependency injection setup
+  └── main.dart                 # App entry point
 ```
 
 **Clean Architecture**: Separates business logic from UI and data concerns, making the code maintainable and testable.
@@ -62,7 +100,8 @@ lib/
 - **Real-time Analytics**: Dynamic charts showing spending patterns and trends
 - **Category System**: Organize transactions with customizable categories and colors
 - **Dashboard Overview**: Quick balance summary and recent transaction history
-- **Period Filtering**: View data by day, week, month, or year
+- **Period Filtering**: View data by this week, this month, last 3 months, and custom date ranges
+- **Transaction Search & Filters:** Search and filter transactions by category, amount, date range and type
 
 ### User Experience
 - **Offline Support**: All data stored locally for instant access
@@ -144,12 +183,12 @@ The go_router package provides type-safe routing and better deep linking support
       <p align="center"><strong>4. Transactions History</strong><br/>Complete transaction list with filtering</p>
     </td>
     <td width="33%">
-      <img src="assets/screenshots/add.png" alt="Transaction Form Add" width="100%"/>
-      <p align="center"><strong>5. Transaction Form Add</strong><br/>Clean form for adding new transactions</p>
+      <img src="assets/screenshots/add_transaction.png" alt="Transaction Form Add" width="100%"/>
+      <p align="center"><strong>5. Transaction Form - Add</strong><br/>Clean form for adding new transactions</p>
     </td>
     <td width="33%">
-      <img src="assets/screenshots/edit.png" alt="Transaction Form Edit" width="100%"/>
-      <p align="center"><strong>6. Transaction Form Edit</strong><br/>Edit existing transactions easily</p>
+      <img src="assets/screenshots/edit_transaction.png" alt="Transaction Form Edit" width="100%"/>
+      <p align="center"><strong>6. Transaction Form - Edit</strong><br/>Edit existing transactions easily</p>
     </td>
   </tr>
   <tr>
@@ -164,6 +203,20 @@ The go_router package provides type-safe routing and better deep linking support
     <td width="33%">
       <img src="assets/screenshots/budget_progress.png" alt="Budget Overview" width="100%"/>
       <p align="center"><strong>9. Budget Overview</strong><br/>Budget tracking with progress indicators</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="33%">
+      <img src="assets/screenshots/fab.png" alt="Floating Action Button" width="100%"/>
+      <p align="center"><strong>10. Floating Action Button</strong><br/>Quick actions and shortcuts via FAB</p>
+    </td>
+    <td width="33%">
+      <img src="assets/screenshots/filter_transaction.png" alt="Filter Transactions" width="100%"/>
+      <p align="center"><strong>11. Transaction Filters</strong><br/>Filter transactions by category, amount and period</p>
+    </td>
+    <td width="33%">
+      <img src="assets/screenshots/filter_apply.png" alt="Apply Filter" width="100%"/>
+      <p align="center"><strong>12. Apply Filter</strong><br/>Apply and see filtered results instantly</p>
     </td>
   </tr>
 </table>
@@ -187,7 +240,7 @@ The go_router package provides type-safe routing and better deep linking support
 - Category management implementation
 
 ### Day 3 - Polish and Testing (5 hours)
-- Comprehensive test suite (218 passing tests)
+- Comprehensive test suite (234 passing tests)
 - UI/UX refinements and animations
 - Bug fixes and performance optimization
 - Documentation and code cleanup
