@@ -1,8 +1,8 @@
+import 'package:fintrack/core/constants/app_constants.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:flutter/material.dart';
 import '../../domain/entities/transaction.dart';
 import '../../domain/entities/category.dart';
-import '../../core/config/cache_config.dart';
 
 part 'cached_transaction.g.dart';
 
@@ -70,7 +70,7 @@ class CachedTransaction extends HiveObject {
     Duration? ttl,
   }) {
     final now = DateTime.now();
-    final effectiveTtl = ttl ?? kDefaultCacheTTL;
+    final effectiveTtl = ttl ?? AppConstants.cacheExpiry;
     return CachedTransaction(
       id: transaction.id,
       title: transaction.title,

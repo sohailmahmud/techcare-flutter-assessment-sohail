@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:developer' as dev;
+import 'package:fintrack/core/constants/app_constants.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import '../../domain/entities/transaction.dart' hide TransactionType;
 import '../../domain/entities/transaction_filter.dart' as filter
@@ -7,7 +8,6 @@ import '../../domain/entities/transaction_filter.dart' as filter
 import '../../domain/entities/transaction_filter.dart';
 import '../models/cached_transaction.dart';
 import '../models/cache_metadata.dart';
-import '../../core/config/cache_config.dart';
 
 /// Comprehensive cache manager using Hive with proper invalidation strategies
 class HiveCacheManager {
@@ -16,7 +16,7 @@ class HiveCacheManager {
   static const String _configBoxName = 'cache_config';
 
   // Cache configuration
-  static const Duration _defaultTTL = kDefaultCacheTTL;
+  static const Duration _defaultTTL = AppConstants.cacheExpiry;
   // static const Duration _maxCacheAge = Duration(days: 7); // Reserved for future TTL features
   static const int _maxCacheSize = 5000; // Maximum cached transactions
   static const Duration _cleanupInterval = Duration(hours: 6);

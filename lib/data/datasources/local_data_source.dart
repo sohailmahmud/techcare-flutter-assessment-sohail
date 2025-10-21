@@ -1,6 +1,6 @@
 import 'dart:convert';
+import 'package:fintrack/core/constants/app_constants.dart';
 import 'package:hive_ce/hive.dart';
-import '../../core/config/cache_config.dart';
 import '../models/transaction_model.dart';
 import '../models/category_model.dart';
 import '../models/analytics_model.dart';
@@ -73,7 +73,7 @@ class PendingOperation {
 extension HiveKeyValueExtension on HiveKeyValue {
   /// Check if this cached value is still valid
   bool isValid({Duration? maxAge}) {
-    maxAge ??= kDefaultCacheTTL;
+    maxAge ??= AppConstants.cacheExpiry;
     if (timestamp == null) return false;
     final cacheTime = DateTime.fromMillisecondsSinceEpoch(timestamp!);
     return DateTime.now().difference(cacheTime) < maxAge;
@@ -128,7 +128,7 @@ class LocalDataSourceImpl implements LocalDataSource {
   static const String _analyticsCachePrefix = 'analytics_cache_';
   static const String _pendingOperationsKey = 'pending_operations';
 
-  static const Duration _defaultCacheExpiry = kDefaultCacheTTL;
+  static const Duration _defaultCacheExpiry = AppConstants.cacheExpiry;
 
   late final Box<HiveKeyValue> _cacheBox;
   bool _isInitialized = false;
