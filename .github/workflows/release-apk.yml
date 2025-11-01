@@ -12,6 +12,10 @@ on:
         required: true
         default: 'v1.0.0'
 
+permissions:
+  contents: write
+  packages: write
+
 jobs:
   build-and-release:
     name: Build APK and Create Release

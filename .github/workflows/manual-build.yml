@@ -1,4 +1,7 @@
 name: Manual APK Build
+permissions:
+  contents: write
+  packages: write
 
 on:
   workflow_dispatch:

@@ -9,6 +9,10 @@ on:
       - '.gitignore'
       - '.github/workflows/**'
 
+permissions:
+  contents: write
+  packages: write
+
 jobs:
   build-and-deploy:
     name: Build and Deploy APK
