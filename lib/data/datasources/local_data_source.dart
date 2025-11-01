@@ -87,9 +87,12 @@ abstract class LocalDataSource {
 
   // Transaction caching
   Future<PaginatedTransactionsResponse?> getCachedTransactions(
-      TransactionQuery query);
+    TransactionQuery query,
+  );
   Future<void> cacheTransactions(
-      TransactionQuery query, PaginatedTransactionsResponse response);
+    TransactionQuery query,
+    PaginatedTransactionsResponse response,
+  );
   Future<TransactionModel?> getCachedTransaction(String id);
   Future<void> cacheTransaction(TransactionModel transaction);
   Future<void> deleteCachedTransaction(String id);
@@ -151,7 +154,8 @@ class LocalDataSourceImpl implements LocalDataSource {
 
   @override
   Future<PaginatedTransactionsResponse?> getCachedTransactions(
-      TransactionQuery query) async {
+    TransactionQuery query,
+  ) async {
     final key = _getTransactionsCacheKey(query);
 
     if (!await isCacheValid(key)) {
@@ -174,7 +178,9 @@ class LocalDataSourceImpl implements LocalDataSource {
 
   @override
   Future<void> cacheTransactions(
-      TransactionQuery query, PaginatedTransactionsResponse response) async {
+    TransactionQuery query,
+    PaginatedTransactionsResponse response,
+  ) async {
     await _ensureInitialized();
     final key = _getTransactionsCacheKey(query);
     final json = jsonEncode({
@@ -189,12 +195,13 @@ class LocalDataSourceImpl implements LocalDataSource {
     });
 
     await _cacheBox.put(
-        key,
-        HiveKeyValue(
-          key: key,
-          value: json,
-          timestamp: DateTime.now().millisecondsSinceEpoch,
-        ));
+      key,
+      HiveKeyValue(
+        key: key,
+        value: json,
+        timestamp: DateTime.now().millisecondsSinceEpoch,
+      ),
+    );
   }
 
   @override
@@ -226,12 +233,13 @@ class LocalDataSourceImpl implements LocalDataSource {
     final json = jsonEncode(transaction.toJson());
 
     await _cacheBox.put(
-        key,
-        HiveKeyValue(
-          key: key,
-          value: json,
-          timestamp: DateTime.now().millisecondsSinceEpoch,
-        ));
+      key,
+      HiveKeyValue(
+        key: key,
+        value: json,
+        timestamp: DateTime.now().millisecondsSinceEpoch,
+      ),
+    );
     // Also update any cached transaction list pages so the UI sees the
     // newly created/updated transaction immediately in lists.
     try {
@@ -247,7 +255,8 @@ class LocalDataSourceImpl implements LocalDataSource {
         try {
           final map = jsonDecode(cached.value) as Map<String, dynamic>;
 
-          final originalData = (map['data'] as List<dynamic>?)
+          final originalData =
+              (map['data'] as List<dynamic>?)
                   ?.map((e) => e as Map<String, dynamic>)
                   .toList() ??
               <Map<String, dynamic>>[];
@@ -255,7 +264,9 @@ class LocalDataSourceImpl implements LocalDataSource {
           final existed = originalData.any((m) => m['id'] == transaction.id);
 
           // Remove any prior occurrence of this transaction
-          final newData = originalData.where((m) => m['id'] != transaction.id).toList();
+          final newData = originalData
+              .where((m) => m['id'] != transaction.id)
+              .toList();
 
           // Insert at the top so newest appear first
           newData.insert(0, transaction.toJson());
@@ -264,17 +275,23 @@ class LocalDataSourceImpl implements LocalDataSource {
           final meta = (map['meta'] as Map<String, dynamic>?) ?? {};
           final itemsPerPage = (meta['itemsPerPage'] is int)
               ? meta['itemsPerPage'] as int
-              : (meta['itemsPerPage'] is String ? int.tryParse(meta['itemsPerPage']) ?? newData.length : newData.length);
+              : (meta['itemsPerPage'] is String
+                    ? int.tryParse(meta['itemsPerPage']) ?? newData.length
+                    : newData.length);
 
           int totalItems = (meta['totalItems'] is int)
               ? meta['totalItems'] as int
-              : (meta['totalItems'] is String ? int.tryParse(meta['totalItems']) ?? originalData.length : originalData.length);
+              : (meta['totalItems'] is String
+                    ? int.tryParse(meta['totalItems']) ?? originalData.length
+                    : originalData.length);
 
           if (!existed) {
             totalItems = totalItems + 1;
           }
 
-          final totalPages = (itemsPerPage > 0) ? ((totalItems / itemsPerPage).ceil()) : 1;
+          final totalPages = (itemsPerPage > 0)
+              ? ((totalItems / itemsPerPage).ceil())
+              : 1;
 
           final newMap = {
             'data': newData,
@@ -284,7 +301,7 @@ class LocalDataSourceImpl implements LocalDataSource {
               'totalItems': totalItems,
               'itemsPerPage': itemsPerPage,
               'hasMore': (meta['hasMore'] ?? false),
-            }
+            },
           };
 
           await _cacheBox.put(
@@ -353,12 +370,13 @@ class LocalDataSourceImpl implements LocalDataSource {
     final json = jsonEncode(categories.map((c) => c.toJson()).toList());
 
     await _cacheBox.put(
-        _categoriesCacheKey,
-        HiveKeyValue(
-          key: _categoriesCacheKey,
-          value: json,
-          timestamp: DateTime.now().millisecondsSinceEpoch,
-        ));
+      _categoriesCacheKey,
+      HiveKeyValue(
+        key: _categoriesCacheKey,
+        value: json,
+        timestamp: DateTime.now().millisecondsSinceEpoch,
+      ),
+    );
   }
 
   @override
@@ -391,18 +409,21 @@ class LocalDataSourceImpl implements LocalDataSource {
 
   @override
   Future<void> cacheAnalytics(
-      AnalyticsQuery query, AnalyticsDataModel data) async {
+    AnalyticsQuery query,
+    AnalyticsDataModel data,
+  ) async {
     await _ensureInitialized();
     final key = _getAnalyticsCacheKey(query);
     final json = jsonEncode(data.toJson());
 
     await _cacheBox.put(
-        key,
-        HiveKeyValue(
-          key: key,
-          value: json,
-          timestamp: DateTime.now().millisecondsSinceEpoch,
-        ));
+      key,
+      HiveKeyValue(
+        key: key,
+        value: json,
+        timestamp: DateTime.now().millisecondsSinceEpoch,
+      ),
+    );
   }
 
   @override
@@ -440,12 +461,13 @@ class LocalDataSourceImpl implements LocalDataSource {
 
     final json = jsonEncode(operations.map((op) => op.toJson()).toList());
     await _cacheBox.put(
-        _pendingOperationsKey,
-        HiveKeyValue(
-          key: _pendingOperationsKey,
-          value: json,
-          timestamp: DateTime.now().millisecondsSinceEpoch,
-        ));
+      _pendingOperationsKey,
+      HiveKeyValue(
+        key: _pendingOperationsKey,
+        value: json,
+        timestamp: DateTime.now().millisecondsSinceEpoch,
+      ),
+    );
   }
 
   @override
@@ -456,12 +478,13 @@ class LocalDataSourceImpl implements LocalDataSource {
 
     final json = jsonEncode(operations.map((op) => op.toJson()).toList());
     await _cacheBox.put(
-        _pendingOperationsKey,
-        HiveKeyValue(
-          key: _pendingOperationsKey,
-          value: json,
-          timestamp: DateTime.now().millisecondsSinceEpoch,
-        ));
+      _pendingOperationsKey,
+      HiveKeyValue(
+        key: _pendingOperationsKey,
+        value: json,
+        timestamp: DateTime.now().millisecondsSinceEpoch,
+      ),
+    );
   }
 
   @override
@@ -597,7 +620,9 @@ class LocalDataSourceImpl implements LocalDataSource {
         for (final item in data) {
           if (item is Map<String, dynamic>) {
             final idVal = item['id'] as String?;
-            final replacedId = (idVal != null && idMap.containsKey(idVal)) ? idMap[idVal] : idVal;
+            final replacedId = (idVal != null && idMap.containsKey(idVal))
+                ? idMap[idVal]
+                : idVal;
             if (replacedId != null) {
               item['id'] = replacedId;
             }
@@ -611,14 +636,18 @@ class LocalDataSourceImpl implements LocalDataSource {
           }
         }
 
-  map['data'] = newData;
+        map['data'] = newData;
         // totalItems should reflect unique seen count if changed
         final meta = (map['meta'] as Map<String, dynamic>?) ?? {};
         final itemsPerPage = (meta['itemsPerPage'] is int)
             ? meta['itemsPerPage'] as int
-            : (meta['itemsPerPage'] is String ? int.tryParse(meta['itemsPerPage']) ?? newData.length : newData.length);
+            : (meta['itemsPerPage'] is String
+                  ? int.tryParse(meta['itemsPerPage']) ?? newData.length
+                  : newData.length);
         final totalItems = seen.length;
-        final totalPages = (itemsPerPage > 0) ? ((totalItems / itemsPerPage).ceil()) : 1;
+        final totalPages = (itemsPerPage > 0)
+            ? ((totalItems / itemsPerPage).ceil())
+            : 1;
 
         map['meta'] = {
           'currentPage': meta['currentPage'] ?? 1,
@@ -630,7 +659,11 @@ class LocalDataSourceImpl implements LocalDataSource {
 
         await _cacheBox.put(
           listKey,
-          HiveKeyValue(key: listKey.toString(), value: jsonEncode(map), timestamp: now),
+          HiveKeyValue(
+            key: listKey.toString(),
+            value: jsonEncode(map),
+            timestamp: now,
+          ),
         );
       } catch (_) {
         continue;

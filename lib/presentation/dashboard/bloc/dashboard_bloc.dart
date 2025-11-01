@@ -14,9 +14,9 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   DashboardBloc({
     required GetDashboardSummary getDashboardSummary,
     required refresh_usecase.RefreshDashboard refreshDashboard,
-  })  : _getDashboardSummary = getDashboardSummary,
-        _refreshDashboard = refreshDashboard,
-        super(const DashboardInitial()) {
+  }) : _getDashboardSummary = getDashboardSummary,
+       _refreshDashboard = refreshDashboard,
+       super(const DashboardInitial()) {
     on<LoadDashboard>(_onLoadDashboard);
     on<RefreshDashboardData>(_onRefreshDashboard);
     on<RetryLoadDashboard>(_onRetryLoadDashboard);
@@ -35,24 +35,30 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
 
       result.fold(
         (failure) {
-          emit(DashboardError(
-            message: _mapFailureToMessage(failure),
-            canRetry: true,
-          ));
+          emit(
+            DashboardError(
+              message: _mapFailureToMessage(failure),
+              canRetry: true,
+            ),
+          );
         },
         (summary) {
-          emit(DashboardLoaded(
-            summary: summary,
-            filteredTransactions: summary.recentTransactions,
-            isBalanceVisible: true,
-          ));
+          emit(
+            DashboardLoaded(
+              summary: summary,
+              filteredTransactions: summary.recentTransactions,
+              isBalanceVisible: true,
+            ),
+          );
         },
       );
     } catch (e) {
-      emit(DashboardError(
-        message: 'Unexpected error occurred: $e',
-        canRetry: true,
-      ));
+      emit(
+        DashboardError(
+          message: 'Unexpected error occurred: $e',
+          canRetry: true,
+        ),
+      );
     }
   }
 
@@ -76,27 +82,32 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
           emit(currentState.copyWith(isRefreshing: false));
           // Could show a snackbar or toast here for refresh error
         } else {
-          emit(DashboardError(
-            message: _mapFailureToMessage(failure),
-            canRetry: true,
-          ));
+          emit(
+            DashboardError(
+              message: _mapFailureToMessage(failure),
+              canRetry: true,
+            ),
+          );
         }
       },
       (summary) {
-        final currentState =
-            state is DashboardLoaded ? state as DashboardLoaded : null;
+        final currentState = state is DashboardLoaded
+            ? state as DashboardLoaded
+            : null;
         final filteredTransactions = _applyTransactionFilter(
           summary.recentTransactions,
           currentState?.selectedCategoryFilter,
         );
 
-        emit(DashboardLoaded(
-          summary: summary,
-          filteredTransactions: filteredTransactions,
-          selectedCategoryFilter: currentState?.selectedCategoryFilter,
-          isBalanceVisible: currentState?.isBalanceVisible ?? true,
-          isRefreshing: false,
-        ));
+        emit(
+          DashboardLoaded(
+            summary: summary,
+            filteredTransactions: filteredTransactions,
+            selectedCategoryFilter: currentState?.selectedCategoryFilter,
+            isBalanceVisible: currentState?.isBalanceVisible ?? true,
+            isRefreshing: false,
+          ),
+        );
       },
     );
   }
@@ -119,10 +130,12 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
         event.categoryId,
       );
 
-      emit(currentState.copyWith(
-        filteredTransactions: filteredTransactions,
-        selectedCategoryFilter: event.categoryId,
-      ));
+      emit(
+        currentState.copyWith(
+          filteredTransactions: filteredTransactions,
+          selectedCategoryFilter: event.categoryId,
+        ),
+      );
     }
   }
 
@@ -132,9 +145,9 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   ) {
     if (state is DashboardLoaded) {
       final currentState = state as DashboardLoaded;
-      emit(currentState.copyWith(
-        isBalanceVisible: !currentState.isBalanceVisible,
-      ));
+      emit(
+        currentState.copyWith(isBalanceVisible: !currentState.isBalanceVisible),
+      );
     }
   }
 

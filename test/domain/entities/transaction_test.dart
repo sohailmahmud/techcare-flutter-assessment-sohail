@@ -58,8 +58,9 @@ void main() {
 
     group('convenience getters', () {
       test('isIncome returns true for income transactions', () {
-        final incomeTransaction =
-            transaction.copyWith(type: TransactionType.income);
+        final incomeTransaction = transaction.copyWith(
+          type: TransactionType.income,
+        );
         expect(incomeTransaction.isIncome, isTrue);
         expect(incomeTransaction.isExpense, isFalse);
       });
@@ -108,9 +109,7 @@ void main() {
       });
 
       test('maintains optional properties when not explicitly set', () {
-        final updatedTransaction = transaction.copyWith(
-          title: 'Updated Title',
-        );
+        final updatedTransaction = transaction.copyWith(title: 'Updated Title');
 
         expect(updatedTransaction.description, 'Had lunch at restaurant');
         expect(updatedTransaction.createdAt, DateTime(2025, 1, 15, 12, 32));

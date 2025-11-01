@@ -39,13 +39,9 @@ class _PeriodSelectorState extends State<PeriodSelector>
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    _slideAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+    _slideAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
     _animationController.forward();
   }
 
@@ -72,10 +68,7 @@ class _PeriodSelectorState extends State<PeriodSelector>
       builder: (context, child) {
         return Transform.translate(
           offset: Offset(0, (1 - _slideAnimation.value) * 20),
-          child: Opacity(
-            opacity: _slideAnimation.value,
-            child: child,
-          ),
+          child: Opacity(opacity: _slideAnimation.value, child: child),
         );
       },
       child: Container(
@@ -173,8 +166,7 @@ class _PeriodSelectorState extends State<PeriodSelector>
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (period == TimePeriod.custom)
-                  _chipIcon(isSelected),
+                if (period == TimePeriod.custom) _chipIcon(isSelected),
                 if (period == TimePeriod.custom)
                   const SizedBox(width: Spacing.space4),
                 _chipText(period.displayName, isSelected),
@@ -246,10 +238,11 @@ class _PeriodSelectorState extends State<PeriodSelector>
     final startDate = widget.dateRange.startDate.isBefore(DateTime(2020))
         ? DateTime(2020)
         : (widget.dateRange.startDate.isAfter(now)
-            ? now
-            : widget.dateRange.startDate);
-    final endDate =
-        widget.dateRange.endDate.isAfter(now) ? now : widget.dateRange.endDate;
+              ? now
+              : widget.dateRange.startDate);
+    final endDate = widget.dateRange.endDate.isAfter(now)
+        ? now
+        : widget.dateRange.endDate;
 
     // Ensure startDate is not after endDate
     final safeStartDate = startDate.isAfter(endDate) ? endDate : startDate;
@@ -258,19 +251,16 @@ class _PeriodSelectorState extends State<PeriodSelector>
       context: context,
       firstDate: DateTime(2020),
       lastDate: now,
-      initialDateRange: DateTimeRange(
-        start: safeStartDate,
-        end: endDate,
-      ),
+      initialDateRange: DateTimeRange(start: safeStartDate, end: endDate),
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(context).colorScheme.copyWith(
-                  primary: AppColors.primary,
-                  onPrimary: Colors.white,
-                  surface: AppColors.surface,
-                  onSurface: AppColors.textPrimary,
-                ),
+              primary: AppColors.primary,
+              onPrimary: Colors.white,
+              surface: AppColors.surface,
+              onSurface: AppColors.textPrimary,
+            ),
           ),
           child: child!,
         );
@@ -292,8 +282,8 @@ class _PeriodSelectorState extends State<PeriodSelector>
 
       if (mounted) {
         context.read<AnalyticsBloc>().add(
-              ChangePeriod(TimePeriod.custom, customRange: customRange),
-            );
+          ChangePeriod(TimePeriod.custom, customRange: customRange),
+        );
       }
     }
   }

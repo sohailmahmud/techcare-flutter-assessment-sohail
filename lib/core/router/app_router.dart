@@ -33,27 +33,24 @@ class AppRouter {
           GoRoute(
             path: AppRoutes.dashboard,
             name: AppRoutes.dashboardName,
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: DashboardPage(),
-            ),
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: DashboardPage()),
           ),
 
           // Transactions route
           GoRoute(
             path: AppRoutes.transactions,
             name: AppRoutes.transactionsName,
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: TransactionsPage(),
-            ),
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: TransactionsPage()),
           ),
 
           // Analytics route
           GoRoute(
             path: AppRoutes.analytics,
             name: AppRoutes.analyticsName,
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: AnalyticsPage(),
-            ),
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: AnalyticsPage()),
           ),
         ],
       ),
@@ -67,9 +64,7 @@ class AppRouter {
           final extra = state.extra as Map<String, dynamic>?;
           final transaction = extra?['transaction'] as Transaction?;
           return MaterialPage(
-            child: AddEditTransactionScreen(
-              transaction: transaction,
-            ),
+            child: AddEditTransactionScreen(transaction: transaction),
           );
         },
       ),
@@ -83,9 +78,7 @@ class AppRouter {
           final transaction = extra?['transaction'] as Transaction?;
 
           return MaterialPage(
-            child: AddEditTransactionScreen(
-              transaction: transaction,
-            ),
+            child: AddEditTransactionScreen(transaction: transaction),
           );
         },
       ),
@@ -111,18 +104,12 @@ class AppRouter {
 
     // Error handling
     errorBuilder: (context, state) => Scaffold(
-      appBar: AppBar(
-        title: const Text('Page Not Found'),
-      ),
+      appBar: AppBar(title: const Text('Page Not Found')),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.error_outline,
-              size: 64,
-              color: Colors.red,
-            ),
+            const Icon(Icons.error_outline, size: 64, color: Colors.red),
             const SizedBox(height: 16),
             Text(
               'Page not found: ${state.matchedLocation}',

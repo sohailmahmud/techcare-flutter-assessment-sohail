@@ -44,13 +44,9 @@ class _AmountInputFieldState extends State<AmountInputField>
       vsync: this,
     );
 
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 1.02,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.02).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
 
     _focusNode.addListener(_onFocusChanged);
   }
@@ -111,18 +107,15 @@ class _AmountInputFieldState extends State<AmountInputField>
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: [
-                      Colors.white,
-                      Colors.grey.shade50,
-                    ],
+                    colors: [Colors.white, Colors.grey.shade50],
                   ),
                   borderRadius: BorderRadius.circular(Spacing.radiusL),
                   border: Border.all(
                     color: hasError
                         ? AppColors.error
                         : _isFocused
-                            ? AppColors.primary
-                            : AppColors.border,
+                        ? AppColors.primary
+                        : AppColors.border,
                     width: hasError ? 2.0 : 1.5,
                   ),
                   boxShadow: [
@@ -172,8 +165,9 @@ class _AmountInputFieldState extends State<AmountInputField>
                           decoration: InputDecoration(
                             hintText: '0',
                             hintStyle: AppTypography.displaySmall.copyWith(
-                              color: AppColors.textSecondary
-                                  .withValues(alpha: 0.5),
+                              color: AppColors.textSecondary.withValues(
+                                alpha: 0.5,
+                              ),
                               fontWeight: FontWeight.bold,
                             ),
                             border: InputBorder.none,
@@ -204,11 +198,7 @@ class _AmountInputFieldState extends State<AmountInputField>
           const SizedBox(height: Spacing.space8),
           Row(
             children: [
-              const Icon(
-                Icons.error_outline,
-                size: 16,
-                color: AppColors.error,
-              ),
+              const Icon(Icons.error_outline, size: 16, color: AppColors.error),
               const SizedBox(width: Spacing.space4),
               Expanded(
                 child: Text(

@@ -157,11 +157,11 @@ class TransactionFormReady extends TransactionFormBlocState {
 
   @override
   List<Object?> get props => [
-        formData,
-        errors,
-        submissionStatus,
-        submissionError,
-      ];
+    formData,
+    errors,
+    submissionStatus,
+    submissionError,
+  ];
 }
 
 // BLoC Implementation
@@ -169,10 +169,9 @@ class TransactionFormBloc
     extends Bloc<TransactionFormEvent, TransactionFormBlocState> {
   final TransactionsBloc _transactionsBloc;
 
-  TransactionFormBloc({
-    required TransactionsBloc transactionsBloc,
-  })  : _transactionsBloc = transactionsBloc,
-        super(const TransactionFormInitial()) {
+  TransactionFormBloc({required TransactionsBloc transactionsBloc})
+    : _transactionsBloc = transactionsBloc,
+      super(const TransactionFormInitial()) {
     on<InitializeForm>(_onInitializeForm);
     on<AmountChanged>(_onAmountChanged);
     on<TitleChanged>(_onTitleChanged);
@@ -205,17 +204,23 @@ class TransactionFormBloc
     if (currentState is! TransactionFormReady) return;
 
     final formattedAmount = _formatAmount(event.amount);
-    final updatedFormData =
-        currentState.formData.copyWith(amount: formattedAmount);
-    final errors = _validateField(updatedFormData,
-        TransactionFormError.amountRequired, currentState.errors);
+    final updatedFormData = currentState.formData.copyWith(
+      amount: formattedAmount,
+    );
+    final errors = _validateField(
+      updatedFormData,
+      TransactionFormError.amountRequired,
+      currentState.errors,
+    );
 
-    emit(currentState.copyWith(
-      formData: updatedFormData,
-      errors: errors,
-      submissionStatus: FormSubmissionStatus.initial,
-      clearSubmissionError: true,
-    ));
+    emit(
+      currentState.copyWith(
+        formData: updatedFormData,
+        errors: errors,
+        submissionStatus: FormSubmissionStatus.initial,
+        clearSubmissionError: true,
+      ),
+    );
   }
 
   void _onTitleChanged(
@@ -226,15 +231,20 @@ class TransactionFormBloc
     if (currentState is! TransactionFormReady) return;
 
     final updatedFormData = currentState.formData.copyWith(title: event.title);
-    final errors = _validateField(updatedFormData,
-        TransactionFormError.titleRequired, currentState.errors);
+    final errors = _validateField(
+      updatedFormData,
+      TransactionFormError.titleRequired,
+      currentState.errors,
+    );
 
-    emit(currentState.copyWith(
-      formData: updatedFormData,
-      errors: errors,
-      submissionStatus: FormSubmissionStatus.initial,
-      clearSubmissionError: true,
-    ));
+    emit(
+      currentState.copyWith(
+        formData: updatedFormData,
+        errors: errors,
+        submissionStatus: FormSubmissionStatus.initial,
+        clearSubmissionError: true,
+      ),
+    );
   }
 
   void _onNotesChanged(
@@ -245,15 +255,20 @@ class TransactionFormBloc
     if (currentState is! TransactionFormReady) return;
 
     final updatedFormData = currentState.formData.copyWith(notes: event.notes);
-    final errors = _validateField(updatedFormData,
-        TransactionFormError.notesTooLong, currentState.errors);
+    final errors = _validateField(
+      updatedFormData,
+      TransactionFormError.notesTooLong,
+      currentState.errors,
+    );
 
-    emit(currentState.copyWith(
-      formData: updatedFormData,
-      errors: errors,
-      submissionStatus: FormSubmissionStatus.initial,
-      clearSubmissionError: true,
-    ));
+    emit(
+      currentState.copyWith(
+        formData: updatedFormData,
+        errors: errors,
+        submissionStatus: FormSubmissionStatus.initial,
+        clearSubmissionError: true,
+      ),
+    );
   }
 
   void _onTransactionTypeChanged(
@@ -268,11 +283,13 @@ class TransactionFormBloc
       clearCategory: true,
     );
 
-    emit(currentState.copyWith(
-      formData: updatedFormData,
-      submissionStatus: FormSubmissionStatus.initial,
-      clearSubmissionError: true,
-    ));
+    emit(
+      currentState.copyWith(
+        formData: updatedFormData,
+        submissionStatus: FormSubmissionStatus.initial,
+        clearSubmissionError: true,
+      ),
+    );
   }
 
   void _onCategorySelected(
@@ -282,17 +299,23 @@ class TransactionFormBloc
     final currentState = state;
     if (currentState is! TransactionFormReady) return;
 
-    final updatedFormData =
-        currentState.formData.copyWith(selectedCategory: event.category);
-    final errors = _validateField(updatedFormData,
-        TransactionFormError.categoryRequired, currentState.errors);
+    final updatedFormData = currentState.formData.copyWith(
+      selectedCategory: event.category,
+    );
+    final errors = _validateField(
+      updatedFormData,
+      TransactionFormError.categoryRequired,
+      currentState.errors,
+    );
 
-    emit(currentState.copyWith(
-      formData: updatedFormData,
-      errors: errors,
-      submissionStatus: FormSubmissionStatus.initial,
-      clearSubmissionError: true,
-    ));
+    emit(
+      currentState.copyWith(
+        formData: updatedFormData,
+        errors: errors,
+        submissionStatus: FormSubmissionStatus.initial,
+        clearSubmissionError: true,
+      ),
+    );
   }
 
   void _onDateChanged(
@@ -303,15 +326,20 @@ class TransactionFormBloc
     if (currentState is! TransactionFormReady) return;
 
     final updatedFormData = currentState.formData.copyWith(date: event.date);
-    final errors = _validateField(updatedFormData,
-        TransactionFormError.dateInFuture, currentState.errors);
+    final errors = _validateField(
+      updatedFormData,
+      TransactionFormError.dateInFuture,
+      currentState.errors,
+    );
 
-    emit(currentState.copyWith(
-      formData: updatedFormData,
-      errors: errors,
-      submissionStatus: FormSubmissionStatus.initial,
-      clearSubmissionError: true,
-    ));
+    emit(
+      currentState.copyWith(
+        formData: updatedFormData,
+        errors: errors,
+        submissionStatus: FormSubmissionStatus.initial,
+        clearSubmissionError: true,
+      ),
+    );
   }
 
   void _onTimeChanged(
@@ -322,15 +350,20 @@ class TransactionFormBloc
     if (currentState is! TransactionFormReady) return;
 
     final updatedFormData = currentState.formData.copyWith(time: event.time);
-    final errors = _validateField(updatedFormData,
-        TransactionFormError.dateInFuture, currentState.errors);
+    final errors = _validateField(
+      updatedFormData,
+      TransactionFormError.dateInFuture,
+      currentState.errors,
+    );
 
-    emit(currentState.copyWith(
-      formData: updatedFormData,
-      errors: errors,
-      submissionStatus: FormSubmissionStatus.initial,
-      clearSubmissionError: true,
-    ));
+    emit(
+      currentState.copyWith(
+        formData: updatedFormData,
+        errors: errors,
+        submissionStatus: FormSubmissionStatus.initial,
+        clearSubmissionError: true,
+      ),
+    );
   }
 
   void _onValidateForm(
@@ -358,8 +391,9 @@ class TransactionFormBloc
       return;
     }
 
-    emit(currentState.copyWith(
-        submissionStatus: FormSubmissionStatus.inProgress));
+    emit(
+      currentState.copyWith(submissionStatus: FormSubmissionStatus.inProgress),
+    );
 
     try {
       var transaction = currentState.formData.toTransaction();
@@ -376,36 +410,47 @@ class TransactionFormBloc
       final repo = serviceLocator<TransactionRepository>();
       final result = await repo.createTransaction(transaction);
 
-      result.fold((failure) {
-        emit(currentState.copyWith(
-          submissionStatus: FormSubmissionStatus.failure,
-          submissionError: failure.message,
-        ));
-      }, (createdTransaction) {
-        emit(currentState.copyWith(
-            submissionStatus: FormSubmissionStatus.success));
+      result.fold(
+        (failure) {
+          emit(
+            currentState.copyWith(
+              submissionStatus: FormSubmissionStatus.failure,
+              submissionError: failure.message,
+            ),
+          );
+        },
+        (createdTransaction) {
+          emit(
+            currentState.copyWith(
+              submissionStatus: FormSubmissionStatus.success,
+            ),
+          );
 
-        if (currentState.isEditMode) {
-          _transactionsBloc.add(
-              UpdateTransaction(id: createdTransaction.id, transaction: createdTransaction));
-        } else {
-          _transactionsBloc.add(AddTransaction(createdTransaction));
-        }
-      });
+          if (currentState.isEditMode) {
+            _transactionsBloc.add(
+              UpdateTransaction(
+                id: createdTransaction.id,
+                transaction: createdTransaction,
+              ),
+            );
+          } else {
+            _transactionsBloc.add(AddTransaction(createdTransaction));
+          }
+        },
+      );
     } catch (e) {
-      emit(currentState.copyWith(
-        submissionStatus: FormSubmissionStatus.failure,
-        submissionError: e.toString(),
-      ));
+      emit(
+        currentState.copyWith(
+          submissionStatus: FormSubmissionStatus.failure,
+          submissionError: e.toString(),
+        ),
+      );
     }
   }
 
   // temp id generator moved to `lib/core/utils/id_utils.dart`
 
-  void _onResetForm(
-    ResetForm event,
-    Emitter<TransactionFormBlocState> emit,
-  ) {
+  void _onResetForm(ResetForm event, Emitter<TransactionFormBlocState> emit) {
     emit(TransactionFormReady(formData: TransactionFormData.initial()));
   }
 
@@ -423,8 +468,10 @@ class TransactionFormBloc
 
     final formatter = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
     final integerPart = value.truncate().toString();
-    final formattedInteger =
-        integerPart.replaceAllMapped(formatter, (Match m) => '${m[1]},');
+    final formattedInteger = integerPart.replaceAllMapped(
+      formatter,
+      (Match m) => '${m[1]},',
+    );
 
     if (cleanAmount.contains('.')) {
       final decimalPart = cleanAmount.split('.')[1];
@@ -453,4 +500,3 @@ class TransactionFormBloc
 }
 
 // Add Transaction Event (if not already defined in TransactionsBloc)
-

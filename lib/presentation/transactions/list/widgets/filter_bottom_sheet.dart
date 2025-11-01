@@ -91,9 +91,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
       height: mediaQuery.size.height * 0.8,
       decoration: const BoxDecoration(
         color: AppColors.background,
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(24),
-        ),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
         children: [
@@ -157,7 +155,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
               ),
               padding: EdgeInsets.zero,
               labelPadding: EdgeInsets.zero,
-              indicatorPadding: const EdgeInsets.symmetric(vertical: Spacing.space4),
+              indicatorPadding: const EdgeInsets.symmetric(
+                vertical: Spacing.space4,
+              ),
               tabs: _filterTabs
                   .map((tab) {
                     return Tab(
@@ -197,9 +197,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
             ),
             decoration: const BoxDecoration(
               color: AppColors.surface,
-              border: Border(
-                top: BorderSide(color: AppColors.border),
-              ),
+              border: Border(top: BorderSide(color: AppColors.border)),
             ),
             child: Row(
               children: [
@@ -253,9 +251,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
         children: [
           Text(
             'Date Range',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: Spacing.space16),
 
@@ -267,10 +265,12 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
               child: GestureDetector(
                 onTap: () {
                   final dateRange = preset.getDateRange();
-                  _updateFilter(_workingFilter.copyWith(
-                    datePreset: preset,
-                    dateRange: dateRange,
-                  ));
+                  _updateFilter(
+                    _workingFilter.copyWith(
+                      datePreset: preset,
+                      dateRange: dateRange,
+                    ),
+                  );
                 },
                 child: Container(
                   padding: const EdgeInsets.all(Spacing.space16),
@@ -293,17 +293,17 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                             : Icons.radio_button_unchecked,
                         color: isSelected
                             ? Theme.of(context).colorScheme.primary
-                            : Theme.of(context)
-                                .colorScheme
-                                .onSurface
-                                .withAlpha(153),
+                            : Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withAlpha(153),
                       ),
                       const SizedBox(width: Spacing.space12),
                       Text(
                         preset.displayName,
                         style: TextStyle(
-                          fontWeight:
-                              isSelected ? FontWeight.w600 : FontWeight.normal,
+                          fontWeight: isSelected
+                              ? FontWeight.w600
+                              : FontWeight.normal,
                           color: isSelected
                               ? Theme.of(context).colorScheme.primary
                               : null,
@@ -321,9 +321,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
             const SizedBox(height: Spacing.space16),
             Text(
               'Custom Range',
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: Spacing.space12),
             Row(
@@ -334,28 +334,32 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                     _workingFilter.dateRange?.start,
                     (date) {
                       if (date != null && _workingFilter.dateRange != null) {
-                        _updateFilter(_workingFilter.copyWith(
-                          dateRange:
-                              _workingFilter.dateRange!.copyWith(start: date),
-                        ));
+                        _updateFilter(
+                          _workingFilter.copyWith(
+                            dateRange: _workingFilter.dateRange!.copyWith(
+                              start: date,
+                            ),
+                          ),
+                        );
                       }
                     },
                   ),
                 ),
                 const SizedBox(width: Spacing.space12),
                 Expanded(
-                  child: _buildDateButton(
-                    'To',
-                    _workingFilter.dateRange?.end,
-                    (date) {
-                      if (date != null && _workingFilter.dateRange != null) {
-                        _updateFilter(_workingFilter.copyWith(
-                          dateRange:
-                              _workingFilter.dateRange!.copyWith(end: date),
-                        ));
-                      }
-                    },
-                  ),
+                  child: _buildDateButton('To', _workingFilter.dateRange?.end, (
+                    date,
+                  ) {
+                    if (date != null && _workingFilter.dateRange != null) {
+                      _updateFilter(
+                        _workingFilter.copyWith(
+                          dateRange: _workingFilter.dateRange!.copyWith(
+                            end: date,
+                          ),
+                        ),
+                      );
+                    }
+                  }),
                 ),
               ],
             ),
@@ -366,7 +370,10 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
   }
 
   Widget _buildDateButton(
-      String label, DateTime? date, Function(DateTime?) onDateSelected) {
+    String label,
+    DateTime? date,
+    Function(DateTime?) onDateSelected,
+  ) {
     return GestureDetector(
       onTap: () async {
         final selectedDate = await showDatePicker(
@@ -390,18 +397,17 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
             Text(
               label,
               style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color:
-                        Theme.of(context).colorScheme.onSurface.withAlpha(153),
-                  ),
+                color: Theme.of(context).colorScheme.onSurface.withAlpha(153),
+              ),
             ),
             const SizedBox(height: 4),
             Text(
               date != null
                   ? '${date.day}/${date.month}/${date.year}'
                   : 'Select date',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
             ),
           ],
         ),
@@ -419,16 +425,17 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
             children: [
               Text(
                 'Categories',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
               ),
               const Spacer(),
               if (_workingFilter.selectedCategories.isNotEmpty)
                 TextButton(
                   onPressed: () {
                     _updateFilter(
-                        _workingFilter.copyWith(selectedCategories: []));
+                      _workingFilter.copyWith(selectedCategories: []),
+                    );
                   },
                   child: Text(
                     'Clear',
@@ -447,13 +454,19 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
               Expanded(
                 child: OutlinedButton(
                   onPressed: () {
-                    _updateFilter(_workingFilter.copyWith(
-                      selectedCategories: _availableCategories.map((c) => c.id).toList(),
-                    ));
+                    _updateFilter(
+                      _workingFilter.copyWith(
+                        selectedCategories: _availableCategories
+                            .map((c) => c.id)
+                            .toList(),
+                      ),
+                    );
                   },
                   style: OutlinedButton.styleFrom(
                     side: BorderSide(
-                      color: Theme.of(context).colorScheme.onSurface.withAlpha(120),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withAlpha(120),
                     ),
                   ),
                   child: const Text('Select All'),
@@ -464,11 +477,14 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                 child: OutlinedButton(
                   onPressed: () {
                     _updateFilter(
-                        _workingFilter.copyWith(selectedCategories: []));
+                      _workingFilter.copyWith(selectedCategories: []),
+                    );
                   },
                   style: OutlinedButton.styleFrom(
                     side: BorderSide(
-                      color: Theme.of(context).colorScheme.onSurface.withAlpha(120),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withAlpha(120),
                     ),
                   ),
                   child: const Text('Select None'),
@@ -483,19 +499,24 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
             spacing: Spacing.space8,
             runSpacing: Spacing.space8,
             children: _availableCategories.map((category) {
-              final isSelected =
-                  _workingFilter.selectedCategories.contains(category.id);
+              final isSelected = _workingFilter.selectedCategories.contains(
+                category.id,
+              );
               return GestureDetector(
                 onTap: () {
-                  final updatedCategories =
-                      List<String>.from(_workingFilter.selectedCategories);
+                  final updatedCategories = List<String>.from(
+                    _workingFilter.selectedCategories,
+                  );
                   if (isSelected) {
                     updatedCategories.remove(category.id);
                   } else {
                     updatedCategories.add(category.id);
                   }
-                  _updateFilter(_workingFilter.copyWith(
-                      selectedCategories: updatedCategories));
+                  _updateFilter(
+                    _workingFilter.copyWith(
+                      selectedCategories: updatedCategories,
+                    ),
+                  );
                 },
                 child: Container(
                   padding: const EdgeInsets.symmetric(
@@ -519,8 +540,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                       color: isSelected
                           ? AppTheme.primaryColor
                           : Theme.of(context).colorScheme.onSurface,
-                      fontWeight:
-                          isSelected ? FontWeight.w600 : FontWeight.normal,
+                      fontWeight: isSelected
+                          ? FontWeight.w600
+                          : FontWeight.normal,
                     ),
                   ),
                 ),
@@ -545,16 +567,20 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
             children: [
               Text(
                 'Amount Range',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
               ),
               const Spacer(),
               if (_workingFilter.amountRange != null)
                 TextButton(
                   onPressed: () {
                     // amount range to default
-                    _updateFilter(_workingFilter.copyWith(amountRange: const AmountRange(min: 0, max: 100000)));
+                    _updateFilter(
+                      _workingFilter.copyWith(
+                        amountRange: const AmountRange(min: 0, max: 100000),
+                      ),
+                    );
                   },
                   child: Text(
                     'Clear',
@@ -574,16 +600,16 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
               Text(
                 CurrencyFormatter.format(minAmount),
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
+                  fontWeight: FontWeight.w600,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
               ),
               Text(
                 CurrencyFormatter.format(maxAmount),
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
+                  fontWeight: FontWeight.w600,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
               ),
             ],
           ),
@@ -596,12 +622,11 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
             max: 100000,
             divisions: 100,
             onChanged: (RangeValues values) {
-              _updateFilter(_workingFilter.copyWith(
-                amountRange: AmountRange(
-                  min: values.start,
-                  max: values.end,
+              _updateFilter(
+                _workingFilter.copyWith(
+                  amountRange: AmountRange(min: values.start, max: values.end),
                 ),
-              ));
+              );
             },
           ),
           const SizedBox(height: Spacing.space24),
@@ -609,9 +634,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
           // Preset amount ranges
           Text(
             'Quick Ranges',
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: Spacing.space12),
 
@@ -623,17 +648,19 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
           ].map((preset) {
             final isSelected =
                 _workingFilter.amountRange?.min == preset['min'] &&
-                    _workingFilter.amountRange?.max == preset['max'];
+                _workingFilter.amountRange?.max == preset['max'];
             return Padding(
               padding: const EdgeInsets.only(bottom: Spacing.space8),
               child: GestureDetector(
                 onTap: () {
-                  _updateFilter(_workingFilter.copyWith(
-                    amountRange: AmountRange(
-                      min: preset['min'] as double,
-                      max: preset['max'] as double,
+                  _updateFilter(
+                    _workingFilter.copyWith(
+                      amountRange: AmountRange(
+                        min: preset['min'] as double,
+                        max: preset['max'] as double,
+                      ),
                     ),
-                  ));
+                  );
                 },
                 child: Container(
                   padding: const EdgeInsets.all(Spacing.space16),
@@ -656,17 +683,17 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                             : Icons.radio_button_unchecked,
                         color: isSelected
                             ? Theme.of(context).colorScheme.primary
-                            : Theme.of(context)
-                                .colorScheme
-                                .onSurface
-                                .withAlpha(153),
+                            : Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withAlpha(153),
                       ),
                       const SizedBox(width: Spacing.space12),
                       Text(
                         preset['label'] as String,
                         style: TextStyle(
-                          fontWeight:
-                              isSelected ? FontWeight.w600 : FontWeight.normal,
+                          fontWeight: isSelected
+                              ? FontWeight.w600
+                              : FontWeight.normal,
                           color: isSelected
                               ? Theme.of(context).colorScheme.primary
                               : null,
@@ -691,9 +718,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
         children: [
           Text(
             'Transaction Type',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: Spacing.space16),
           ...TransactionType.values.map((type) {
@@ -725,33 +752,32 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
                             : Icons.radio_button_unchecked,
                         color: isSelected
                             ? Theme.of(context).colorScheme.primary
-                            : Theme.of(context)
-                                .colorScheme
-                                .onSurface
-                                .withAlpha(153),
+                            : Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withAlpha(153),
                       ),
                       const SizedBox(width: Spacing.space12),
                       Icon(
                         type == TransactionType.income
                             ? Icons.trending_up_rounded
                             : type == TransactionType.expense
-                                ? Icons.trending_down_rounded
-                                : Icons.swap_horiz_rounded,
+                            ? Icons.trending_down_rounded
+                            : Icons.swap_horiz_rounded,
                         color: type == TransactionType.income
                             ? Colors.green
                             : type == TransactionType.expense
-                                ? Colors.red
-                                : Theme.of(context)
-                                    .colorScheme
-                                    .onSurface
-                                    .withAlpha(153),
+                            ? Colors.red
+                            : Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withAlpha(153),
                       ),
                       const SizedBox(width: Spacing.space12),
                       Text(
                         type.displayName,
                         style: TextStyle(
-                          fontWeight:
-                              isSelected ? FontWeight.w600 : FontWeight.normal,
+                          fontWeight: isSelected
+                              ? FontWeight.w600
+                              : FontWeight.normal,
                           color: isSelected
                               ? Theme.of(context).colorScheme.primary
                               : null,

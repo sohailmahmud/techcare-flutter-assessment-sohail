@@ -3,8 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Transaction Form Tests', () {
-    testWidgets('Transaction form widgets render correctly',
-        (WidgetTester tester) async {
+    testWidgets('Transaction form widgets render correctly', (
+      WidgetTester tester,
+    ) async {
       // Test basic form widgets without full screen initialization
       await tester.pumpWidget(
         MaterialApp(

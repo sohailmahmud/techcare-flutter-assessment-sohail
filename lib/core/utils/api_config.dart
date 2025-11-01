@@ -46,10 +46,7 @@ class NetworkSimulator {
   static final math.Random _random = math.Random();
 
   /// Simulate realistic network delay
-  static Future<void> simulateDelay({
-    int? minMs,
-    int? maxMs,
-  }) async {
+  static Future<void> simulateDelay({int? minMs, int? maxMs}) async {
     final min = minMs ?? ApiConfig.minDelay;
     final max = maxMs ?? ApiConfig.maxDelay;
     final delay = min + _random.nextInt(max - min);
@@ -69,7 +66,7 @@ class NetworkSimulator {
       'SERVER_ERROR',
       'NETWORK_ERROR',
       'RATE_LIMITED',
-      'SERVICE_UNAVAILABLE'
+      'SERVICE_UNAVAILABLE',
     ];
 
     final errorType = errorTypes[_random.nextInt(errorTypes.length)];
@@ -86,11 +83,7 @@ class NetworkSimulator {
 }
 
 /// Network quality enum
-enum NetworkQuality {
-  good,
-  poor,
-  offline,
-}
+enum NetworkQuality { good, poor, offline }
 
 /// Performance monitoring utilities
 class PerformanceMonitor {

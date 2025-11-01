@@ -88,9 +88,9 @@ class _DashboardPageState extends State<DashboardPage> {
                       return Center(
                         child: _buildErrorWidget(
                           state.message,
-                          onRetry: () => context
-                              .read<DashboardBloc>()
-                              .add(const RetryLoadDashboard()),
+                          onRetry: () => context.read<DashboardBloc>().add(
+                            const RetryLoadDashboard(),
+                          ),
                           iconSize: 32,
                           title: 'Oops! Something went wrong',
                         ),
@@ -100,22 +100,22 @@ class _DashboardPageState extends State<DashboardPage> {
                     return RefreshIndicator(
                       onRefresh: () async {
                         final completer = Completer<void>();
-                        context
-                            .read<DashboardBloc>()
-                            .add(const RefreshDashboardData());
+                        context.read<DashboardBloc>().add(
+                          const RefreshDashboardData(),
+                        );
 
                         // Listen for state changes to complete refresh
                         final subscription = context
                             .read<DashboardBloc>()
                             .stream
                             .listen((newState) {
-                          if (newState is DashboardLoaded ||
-                              newState is DashboardError) {
-                            if (!completer.isCompleted) {
-                              completer.complete();
-                            }
-                          }
-                        });
+                              if (newState is DashboardLoaded ||
+                                  newState is DashboardError) {
+                                if (!completer.isCompleted) {
+                                  completer.complete();
+                                }
+                              }
+                            });
 
                         // Timeout after reasonable time
                         Timer(AppConstants.refreshDelay * 2, () {
@@ -186,9 +186,7 @@ class _DashboardPageState extends State<DashboardPage> {
     return Padding(
       padding:
           padding ?? const EdgeInsets.symmetric(horizontal: Spacing.space16),
-      child: BlocBuilder<DashboardBloc, DashboardState>(
-        builder: builder,
-      ),
+      child: BlocBuilder<DashboardBloc, DashboardState>(builder: builder),
     );
   }
 
@@ -200,9 +198,9 @@ class _DashboardPageState extends State<DashboardPage> {
         } else if (state is DashboardLoaded) {
           return GestureDetector(
             onTap: () {
-              context
-                  .read<DashboardBloc>()
-                  .add(const ToggleBalanceVisibility());
+              context.read<DashboardBloc>().add(
+                const ToggleBalanceVisibility(),
+              );
             },
             child: BalanceCard(
               balance: state.summary.totalBalance,
@@ -238,8 +236,8 @@ class _DashboardPageState extends State<DashboardPage> {
             selectedCategory: state.selectedCategoryFilter,
             onCategorySelected: (categoryId) {
               context.read<DashboardBloc>().add(
-                    SelectTransactionFilter(categoryId: categoryId),
-                  );
+                SelectTransactionFilter(categoryId: categoryId),
+              );
             },
           );
         } else if (state is DashboardLoading) {
@@ -287,39 +285,38 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  Widget _buildErrorWidget(String message,
-      {VoidCallback? onRetry, double iconSize = 48, String? title}) {
+  Widget _buildErrorWidget(
+    String message, {
+    VoidCallback? onRetry,
+    double iconSize = 48,
+    String? title,
+  }) {
     return GlassMorphicContainer(
       padding: const EdgeInsets.all(Spacing.space24),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.error_outline,
-            color: AppColors.error,
-            size: iconSize,
-          ),
+          Icon(Icons.error_outline, color: AppColors.error, size: iconSize),
           const SizedBox(height: Spacing.space16),
           if (title != null)
             Text(
               title,
-              style: AppTypography.titleLarge
-                  .copyWith(color: AppColors.textPrimary),
+              style: AppTypography.titleLarge.copyWith(
+                color: AppColors.textPrimary,
+              ),
               textAlign: TextAlign.center,
             ),
           if (title != null) const SizedBox(height: Spacing.space8),
           Text(
             message,
-            style: AppTypography.bodyMedium
-                .copyWith(color: AppColors.textSecondary),
+            style: AppTypography.bodyMedium.copyWith(
+              color: AppColors.textSecondary,
+            ),
             textAlign: TextAlign.center,
           ),
           if (onRetry != null) ...[
             const SizedBox(height: Spacing.space24),
-            ElevatedButton(
-              onPressed: onRetry,
-              child: const Text('Try Again'),
-            ),
+            ElevatedButton(onPressed: onRetry, child: const Text('Try Again')),
           ],
         ],
       ),
@@ -448,7 +445,10 @@ class _ParallaxHeaderDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   Widget build(
-      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
     final progress = shrinkOffset / (expandedHeight - collapsedHeight);
     final clampedProgress = progress.clamp(0.0, 1.0);
     final statusBarHeight = MediaQuery.of(context).padding.top;
@@ -473,8 +473,10 @@ class _ParallaxHeaderDelegate extends SliverPersistentHeaderDelegate {
 
   Widget _buildParallaxBackground(double shrinkOffset) {
     // Enhanced parallax offset with smoother curve
-    final progress =
-        (shrinkOffset / (expandedHeight - collapsedHeight)).clamp(0.0, 1.0);
+    final progress = (shrinkOffset / (expandedHeight - collapsedHeight)).clamp(
+      0.0,
+      1.0,
+    );
     final parallaxOffset = shrinkOffset * 0.3; // Reduced for smoother effect
     final scaleProgress = 1.0 - (progress * 0.1); // Subtle scaling effect
 
@@ -482,7 +484,8 @@ class _ParallaxHeaderDelegate extends SliverPersistentHeaderDelegate {
       top: -parallaxOffset,
       left: 0,
       right: 0,
-      height: expandedHeight +
+      height:
+          expandedHeight +
           parallaxOffset +
           50, // Extra height for better coverage
       child: Transform.scale(
@@ -494,10 +497,12 @@ class _ParallaxHeaderDelegate extends SliverPersistentHeaderDelegate {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                AppColors.primary
-                    .withValues(alpha: 0.15 * (1.0 - progress * 0.5)),
-                AppColors.secondary
-                    .withValues(alpha: 0.08 * (1.0 - progress * 0.3)),
+                AppColors.primary.withValues(
+                  alpha: 0.15 * (1.0 - progress * 0.5),
+                ),
+                AppColors.secondary.withValues(
+                  alpha: 0.08 * (1.0 - progress * 0.3),
+                ),
                 AppColors.background,
               ],
               stops: const [0.0, 0.4, 1.0],
@@ -512,7 +517,10 @@ class _ParallaxHeaderDelegate extends SliverPersistentHeaderDelegate {
   }
 
   Widget _buildHeaderContent(
-      BuildContext context, double progress, double statusBarHeight) {
+    BuildContext context,
+    double progress,
+    double statusBarHeight,
+  ) {
     // Enhanced animation curves for smoother transitions - fade out earlier to prevent overflow
     final titleOpacity = (1.0 - progress * 2.0).clamp(0.0, 1.0);
     final subtitleOpacity = (1.0 - progress * 2.5).clamp(0.0, 1.0);
@@ -595,19 +603,23 @@ class _ParallaxHeaderDelegate extends SliverPersistentHeaderDelegate {
                       if (state is DashboardLoaded) {
                         // Calculate notification count based on recent transactions (last 3 days for better visibility)
                         notificationCount = state.filteredTransactions
-                            .where((t) =>
-                                DateTime.now().difference(t.date).inDays <= 3)
+                            .where(
+                              (t) =>
+                                  DateTime.now().difference(t.date).inDays <= 3,
+                            )
                             .length;
 
                         // For demo purposes, ensure there's always at least 1 notification
                         if (notificationCount == 0 &&
                             state.filteredTransactions.isNotEmpty) {
-                          notificationCount =
-                              state.filteredTransactions.length.clamp(1, 5);
+                          notificationCount = state.filteredTransactions.length
+                              .clamp(1, 5);
                         }
                       }
                       return _buildNotificationBadge(
-                          context: context, count: notificationCount);
+                        context: context,
+                        count: notificationCount,
+                      );
                     },
                   ),
                   const SizedBox(width: 16),
@@ -645,7 +657,10 @@ class _ParallaxHeaderDelegate extends SliverPersistentHeaderDelegate {
   }
 
   Widget _buildCollapsedAppBar(
-      BuildContext context, double progress, double statusBarHeight) {
+    BuildContext context,
+    double progress,
+    double statusBarHeight,
+  ) {
     final collapsedOpacity =
         (progress - 0.5).clamp(0.0, 1.0) * 2.0; // Start showing at 50% collapse
 
@@ -703,15 +718,19 @@ class _ParallaxHeaderDelegate extends SliverPersistentHeaderDelegate {
                               int notificationCount = 0;
                               if (state is DashboardLoaded) {
                                 notificationCount = state.filteredTransactions
-                                    .where((t) => DateTime.now()
-                                        .difference(t.date)
-                                        .inDays <=
-                                    3)
+                                    .where(
+                                      (t) =>
+                                          DateTime.now()
+                                              .difference(t.date)
+                                              .inDays <=
+                                          3,
+                                    )
                                     .length;
 
                                 if (notificationCount == 0 &&
                                     state.filteredTransactions.isNotEmpty) {
-                                  notificationCount = state.filteredTransactions
+                                  notificationCount = state
+                                      .filteredTransactions
                                       .length
                                       .clamp(1, 5);
                                 }
@@ -743,8 +762,10 @@ class _ParallaxHeaderDelegate extends SliverPersistentHeaderDelegate {
     );
   }
 
-  Widget _buildNotificationBadge(
-      {required BuildContext context, int count = 0}) {
+  Widget _buildNotificationBadge({
+    required BuildContext context,
+    int count = 0,
+  }) {
     // Force notification badge for demo (remove this in production)
     int displayCount = count > 0 ? count : 3;
 
@@ -930,10 +951,9 @@ class _HeaderPatternPainter extends CustomPainter {
       final x = centerX + radius * 0.7 * (i * 0.3) * math.cos(angle);
       final y = centerY + radius * 0.5 * (i * 0.2) * math.sin(angle);
 
-      path.addOval(Rect.fromCircle(
-        center: Offset(x, y),
-        radius: 80 - (i * 20),
-      ));
+      path.addOval(
+        Rect.fromCircle(center: Offset(x, y), radius: 80 - (i * 20)),
+      );
     }
 
     canvas.drawPath(path, paint);

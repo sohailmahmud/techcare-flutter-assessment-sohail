@@ -34,10 +34,7 @@ class RefreshCacheEvent extends CacheEvent {
   final TransactionFilter? filter;
   final bool forceRefresh;
 
-  const RefreshCacheEvent({
-    this.filter,
-    this.forceRefresh = false,
-  });
+  const RefreshCacheEvent({this.filter, this.forceRefresh = false});
 
   @override
   List<Object?> get props => [filter, forceRefresh];
@@ -47,9 +44,7 @@ class RefreshCacheEvent extends CacheEvent {
 class ClearAllCacheEvent extends CacheEvent {
   final bool reloadAfterClear;
 
-  const ClearAllCacheEvent({
-    this.reloadAfterClear = true,
-  });
+  const ClearAllCacheEvent({this.reloadAfterClear = true});
 
   @override
   List<Object?> get props => [reloadAfterClear];
@@ -64,9 +59,7 @@ class GetCacheStatsEvent extends CacheEvent {
 class CleanupCacheEvent extends CacheEvent {
   final bool force;
 
-  const CleanupCacheEvent({
-    this.force = false,
-  });
+  const CleanupCacheEvent({this.force = false});
 
   @override
   List<Object?> get props => [force];
@@ -77,10 +70,7 @@ class PreloadCacheEvent extends CacheEvent {
   final TransactionFilter filter;
   final Duration? ttl;
 
-  const PreloadCacheEvent({
-    required this.filter,
-    this.ttl,
-  });
+  const PreloadCacheEvent({required this.filter, this.ttl});
 
   @override
   List<Object?> get props => [filter, ttl];

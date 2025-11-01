@@ -20,10 +20,7 @@ class AddEditTransactionScreen extends StatefulWidget {
   static const routeName = '/add-edit-transaction';
   final Transaction? transaction; // null for add, non-null for edit
 
-  const AddEditTransactionScreen({
-    super.key,
-    this.transaction,
-  });
+  const AddEditTransactionScreen({super.key, this.transaction});
 
   @override
   State<AddEditTransactionScreen> createState() =>
@@ -58,31 +55,29 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen>
     );
 
     // Hero scale animation
-    _heroScaleAnimation = Tween<double>(
-      begin: 0.8,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _heroAnimationController,
-      curve: Curves.easeOutBack,
-    ));
+    _heroScaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _heroAnimationController,
+        curve: Curves.easeOutBack,
+      ),
+    );
 
     // Content slide animation
-    _contentSlideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.3),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _contentAnimationController,
-      curve: Curves.easeOutCubic,
-    ));
+    _contentSlideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _contentAnimationController,
+            curve: Curves.easeOutCubic,
+          ),
+        );
 
     // Content fade animation
-    _contentFadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _contentAnimationController,
-      curve: const Interval(0.2, 1.0, curve: Curves.easeOut),
-    ));
+    _contentFadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _contentAnimationController,
+        curve: const Interval(0.2, 1.0, curve: Curves.easeOut),
+      ),
+    );
 
     // Start animations
     _heroAnimationController.forward();
@@ -109,13 +104,15 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen>
 
   @override
   Widget build(BuildContext context) {
-  // Get route arguments for transaction type if provided.
-  // Prefer go_router extras (GoRouterState.extra), fall back to ModalRoute arguments for compatibility.
-  final routeState = GoRouterState.of(context);
-  final extraFromGoRouter = routeState.extra as Map<String, dynamic>?;
-  final modalArgs = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-  final transactionType = (extraFromGoRouter?['type'] as TransactionType?) ??
-    (modalArgs?['type'] as TransactionType?);
+    // Get route arguments for transaction type if provided.
+    // Prefer go_router extras (GoRouterState.extra), fall back to ModalRoute arguments for compatibility.
+    final routeState = GoRouterState.of(context);
+    final extraFromGoRouter = routeState.extra as Map<String, dynamic>?;
+    final modalArgs =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    final transactionType =
+        (extraFromGoRouter?['type'] as TransactionType?) ??
+        (modalArgs?['type'] as TransactionType?);
 
     return BlocProvider(
       create: (context) {
@@ -133,12 +130,12 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen>
           }
         },
         child: PopScope(
-        canPop: false,
-        onPopInvokedWithResult: (bool didPop, Object? result) async {
-          if (didPop) return;
-          _onBackPressed();
-        },
-        child: Scaffold(
+          canPop: false,
+          onPopInvokedWithResult: (bool didPop, Object? result) async {
+            if (didPop) return;
+            _onBackPressed();
+          },
+          child: Scaffold(
             backgroundColor: AppColors.background,
             body: SafeArea(
               child: Column(
@@ -241,11 +238,12 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen>
               // Amount Input
               AmountInputField(
                 value: state.formData.amount,
-                onChanged: (value) => context
-                    .read<TransactionFormBloc>()
-                    .add(AmountChanged(value)),
-                errorText:
-                    state.getFieldError(TransactionFormError.amountRequired),
+                onChanged: (value) => context.read<TransactionFormBloc>().add(
+                  AmountChanged(value),
+                ),
+                errorText: state.getFieldError(
+                  TransactionFormError.amountRequired,
+                ),
                 autofocus: !isEditMode,
                 focusNode: _amountFocusNode,
               ),
@@ -254,9 +252,9 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen>
               // Transaction Type Selector
               TransactionTypeSelector(
                 selectedType: state.formData.type,
-                onChanged: (type) => context
-                    .read<TransactionFormBloc>()
-                    .add(TransactionTypeChanged(type)),
+                onChanged: (type) => context.read<TransactionFormBloc>().add(
+                  TransactionTypeChanged(type),
+                ),
               ),
               const SizedBox(height: Spacing.space24),
 
@@ -277,8 +275,9 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen>
                     onCategorySelected: (category) => context
                         .read<TransactionFormBloc>()
                         .add(CategorySelected(category)),
-                    errorText:
-                        state.getFieldError(TransactionFormError.categoryRequired),
+                    errorText: state.getFieldError(
+                      TransactionFormError.categoryRequired,
+                    ),
                   );
                 },
               ),
@@ -302,11 +301,13 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen>
                     context.read<TransactionFormBloc>().add(TimeChanged(time)),
                 titleError:
                     state.getFieldError(TransactionFormError.titleRequired) ??
-                        state.getFieldError(TransactionFormError.titleTooLong),
-                notesError:
-                    state.getFieldError(TransactionFormError.notesTooLong),
-                dateError:
-                    state.getFieldError(TransactionFormError.dateInFuture),
+                    state.getFieldError(TransactionFormError.titleTooLong),
+                notesError: state.getFieldError(
+                  TransactionFormError.notesTooLong,
+                ),
+                dateError: state.getFieldError(
+                  TransactionFormError.dateInFuture,
+                ),
               ),
 
               // Bottom spacing for action buttons
@@ -344,8 +345,9 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen>
                 child: OutlinedButton(
                   onPressed: state.isSubmitting ? null : _onBackPressed,
                   style: OutlinedButton.styleFrom(
-                    padding:
-                        const EdgeInsets.symmetric(vertical: Spacing.space16),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: Spacing.space16,
+                    ),
                     side: const BorderSide(color: AppColors.textSecondary),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(Spacing.radiusL),
@@ -373,8 +375,9 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen>
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
-                      padding:
-                          const EdgeInsets.symmetric(vertical: Spacing.space16),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: Spacing.space16,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(Spacing.radiusL),
                       ),
@@ -389,8 +392,9 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen>
                                 height: 20,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  valueColor:
-                                      AlwaysStoppedAnimation<Color>(Colors.white),
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.white,
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: Spacing.space8),
@@ -452,7 +456,7 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen>
 
     // if (sourcePage == 'transactions') {
     //   context.go(AppRoutes.transactions);
-    // } 
+    // }
     // if (sourcePage == 'dashboard') {
     //   context.go(AppRoutes.dashboard);
     // }
@@ -467,7 +471,7 @@ class _AddEditTransactionScreenState extends State<AddEditTransactionScreen>
         break;
       default:
         context.go(AppRoutes.dashboard);
-    }   
+    }
   }
 
   void _onSavePressedWithContext(BuildContext buttonContext) {

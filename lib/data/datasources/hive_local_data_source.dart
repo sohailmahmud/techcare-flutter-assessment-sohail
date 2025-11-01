@@ -28,9 +28,8 @@ class HiveLocalDataSource {
   bool _isInitialized = false;
   StreamSubscription<ConnectivityResult>? _connectivitySubscription;
 
-  HiveLocalDataSource({
-    required Connectivity connectivity,
-  }) : _connectivity = connectivity;
+  HiveLocalDataSource({required Connectivity connectivity})
+    : _connectivity = connectivity;
 
   /// Initialize Hive boxes and register adapters
   Future<Result<void>> initialize() async {
@@ -60,12 +59,15 @@ class HiveLocalDataSource {
       */
 
       // Open boxes
-      _transactionsBox =
-          await Hive.openBox<HiveTransaction>(HiveBoxNames.transactions);
-      _categoriesBox =
-          await Hive.openBox<HiveCategory>(HiveBoxNames.categories);
-      _syncQueueBox =
-          await Hive.openBox<HiveSyncQueueItem>(HiveBoxNames.syncQueue);
+      _transactionsBox = await Hive.openBox<HiveTransaction>(
+        HiveBoxNames.transactions,
+      );
+      _categoriesBox = await Hive.openBox<HiveCategory>(
+        HiveBoxNames.categories,
+      );
+      _syncQueueBox = await Hive.openBox<HiveSyncQueueItem>(
+        HiveBoxNames.syncQueue,
+      );
       _settingsBox = await Hive.openBox(HiveBoxNames.settings);
 
       // Set up connectivity monitoring
@@ -76,10 +78,12 @@ class HiveLocalDataSource {
       _isInitialized = true;
       return Result.success(null);
     } catch (e) {
-      return Result.error(StorageFailure(
-        'Failed to initialize local storage: $e',
-        code: 'STORAGE_INIT_ERROR',
-      ));
+      return Result.error(
+        StorageFailure(
+          'Failed to initialize local storage: $e',
+          code: 'STORAGE_INIT_ERROR',
+        ),
+      );
     }
   }
 
@@ -142,10 +146,12 @@ class HiveLocalDataSource {
 
       return Result.success(transactions);
     } catch (e) {
-      return Result.error(StorageFailure(
-        'Failed to get transactions: $e',
-        code: 'GET_TRANSACTIONS_ERROR',
-      ));
+      return Result.error(
+        StorageFailure(
+          'Failed to get transactions: $e',
+          code: 'GET_TRANSACTIONS_ERROR',
+        ),
+      );
     }
   }
 
@@ -158,24 +164,28 @@ class HiveLocalDataSource {
 
       return Result.success(transaction);
     } catch (e) {
-      return Result.error(StorageFailure(
-        'Failed to get transaction by ID: $e',
-        code: 'GET_TRANSACTION_ERROR',
-      ));
+      return Result.error(
+        StorageFailure(
+          'Failed to get transaction by ID: $e',
+          code: 'GET_TRANSACTION_ERROR',
+        ),
+      );
     }
   }
 
   /// Create a new transaction
   Future<Result<HiveTransaction>> createTransaction(
-      HiveTransaction transaction) async {
+    HiveTransaction transaction,
+  ) async {
     try {
       // Generate local ID if not provided
       transaction.localId ??= _generateId();
 
       // Set sync status based on connectivity
       final online = await isOnline;
-      transaction.syncStatus =
-          online ? HiveSyncStatus.pending : HiveSyncStatus.pending;
+      transaction.syncStatus = online
+          ? HiveSyncStatus.pending
+          : HiveSyncStatus.pending;
       transaction.createdAt = DateTime.now();
       transaction.updatedAt = DateTime.now();
 
@@ -192,10 +202,12 @@ class HiveLocalDataSource {
 
       return Result.success(transaction);
     } catch (e) {
-      return Result.error(StorageFailure(
-        'Failed to create transaction: $e',
-        code: 'CREATE_TRANSACTION_ERROR',
-      ));
+      return Result.error(
+        StorageFailure(
+          'Failed to create transaction: $e',
+          code: 'CREATE_TRANSACTION_ERROR',
+        ),
+      );
     }
   }
 
@@ -205,15 +217,17 @@ class HiveLocalDataSource {
     Map<String, dynamic> updates,
   ) async {
     try {
-      final existingIndex = _transactionsBox.values
-          .toList()
-          .indexWhere((t) => (t.id == id || t.localId == id) && !t.isDeleted);
+      final existingIndex = _transactionsBox.values.toList().indexWhere(
+        (t) => (t.id == id || t.localId == id) && !t.isDeleted,
+      );
 
       if (existingIndex == -1) {
-        return Result.error(const NotFoundFailure(
-          'Transaction not found',
-          code: 'TRANSACTION_NOT_FOUND',
-        ));
+        return Result.error(
+          const NotFoundFailure(
+            'Transaction not found',
+            code: 'TRANSACTION_NOT_FOUND',
+          ),
+        );
       }
 
       final existing = _transactionsBox.getAt(existingIndex)!;
@@ -224,8 +238,8 @@ class HiveLocalDataSource {
         amount: updates['amount']?.toDouble() ?? existing.amount,
         type: updates['type'] != null
             ? (updates['type'] == 'income'
-                ? HiveTransactionType.income
-                : HiveTransactionType.expense)
+                  ? HiveTransactionType.income
+                  : HiveTransactionType.expense)
             : existing.type,
         categoryId: updates['categoryId'] ?? existing.categoryId,
         date: updates['date'] != null
@@ -253,25 +267,29 @@ class HiveLocalDataSource {
 
       return Result.success(updated);
     } catch (e) {
-      return Result.error(StorageFailure(
-        'Failed to update transaction: $e',
-        code: 'UPDATE_TRANSACTION_ERROR',
-      ));
+      return Result.error(
+        StorageFailure(
+          'Failed to update transaction: $e',
+          code: 'UPDATE_TRANSACTION_ERROR',
+        ),
+      );
     }
   }
 
   /// Delete a transaction (soft delete)
   Future<Result<void>> deleteTransaction(String id) async {
     try {
-      final existingIndex = _transactionsBox.values
-          .toList()
-          .indexWhere((t) => (t.id == id || t.localId == id) && !t.isDeleted);
+      final existingIndex = _transactionsBox.values.toList().indexWhere(
+        (t) => (t.id == id || t.localId == id) && !t.isDeleted,
+      );
 
       if (existingIndex == -1) {
-        return Result.error(const NotFoundFailure(
-          'Transaction not found',
-          code: 'TRANSACTION_NOT_FOUND',
-        ));
+        return Result.error(
+          const NotFoundFailure(
+            'Transaction not found',
+            code: 'TRANSACTION_NOT_FOUND',
+          ),
+        );
       }
 
       final existing = _transactionsBox.getAt(existingIndex)!;
@@ -296,16 +314,19 @@ class HiveLocalDataSource {
 
       return Result.success(null);
     } catch (e) {
-      return Result.error(StorageFailure(
-        'Failed to delete transaction: $e',
-        code: 'DELETE_TRANSACTION_ERROR',
-      ));
+      return Result.error(
+        StorageFailure(
+          'Failed to delete transaction: $e',
+          code: 'DELETE_TRANSACTION_ERROR',
+        ),
+      );
     }
   }
 
   /// Get all categories
-  Future<Result<List<HiveCategory>>> getCategories(
-      {bool includeDeleted = false}) async {
+  Future<Result<List<HiveCategory>>> getCategories({
+    bool includeDeleted = false,
+  }) async {
     try {
       final categories = _categoriesBox.values
           .where((c) => includeDeleted || !c.isDeleted)
@@ -316,10 +337,12 @@ class HiveLocalDataSource {
 
       return Result.success(categories);
     } catch (e) {
-      return Result.error(StorageFailure(
-        'Failed to get categories: $e',
-        code: 'GET_CATEGORIES_ERROR',
-      ));
+      return Result.error(
+        StorageFailure(
+          'Failed to get categories: $e',
+          code: 'GET_CATEGORIES_ERROR',
+        ),
+      );
     }
   }
 
@@ -343,10 +366,12 @@ class HiveLocalDataSource {
 
       return Result.success(category);
     } catch (e) {
-      return Result.error(StorageFailure(
-        'Failed to create category: $e',
-        code: 'CREATE_CATEGORY_ERROR',
-      ));
+      return Result.error(
+        StorageFailure(
+          'Failed to create category: $e',
+          code: 'CREATE_CATEGORY_ERROR',
+        ),
+      );
     }
   }
 
@@ -354,9 +379,11 @@ class HiveLocalDataSource {
   Future<Result<List<HiveSyncQueueItem>>> getPendingSyncItems() async {
     try {
       final items = _syncQueueBox.values
-          .where((item) =>
-              item.status == HiveSyncStatus.pending ||
-              (item.status == HiveSyncStatus.failed && item.shouldRetry))
+          .where(
+            (item) =>
+                item.status == HiveSyncStatus.pending ||
+                (item.status == HiveSyncStatus.failed && item.shouldRetry),
+          )
           .toList();
 
       // Sort by priority (higher first) then by creation date
@@ -368,18 +395,21 @@ class HiveLocalDataSource {
 
       return Result.success(items);
     } catch (e) {
-      return Result.error(StorageFailure(
-        'Failed to get pending sync items: $e',
-        code: 'GET_SYNC_ITEMS_ERROR',
-      ));
+      return Result.error(
+        StorageFailure(
+          'Failed to get pending sync items: $e',
+          code: 'GET_SYNC_ITEMS_ERROR',
+        ),
+      );
     }
   }
 
   /// Mark sync item as completed
   Future<Result<void>> markSyncItemCompleted(String itemId) async {
     try {
-      final itemIndex =
-          _syncQueueBox.values.toList().indexWhere((item) => item.id == itemId);
+      final itemIndex = _syncQueueBox.values.toList().indexWhere(
+        (item) => item.id == itemId,
+      );
 
       if (itemIndex != -1) {
         final item = _syncQueueBox.getAt(itemIndex)!;
@@ -392,18 +422,21 @@ class HiveLocalDataSource {
 
       return Result.success(null);
     } catch (e) {
-      return Result.error(StorageFailure(
-        'Failed to mark sync item as completed: $e',
-        code: 'MARK_SYNC_COMPLETED_ERROR',
-      ));
+      return Result.error(
+        StorageFailure(
+          'Failed to mark sync item as completed: $e',
+          code: 'MARK_SYNC_COMPLETED_ERROR',
+        ),
+      );
     }
   }
 
   /// Mark sync item as failed
   Future<Result<void>> markSyncItemFailed(String itemId, String error) async {
     try {
-      final itemIndex =
-          _syncQueueBox.values.toList().indexWhere((item) => item.id == itemId);
+      final itemIndex = _syncQueueBox.values.toList().indexWhere(
+        (item) => item.id == itemId,
+      );
 
       if (itemIndex != -1) {
         final item = _syncQueueBox.getAt(itemIndex)!;
@@ -418,10 +451,12 @@ class HiveLocalDataSource {
 
       return Result.success(null);
     } catch (e) {
-      return Result.error(StorageFailure(
-        'Failed to mark sync item as failed: $e',
-        code: 'MARK_SYNC_FAILED_ERROR',
-      ));
+      return Result.error(
+        StorageFailure(
+          'Failed to mark sync item as failed: $e',
+          code: 'MARK_SYNC_FAILED_ERROR',
+        ),
+      );
     }
   }
 
@@ -448,8 +483,10 @@ class HiveLocalDataSource {
 
   /// Trigger automatic sync if enabled
   void _triggerAutoSync() {
-    final autoSyncEnabled =
-        _settingsBox.get(HiveSettingsKeys.autoSync, defaultValue: true);
+    final autoSyncEnabled = _settingsBox.get(
+      HiveSettingsKeys.autoSync,
+      defaultValue: true,
+    );
     if (autoSyncEnabled) {
       // This would be handled by a sync service
       debugPrint('Auto sync triggered');
@@ -467,10 +504,12 @@ class HiveLocalDataSource {
       await _settingsBox.put(key, value);
       return Result.success(null);
     } catch (e) {
-      return Result.error(StorageFailure(
-        'Failed to save setting: $e',
-        code: 'SAVE_SETTING_ERROR',
-      ));
+      return Result.error(
+        StorageFailure(
+          'Failed to save setting: $e',
+          code: 'SAVE_SETTING_ERROR',
+        ),
+      );
     }
   }
 
@@ -496,10 +535,12 @@ class HiveLocalDataSource {
 
       return Result.success(null);
     } catch (e) {
-      return Result.error(StorageFailure(
-        'Failed to cleanup sync queue: $e',
-        code: 'CLEANUP_SYNC_ERROR',
-      ));
+      return Result.error(
+        StorageFailure(
+          'Failed to cleanup sync queue: $e',
+          code: 'CLEANUP_SYNC_ERROR',
+        ),
+      );
     }
   }
 
@@ -543,10 +584,12 @@ class HiveLocalDataSource {
 
       return Result.success(stats);
     } catch (e) {
-      return Result.error(StorageFailure(
-        'Failed to get storage stats: $e',
-        code: 'GET_STATS_ERROR',
-      ));
+      return Result.error(
+        StorageFailure(
+          'Failed to get storage stats: $e',
+          code: 'GET_STATS_ERROR',
+        ),
+      );
     }
   }
 

@@ -48,8 +48,13 @@ void main() {
     setUp(() {
       mockTransactionsBloc = MockTransactionsBloc();
       // Default stub: return the mockTransactions list for the allUnfilteredTransactions getter
-      when(() => mockTransactionsBloc.allUnfilteredTransactions).thenReturn(mockTransactions);
-      analyticsBloc = AnalyticsBloc(transactionsBloc: mockTransactionsBloc, categories: []);
+      when(
+        () => mockTransactionsBloc.allUnfilteredTransactions,
+      ).thenReturn(mockTransactions);
+      analyticsBloc = AnalyticsBloc(
+        transactionsBloc: mockTransactionsBloc,
+        categories: [],
+      );
     });
 
     tearDown(() {
@@ -72,13 +77,12 @@ void main() {
               currentPage: 1,
             ),
           );
-          when(() => mockTransactionsBloc.allUnfilteredTransactions).thenReturn(mockTransactions);
+          when(
+            () => mockTransactionsBloc.allUnfilteredTransactions,
+          ).thenReturn(mockTransactions);
         },
         act: (bloc) => bloc.add(const ChangePeriod(TimePeriod.thisWeek)),
-        expect: () => [
-          const AnalyticsLoading(),
-          isA<AnalyticsLoaded>(),
-        ],
+        expect: () => [const AnalyticsLoading(), isA<AnalyticsLoaded>()],
       );
 
       blocTest<AnalyticsBloc, AnalyticsState>(
@@ -92,13 +96,12 @@ void main() {
               currentPage: 1,
             ),
           );
-          when(() => mockTransactionsBloc.allUnfilteredTransactions).thenReturn(mockTransactions);
+          when(
+            () => mockTransactionsBloc.allUnfilteredTransactions,
+          ).thenReturn(mockTransactions);
         },
         act: (bloc) => bloc.add(const ChangePeriod(TimePeriod.thisMonth)),
-        expect: () => [
-          const AnalyticsLoading(),
-          isA<AnalyticsLoaded>(),
-        ],
+        expect: () => [const AnalyticsLoading(), isA<AnalyticsLoaded>()],
       );
     });
 
@@ -114,13 +117,12 @@ void main() {
               currentPage: 1,
             ),
           );
-          when(() => mockTransactionsBloc.allUnfilteredTransactions).thenReturn(mockTransactions);
+          when(
+            () => mockTransactionsBloc.allUnfilteredTransactions,
+          ).thenReturn(mockTransactions);
         },
         act: (bloc) => bloc.add(const LoadAnalytics()),
-        expect: () => [
-          const AnalyticsLoading(),
-          isA<AnalyticsLoaded>(),
-        ],
+        expect: () => [const AnalyticsLoading(), isA<AnalyticsLoaded>()],
       );
 
       blocTest<AnalyticsBloc, AnalyticsState>(
@@ -134,7 +136,9 @@ void main() {
               currentPage: 1,
             ),
           );
-          when(() => mockTransactionsBloc.allUnfilteredTransactions).thenReturn(mockTransactions);
+          when(
+            () => mockTransactionsBloc.allUnfilteredTransactions,
+          ).thenReturn(mockTransactions);
         },
         act: (bloc) => bloc.add(const LoadAnalytics()),
         verify: (bloc) {
@@ -160,13 +164,12 @@ void main() {
               currentPage: 1,
             ),
           );
-          when(() => mockTransactionsBloc.allUnfilteredTransactions).thenReturn(mockTransactions);
+          when(
+            () => mockTransactionsBloc.allUnfilteredTransactions,
+          ).thenReturn(mockTransactions);
         },
         act: (bloc) => bloc.add(const RefreshAnalytics()),
-        expect: () => [
-          const AnalyticsLoading(),
-          isA<AnalyticsLoaded>(),
-        ],
+        expect: () => [const AnalyticsLoading(), isA<AnalyticsLoaded>()],
       );
     });
 
@@ -233,13 +236,16 @@ void main() {
             const TransactionError(error: 'Failed to load transactions'),
           );
           // Simulate failure to provide transactions via the getter
-          when(() => mockTransactionsBloc.allUnfilteredTransactions).thenThrow(Exception('Failed to load transactions'));
+          when(
+            () => mockTransactionsBloc.allUnfilteredTransactions,
+          ).thenThrow(Exception('Failed to load transactions'));
         },
         act: (bloc) => bloc.add(const LoadAnalytics()),
         expect: () => [
           const AnalyticsLoading(),
           const AnalyticsError(
-              'Failed to load analytics: Exception: Failed to load transactions'),
+            'Failed to load analytics: Exception: Failed to load transactions',
+          ),
         ],
       );
     });
@@ -256,13 +262,12 @@ void main() {
               currentPage: 1,
             ),
           );
-          when(() => mockTransactionsBloc.allUnfilteredTransactions).thenReturn([]);
+          when(
+            () => mockTransactionsBloc.allUnfilteredTransactions,
+          ).thenReturn([]);
         },
         act: (bloc) => bloc.add(const LoadAnalytics()),
-        expect: () => [
-          const AnalyticsLoading(),
-          isA<AnalyticsLoaded>(),
-        ],
+        expect: () => [const AnalyticsLoading(), isA<AnalyticsLoaded>()],
         verify: (bloc) {
           final state = bloc.state;
           if (state is AnalyticsLoaded) {
@@ -286,17 +291,16 @@ void main() {
             ),
           );
         },
-        act: (bloc) => bloc.add(ChangePeriod(
-          TimePeriod.custom,
-          customRange: DateRange(
-            startDate: DateTime(2025, 10, 1),
-            endDate: DateTime(2025, 10, 31),
+        act: (bloc) => bloc.add(
+          ChangePeriod(
+            TimePeriod.custom,
+            customRange: DateRange(
+              startDate: DateTime(2025, 10, 1),
+              endDate: DateTime(2025, 10, 31),
+            ),
           ),
-        )),
-        expect: () => [
-          const AnalyticsLoading(),
-          isA<AnalyticsLoaded>(),
-        ],
+        ),
+        expect: () => [const AnalyticsLoading(), isA<AnalyticsLoaded>()],
       );
     });
   });

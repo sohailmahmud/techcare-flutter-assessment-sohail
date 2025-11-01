@@ -68,11 +68,7 @@ class CategorySelector extends StatelessWidget {
           const SizedBox(height: Spacing.space8),
           Row(
             children: [
-              const Icon(
-                Icons.error_outline,
-                size: 16,
-                color: AppColors.error,
-              ),
+              const Icon(Icons.error_outline, size: 16, color: AppColors.error),
               const SizedBox(width: Spacing.space4),
               Expanded(
                 child: Text(
@@ -154,8 +150,9 @@ class CategorySelector extends StatelessWidget {
                         color: isSelected
                             ? category.color
                             : AppColors.textSecondary,
-                        fontWeight:
-                            isSelected ? FontWeight.w600 : FontWeight.w500,
+                        fontWeight: isSelected
+                            ? FontWeight.w600
+                            : FontWeight.w500,
                       ),
                       textAlign: TextAlign.center,
                       maxLines: 2,
@@ -220,8 +217,9 @@ class HorizontalCategorySelector extends StatelessWidget {
               Expanded(
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: Spacing.space16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: Spacing.space16,
+                  ),
                   itemCount: categories.length,
                   itemBuilder: (context, index) {
                     final category = categories[index];
@@ -238,8 +236,9 @@ class HorizontalCategorySelector extends StatelessWidget {
                             color: isSelected
                                 ? category.color.withValues(alpha: 0.15)
                                 : Colors.transparent,
-                            borderRadius:
-                                BorderRadius.circular(Spacing.radiusM),
+                            borderRadius: BorderRadius.circular(
+                              Spacing.radiusM,
+                            ),
                             border: Border.all(
                               color: isSelected
                                   ? category.color
@@ -256,8 +255,9 @@ class HorizontalCategorySelector extends StatelessWidget {
                                   color: isSelected
                                       ? category.color
                                       : category.color.withValues(alpha: 0.1),
-                                  borderRadius:
-                                      BorderRadius.circular(Spacing.radiusS),
+                                  borderRadius: BorderRadius.circular(
+                                    Spacing.radiusS,
+                                  ),
                                 ),
                                 child: Icon(
                                   category.icon,
@@ -299,11 +299,7 @@ class HorizontalCategorySelector extends StatelessWidget {
           const SizedBox(height: Spacing.space8),
           Row(
             children: [
-              const Icon(
-                Icons.error_outline,
-                size: 16,
-                color: AppColors.error,
-              ),
+              const Icon(Icons.error_outline, size: 16, color: AppColors.error),
               const SizedBox(width: Spacing.space4),
               Expanded(
                 child: Text(

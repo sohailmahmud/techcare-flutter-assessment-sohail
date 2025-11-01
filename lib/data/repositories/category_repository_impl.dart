@@ -43,10 +43,12 @@ class CategoryRepositoryImpl implements CategoryRepository {
           // If remote fails, try cache
           final cachedCategories = await _localDataSource.getCachedCategories();
           if (cachedCategories != null && cachedCategories.isNotEmpty) {
-            return Right(cachedCategories
-                .whereType<CategoryModel>()
-                .map((model) => model.toEntity())
-                .toList());
+            return Right(
+              cachedCategories
+                  .whereType<CategoryModel>()
+                  .map((model) => model.toEntity())
+                  .toList(),
+            );
           }
           return Left(ServerFailure(e.toString()));
         }
@@ -54,13 +56,18 @@ class CategoryRepositoryImpl implements CategoryRepository {
         // Offline - try cache first
         final cachedCategories = await _localDataSource.getCachedCategories();
         if (cachedCategories != null && cachedCategories.isNotEmpty) {
-          return Right(cachedCategories
-              .whereType<CategoryModel>()
-              .map((model) => model.toEntity())
-              .toList());
+          return Right(
+            cachedCategories
+                .whereType<CategoryModel>()
+                .map((model) => model.toEntity())
+                .toList(),
+          );
         }
-        return const Left(NetworkFailure(
-            'No internet connection and no cached categories available'));
+        return const Left(
+          NetworkFailure(
+            'No internet connection and no cached categories available',
+          ),
+        );
       }
     } catch (e) {
       return Left(UnknownFailure(e.toString()));
@@ -72,17 +79,14 @@ class CategoryRepositoryImpl implements CategoryRepository {
     try {
       final categoriesResult = await getCategories();
 
-      return categoriesResult.fold(
-        (failure) => Left(failure),
-        (categories) {
-          try {
-            final category = categories.firstWhere((cat) => cat.id == id);
-            return Right(category);
-          } catch (e) {
-            return const Left(NotFoundFailure('Category not found'));
-          }
-        },
-      );
+      return categoriesResult.fold((failure) => Left(failure), (categories) {
+        try {
+          final category = categories.firstWhere((cat) => cat.id == id);
+          return Right(category);
+        } catch (e) {
+          return const Left(NotFoundFailure('Category not found'));
+        }
+      });
     } catch (e) {
       return Left(UnknownFailure(e.toString()));
     }
@@ -90,7 +94,8 @@ class CategoryRepositoryImpl implements CategoryRepository {
 
   @override
   Future<Either<Failure, List<Category>>> getCategoriesByType(
-      bool isIncome) async {
+    bool isIncome,
+  ) async {
     try {
       List<Category> filteredCategories;
       if (isIncome) {
@@ -109,10 +114,12 @@ class CategoryRepositoryImpl implements CategoryRepository {
     try {
       final cachedCategories = await _localDataSource.getCachedCategories();
       if (cachedCategories != null && cachedCategories.isNotEmpty) {
-        return Right(cachedCategories
-            .whereType<CategoryModel>()
-            .map((model) => model.toEntity())
-            .toList());
+        return Right(
+          cachedCategories
+              .whereType<CategoryModel>()
+              .map((model) => model.toEntity())
+              .toList(),
+        );
       }
       return const Right([]);
     } catch (e) {

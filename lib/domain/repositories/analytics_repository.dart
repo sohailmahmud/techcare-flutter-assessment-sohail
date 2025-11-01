@@ -7,10 +7,7 @@ class AnalyticsQuery {
   final DateTime startDate;
   final DateTime endDate;
 
-  const AnalyticsQuery({
-    required this.startDate,
-    required this.endDate,
-  });
+  const AnalyticsQuery({required this.startDate, required this.endDate});
 }
 
 /// Repository interface for analytics data
@@ -20,7 +17,8 @@ abstract class AnalyticsRepository {
 
   /// Get cached analytics (for offline support)
   Future<Either<Failure, AnalyticsData?>> getCachedAnalytics(
-      AnalyticsQuery query);
+    AnalyticsQuery query,
+  );
 
   /// Clear analytics cache
   Future<Either<Failure, void>> clearCache();

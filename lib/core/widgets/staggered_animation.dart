@@ -42,24 +42,20 @@ class _StaggeredListItemState extends State<StaggeredListItem>
     _fadeAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: widget.curve,
-    ));
+    ).animate(CurvedAnimation(parent: _controller, curve: widget.curve));
 
     _slideAnimation = Tween<Offset>(
       begin: widget.slideOffset,
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: widget.curve,
-    ));
+    ).animate(CurvedAnimation(parent: _controller, curve: widget.curve));
 
     // Start animation with stagger delay
-    final delay = widget.delay ??
+    final delay =
+        widget.delay ??
         Duration(
-            milliseconds:
-                widget.index * AppConstants.listItemAnimation.inMilliseconds);
+          milliseconds:
+              widget.index * AppConstants.listItemAnimation.inMilliseconds,
+        );
 
     Future.delayed(delay, () {
       if (mounted) {
@@ -81,10 +77,7 @@ class _StaggeredListItemState extends State<StaggeredListItem>
       builder: (context, child) {
         return SlideTransition(
           position: _slideAnimation,
-          child: FadeTransition(
-            opacity: _fadeAnimation,
-            child: widget.child,
-          ),
+          child: FadeTransition(opacity: _fadeAnimation, child: widget.child),
         );
       },
     );

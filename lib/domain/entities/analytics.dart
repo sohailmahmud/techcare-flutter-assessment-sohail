@@ -3,12 +3,7 @@ import 'category.dart';
 import 'package:flutter/material.dart';
 
 /// Enum for different time period options
-enum TimePeriod {
-  thisWeek,
-  thisMonth,
-  lastThreeMonths,
-  custom,
-}
+enum TimePeriod { thisWeek, thisMonth, lastThreeMonths, custom }
 
 extension TimePeriodExtension on TimePeriod {
   String get displayName {
@@ -43,15 +38,9 @@ class DateRange extends Equatable {
   final DateTime startDate;
   final DateTime endDate;
 
-  const DateRange({
-    required this.startDate,
-    required this.endDate,
-  });
+  const DateRange({required this.startDate, required this.endDate});
 
-  DateRange copyWith({
-    DateTime? startDate,
-    DateTime? endDate,
-  }) {
+  DateRange copyWith({DateTime? startDate, DateTime? endDate}) {
     return DateRange(
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
@@ -62,10 +51,16 @@ class DateRange extends Equatable {
   String get description {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final startDate =
-        DateTime(this.startDate.year, this.startDate.month, this.startDate.day);
-    final endDate =
-        DateTime(this.endDate.year, this.endDate.month, this.endDate.day);
+    final startDate = DateTime(
+      this.startDate.year,
+      this.startDate.month,
+      this.startDate.day,
+    );
+    final endDate = DateTime(
+      this.endDate.year,
+      this.endDate.month,
+      this.endDate.day,
+    );
 
     if (startDate == endDate) {
       if (startDate == today) {
@@ -186,7 +181,14 @@ class CategoryBreakdown extends Equatable {
   IconData get categoryIcon => category.icon;
 
   @override
-  List<Object?> get props => [category, amount, transactionCount, percentage, budget, budgetUtilization];
+  List<Object?> get props => [
+    category,
+    amount,
+    transactionCount,
+    percentage,
+    budget,
+    budgetUtilization,
+  ];
 }
 
 /// Model for budget vs actual spending
@@ -201,51 +203,52 @@ class BudgetComparison extends Equatable {
   final Category category;
 
   const BudgetComparison({
-  required this.categoryId,
-  required this.categoryName,
-  required this.budgetAmount,
-  required this.actualAmount,
-  required this.remainingAmount,
-  required this.percentage,
-  required this.isOverBudget,
-  required this.category,
+    required this.categoryId,
+    required this.categoryName,
+    required this.budgetAmount,
+    required this.actualAmount,
+    required this.remainingAmount,
+    required this.percentage,
+    required this.isOverBudget,
+    required this.category,
   });
 
   /// Factory constructor to create from budget and actual amounts
   factory BudgetComparison.fromAmounts({
-  required String categoryId,
-  required String categoryName,
-  required double budgetAmount,
-  required double actualAmount,
-  required Category category,
+    required String categoryId,
+    required String categoryName,
+    required double budgetAmount,
+    required double actualAmount,
+    required Category category,
   }) {
     final remaining = budgetAmount - actualAmount;
-    final percentage =
-        budgetAmount > 0 ? (actualAmount / budgetAmount) * 100 : 0.0;
+    final percentage = budgetAmount > 0
+        ? (actualAmount / budgetAmount) * 100
+        : 0.0;
     final isOverBudget = actualAmount > budgetAmount;
 
     return BudgetComparison(
-  categoryId: categoryId,
-  categoryName: categoryName,
-  budgetAmount: budgetAmount,
-  actualAmount: actualAmount,
-  remainingAmount: remaining,
-  percentage: percentage,
-  isOverBudget: isOverBudget,
-  category: category,
+      categoryId: categoryId,
+      categoryName: categoryName,
+      budgetAmount: budgetAmount,
+      actualAmount: actualAmount,
+      remainingAmount: remaining,
+      percentage: percentage,
+      isOverBudget: isOverBudget,
+      category: category,
     );
   }
 
   @override
   List<Object> get props => [
-        categoryId,
-        categoryName,
-        budgetAmount,
-        actualAmount,
-        remainingAmount,
-        percentage,
-        isOverBudget,
-      ];
+    categoryId,
+    categoryName,
+    budgetAmount,
+    actualAmount,
+    remainingAmount,
+    percentage,
+    isOverBudget,
+  ];
 }
 
 /// Complete analytics data model
@@ -297,19 +300,19 @@ class AnalyticsData extends Equatable {
 
   /// Copy with new values
   AnalyticsData copyWith({
-  DateRange? dateRange,
-  TimePeriod? period,
-  TrendData? trendData,
-  List<CategoryBreakdown>? categoryBreakdown,
-  List<BudgetComparison>? budgetComparisons,
-  List<Category>? categories,
-  double? totalIncome,
-  double? totalExpenses,
-  double? netBalance,
-  double? savingsRate,
-  int? totalTransactions,
-  double? averageTransactionAmount,
-  DateTime? lastUpdated,
+    DateRange? dateRange,
+    TimePeriod? period,
+    TrendData? trendData,
+    List<CategoryBreakdown>? categoryBreakdown,
+    List<BudgetComparison>? budgetComparisons,
+    List<Category>? categories,
+    double? totalIncome,
+    double? totalExpenses,
+    double? netBalance,
+    double? savingsRate,
+    int? totalTransactions,
+    double? averageTransactionAmount,
+    DateTime? lastUpdated,
   }) {
     return AnalyticsData(
       dateRange: dateRange ?? this.dateRange,

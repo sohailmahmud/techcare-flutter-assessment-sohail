@@ -147,9 +147,9 @@ class _BalanceCardState extends State<BalanceCard>
                   Text(
                     'Total Balance',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: AppColors.textSecondary,
-                          fontWeight: FontWeight.w600,
-                        ),
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   IconButton(
                     icon: Icon(
@@ -171,9 +171,9 @@ class _BalanceCardState extends State<BalanceCard>
                 prefix: '৳',
                 decimalPlaces: 0, // Taka typically doesn't use decimal places
                 style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: Spacing.space24),
 
@@ -260,8 +260,8 @@ class _BalanceCardState extends State<BalanceCard>
                   Text(
                     'Balance Hidden',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                   IconButton(
                     icon: Icon(
@@ -279,10 +279,10 @@ class _BalanceCardState extends State<BalanceCard>
               Text(
                 '••••••••',
                 style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                      color: AppColors.textDisabled,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 8,
-                    ),
+                  color: AppColors.textDisabled,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 8,
+                ),
               ),
             ],
           ),
@@ -335,9 +335,9 @@ class _BalanceCardState extends State<BalanceCard>
               Text(
                 label,
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: AppColors.textSecondary,
-                      fontWeight: FontWeight.w500,
-                    ),
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ],
           ),
@@ -345,9 +345,9 @@ class _BalanceCardState extends State<BalanceCard>
           Text(
             CurrencyFormatter.formatCompact(amount),
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: AppColors.textPrimary,
-                  fontWeight: FontWeight.bold,
-                ),
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ],
       ),

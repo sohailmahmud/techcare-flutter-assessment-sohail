@@ -12,9 +12,7 @@ import '../datasources/mock_api_service.dart';
 class DashboardRepositoryImpl implements DashboardRepository {
   final MockApiService apiService;
 
-  DashboardRepositoryImpl({
-    required this.apiService,
-  });
+  DashboardRepositoryImpl({required this.apiService});
 
   @override
   Future<Either<Failure, DashboardSummary>> getDashboardSummary() async {
@@ -39,8 +37,11 @@ class DashboardRepositoryImpl implements DashboardRepository {
         return const Left(ServerFailure('Dashboard API returned error'));
       }
     } catch (e, stackTrace) {
-      Logger.e('DashboardRepo: Error occurred',
-          error: e, stackTrace: stackTrace);
+      Logger.e(
+        'DashboardRepo: Error occurred',
+        error: e,
+        stackTrace: stackTrace,
+      );
       return Left(NetworkFailure('Failed to get dashboard summary: $e'));
     }
   }
@@ -162,8 +163,10 @@ class DashboardRepositoryImpl implements DashboardRepository {
 
       return Color(int.parse(hex, radix: 16));
     } catch (e) {
-      Logger.w('Failed to parse color: $colorHex, using default grey',
-          error: e);
+      Logger.w(
+        'Failed to parse color: $colorHex, using default grey',
+        error: e,
+      );
       return Colors.grey;
     }
   }

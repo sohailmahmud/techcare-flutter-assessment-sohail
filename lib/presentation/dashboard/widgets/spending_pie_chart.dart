@@ -186,12 +186,14 @@ class _SpendingPieChartState extends State<SpendingPieChart>
                             return;
                           }
                           final touchedIndex = pieTouchResponse
-                              .touchedSection!.touchedSectionIndex;
+                              .touchedSection!
+                              .touchedSectionIndex;
                           if (touchedIndex != -1) {
                             _touchedIndex = touchedIndex;
                             final category = widget.categories[touchedIndex];
-                            widget.onCategorySelected
-                                ?.call(category.categoryId);
+                            widget.onCategorySelected?.call(
+                              category.categoryId,
+                            );
                           }
                         });
                       },
@@ -228,7 +230,9 @@ class _SpendingPieChartState extends State<SpendingPieChart>
       final opacity = widget.selectedCategory == null || isSelected ? 1.0 : 0.3;
 
       final category = _categoryMap[categoryExpense.categoryId];
-      final color = (category?.color ?? fallbackColors[index % fallbackColors.length]).withValues(alpha:opacity);
+      final color =
+          (category?.color ?? fallbackColors[index % fallbackColors.length])
+              .withValues(alpha: opacity);
 
       return PieChartSectionData(
         color: color,
@@ -238,8 +242,8 @@ class _SpendingPieChartState extends State<SpendingPieChart>
         radius: isTouched
             ? Spacing.pieChartTouchedRadius
             : (isSelected
-                ? Spacing.pieChartSelectedRadius
-                : Spacing.pieChartNormalRadius),
+                  ? Spacing.pieChartSelectedRadius
+                  : Spacing.pieChartNormalRadius),
         titleStyle: AppTypography.labelSmall.copyWith(
           fontWeight: FontWeight.bold,
           color: Colors.white,
@@ -260,7 +264,9 @@ class _SpendingPieChartState extends State<SpendingPieChart>
       final opacity = widget.selectedCategory == null || isSelected ? 1.0 : 0.5;
 
       final category = _categoryMap[categoryExpense.categoryId];
-      final color = (category?.color ?? fallbackColors[index % fallbackColors.length]).withValues(alpha:opacity);
+      final color =
+          (category?.color ?? fallbackColors[index % fallbackColors.length])
+              .withValues(alpha: opacity);
 
       return Padding(
         padding: const EdgeInsets.only(bottom: 8),
@@ -290,8 +296,9 @@ class _SpendingPieChartState extends State<SpendingPieChart>
                         categoryExpense.categoryName,
                         style: AppTypography.labelMedium.copyWith(
                           color: AppColors.textPrimary,
-                          fontWeight:
-                              isSelected ? FontWeight.w600 : FontWeight.normal,
+                          fontWeight: isSelected
+                              ? FontWeight.w600
+                              : FontWeight.normal,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,

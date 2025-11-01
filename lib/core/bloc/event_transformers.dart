@@ -113,10 +113,9 @@ extension _StreamExtensions<T> on Stream<T> {
         outerSubscription = listen(
           (data) {
             innerSubscription?.cancel();
-            innerSubscription = mapper(data).listen(
-              streamController.add,
-              onError: streamController.addError,
-            );
+            innerSubscription = mapper(
+              data,
+            ).listen(streamController.add, onError: streamController.addError);
           },
           onError: streamController.addError,
           onDone: streamController.close,
@@ -140,10 +139,9 @@ extension _StreamExtensions<T> on Stream<T> {
       onListen: () {
         outerSubscription = listen(
           (data) {
-            final innerSubscription = mapper(data).listen(
-              streamController.add,
-              onError: streamController.addError,
-            );
+            final innerSubscription = mapper(
+              data,
+            ).listen(streamController.add, onError: streamController.addError);
             innerSubscriptions.add(innerSubscription);
           },
           onError: streamController.addError,

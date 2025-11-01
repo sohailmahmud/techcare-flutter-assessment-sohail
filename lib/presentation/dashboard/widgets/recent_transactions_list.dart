@@ -96,8 +96,10 @@ class _RecentTransactionsListState extends State<RecentTransactionsList>
     Future.delayed(const Duration(milliseconds: 300), () {
       if (mounted) {
         setState(() {
-          _displayedItemsCount = (_displayedItemsCount + _itemsPerPage)
-              .clamp(0, widget.transactions.length);
+          _displayedItemsCount = (_displayedItemsCount + _itemsPerPage).clamp(
+            0,
+            widget.transactions.length,
+          );
           _isLoadingMore = false;
         });
       }
@@ -138,10 +140,7 @@ class _RecentTransactionsListState extends State<RecentTransactionsList>
           GestureDetector(
             onTap: widget.onViewAll,
             child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 6,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
                 color: AppColors.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(16),
@@ -238,7 +237,9 @@ class _RecentTransactionsListState extends State<RecentTransactionsList>
   }
 
   Widget _buildTransactionGroup(
-      String date, List<tx.Transaction> transactions) {
+    String date,
+    List<tx.Transaction> transactions,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -248,17 +249,17 @@ class _RecentTransactionsListState extends State<RecentTransactionsList>
           final index = transactionEntry.key;
           final transaction = transactionEntry.value;
           return SlideTransition(
-            position: Tween<Offset>(
-              begin: const Offset(1, 0),
-              end: Offset.zero,
-            ).animate(CurvedAnimation(
-              parent: _listAnimation,
-              curve: Interval(
-                index * 0.1,
-                1.0,
-                curve: Curves.easeOutCubic,
-              ),
-            )),
+            position: Tween<Offset>(begin: const Offset(1, 0), end: Offset.zero)
+                .animate(
+                  CurvedAnimation(
+                    parent: _listAnimation,
+                    curve: Interval(
+                      index * 0.1,
+                      1.0,
+                      curve: Curves.easeOutCubic,
+                    ),
+                  ),
+                ),
             child: _buildTransactionItem(transaction),
           );
         }).toList(),
@@ -269,8 +270,9 @@ class _RecentTransactionsListState extends State<RecentTransactionsList>
 
   /// Builds a lazy-loading ListView for large transaction datasets
   Widget _buildLazyLoadingList() {
-    final displayedTransactions =
-        widget.transactions.take(_displayedItemsCount).toList();
+    final displayedTransactions = widget.transactions
+        .take(_displayedItemsCount)
+        .toList();
     final groupedTransactions = _groupTransactionsByDate(displayedTransactions);
 
     // Calculate total items for ListView (groups + transactions + loading indicator)
@@ -311,17 +313,20 @@ class _RecentTransactionsListState extends State<RecentTransactionsList>
                   animation: _listAnimation,
                   builder: (context, child) {
                     return SlideTransition(
-                      position: Tween<Offset>(
-                        begin: const Offset(1, 0),
-                        end: Offset.zero,
-                      ).animate(CurvedAnimation(
-                        parent: _listAnimation,
-                        curve: Interval(
-                          i * 0.05,
-                          1.0,
-                          curve: Curves.easeOutCubic,
-                        ),
-                      )),
+                      position:
+                          Tween<Offset>(
+                            begin: const Offset(1, 0),
+                            end: Offset.zero,
+                          ).animate(
+                            CurvedAnimation(
+                              parent: _listAnimation,
+                              curve: Interval(
+                                i * 0.05,
+                                1.0,
+                                curve: Curves.easeOutCubic,
+                              ),
+                            ),
+                          ),
                       child: _buildTransactionItem(transactions[i]),
                     );
                   },
@@ -335,9 +340,7 @@ class _RecentTransactionsListState extends State<RecentTransactionsList>
           if (_isLoadingMore && index == totalItems - 1) {
             return const Padding(
               padding: EdgeInsets.all(16),
-              child: Center(
-                child: CircularProgressIndicator(),
-              ),
+              child: Center(child: CircularProgressIndicator()),
             );
           }
 
@@ -347,10 +350,12 @@ class _RecentTransactionsListState extends State<RecentTransactionsList>
     );
   }
 
-  Map<String, List<tx.Transaction>> _groupTransactionsByDate(
-      [List<tx.Transaction>? transactions]) {
+  Map<String, List<tx.Transaction>> _groupTransactionsByDate([
+    List<tx.Transaction>? transactions,
+  ]) {
     final Map<String, List<tx.Transaction>> grouped = {};
-    final List<tx.Transaction> transactionsToGroup = transactions ??
+    final List<tx.Transaction> transactionsToGroup =
+        transactions ??
         widget.transactions
             .take(widget.maxItems ?? AppConstants.maxRecentTransactions)
             .toList();
@@ -529,11 +534,7 @@ class _RecentTransactionsListState extends State<RecentTransactionsList>
         alignment: alignment,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Icon(
-            icon,
-            color: Colors.white,
-            size: 24,
-          ),
+          child: Icon(icon, color: Colors.white, size: 24),
         ),
       ),
     );
@@ -544,8 +545,9 @@ class _RecentTransactionsListState extends State<RecentTransactionsList>
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Transaction'),
-        content:
-            Text('Are you sure you want to delete "${transaction.title}"?'),
+        content: Text(
+          'Are you sure you want to delete "${transaction.title}"?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),

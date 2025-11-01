@@ -58,13 +58,12 @@ class TransactionFormData extends Equatable {
 
   factory TransactionFormData.initial() {
     final now = DateTime.now();
-    return TransactionFormData(
-      date: now,
-      time: now,
-    );
+    return TransactionFormData(date: now, time: now);
   }
 
-  static Future<TransactionFormData> fromTransaction(Transaction transaction) async {
+  static Future<TransactionFormData> fromTransaction(
+    Transaction transaction,
+  ) async {
     final category = await AppCategories.findById(transaction.categoryId);
     return TransactionFormData(
       id: transaction.id,
@@ -96,8 +95,9 @@ class TransactionFormData extends Equatable {
       title: title ?? this.title,
       notes: clearNotes ? null : (notes ?? this.notes),
       type: type ?? this.type,
-      selectedCategory:
-          clearCategory ? null : (selectedCategory ?? this.selectedCategory),
+      selectedCategory: clearCategory
+          ? null
+          : (selectedCategory ?? this.selectedCategory),
       date: date ?? this.date,
       time: time ?? this.time,
     );
@@ -202,24 +202,19 @@ class TransactionFormData extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        amount,
-        title,
-        notes,
-        type,
-        selectedCategory,
-        date,
-        time,
-      ];
+    id,
+    amount,
+    title,
+    notes,
+    type,
+    selectedCategory,
+    date,
+    time,
+  ];
 }
 
 /// Form submission state
-enum FormSubmissionStatus {
-  initial,
-  inProgress,
-  success,
-  failure,
-}
+enum FormSubmissionStatus { initial, inProgress, success, failure }
 
 /// Complete form state
 class TransactionFormState extends Equatable {
@@ -236,16 +231,12 @@ class TransactionFormState extends Equatable {
   });
 
   factory TransactionFormState.initial() {
-    return TransactionFormState(
-      formData: TransactionFormData.initial(),
-    );
+    return TransactionFormState(formData: TransactionFormData.initial());
   }
 
   static Future<TransactionFormState> forEdit(Transaction transaction) async {
     final formData = await TransactionFormData.fromTransaction(transaction);
-    return TransactionFormState(
-      formData: formData,
-    );
+    return TransactionFormState(formData: formData);
   }
 
   TransactionFormState copyWith({
@@ -278,9 +269,9 @@ class TransactionFormState extends Equatable {
 
   @override
   List<Object?> get props => [
-        formData,
-        errors,
-        submissionStatus,
-        submissionError,
-      ];
+    formData,
+    errors,
+    submissionStatus,
+    submissionError,
+  ];
 }

@@ -37,10 +37,7 @@ class CacheInvalidated extends CacheState {
   final String message;
   final CacheInvalidationType type;
 
-  const CacheInvalidated({
-    required this.message,
-    required this.type,
-  });
+  const CacheInvalidated({required this.message, required this.type});
 
   @override
   List<Object?> get props => [message, type];
@@ -81,10 +78,7 @@ class CachePreloaded extends CacheState {
   final TransactionFilter filter;
   final int itemsLoaded;
 
-  const CachePreloaded({
-    required this.filter,
-    required this.itemsLoaded,
-  });
+  const CachePreloaded({required this.filter, required this.itemsLoaded});
 
   @override
   List<Object?> get props => [filter, itemsLoaded];
@@ -95,10 +89,7 @@ class CacheError extends CacheState {
   final String message;
   final String operation;
 
-  const CacheError({
-    required this.message,
-    required this.operation,
-  });
+  const CacheError({required this.message, required this.operation});
 
   @override
   List<Object?> get props => [message, operation];
@@ -146,12 +137,12 @@ class TransactionsLoadedWithCache extends CacheState {
 
   @override
   List<Object?> get props => [
-        transactions,
-        isFromCache,
-        cacheTime,
-        appliedFilter,
-        hasMoreData,
-        currentPage,
-        isStale,
-      ];
+    transactions,
+    isFromCache,
+    cacheTime,
+    appliedFilter,
+    hasMoreData,
+    currentPage,
+    isStale,
+  ];
 }

@@ -45,8 +45,9 @@ void main() {
 
     test('should create transaction through repository', () async {
       // Arrange
-      when(() => mockRepository.createTransaction(any()))
-          .thenAnswer((_) async => Right(testTransaction));
+      when(
+        () => mockRepository.createTransaction(any()),
+      ).thenAnswer((_) async => Right(testTransaction));
 
       // Act
       final result = await usecase(testTransaction);
@@ -60,8 +61,9 @@ void main() {
     test('should return failure when repository fails', () async {
       // Arrange
       const failure = ServerFailure('Failed to create transaction');
-      when(() => mockRepository.createTransaction(any()))
-          .thenAnswer((_) async => const Left(failure));
+      when(
+        () => mockRepository.createTransaction(any()),
+      ).thenAnswer((_) async => const Left(failure));
 
       // Act
       final result = await usecase(testTransaction);
@@ -73,10 +75,12 @@ void main() {
 
     test('should handle validation failure', () async {
       // Arrange
-      const validationFailure =
-          ValidationFailure('Amount must be greater than 0');
-      when(() => mockRepository.createTransaction(any()))
-          .thenAnswer((_) async => const Left(validationFailure));
+      const validationFailure = ValidationFailure(
+        'Amount must be greater than 0',
+      );
+      when(
+        () => mockRepository.createTransaction(any()),
+      ).thenAnswer((_) async => const Left(validationFailure));
 
       // Act
       final result = await usecase(testTransaction);
@@ -99,8 +103,9 @@ void main() {
         createdAt: DateTime.now(),
       );
 
-      when(() => mockRepository.createTransaction(fullTransaction))
-          .thenAnswer((_) async => Right(fullTransaction));
+      when(
+        () => mockRepository.createTransaction(fullTransaction),
+      ).thenAnswer((_) async => Right(fullTransaction));
 
       // Act
       final result = await usecase(fullTransaction);
@@ -129,16 +134,18 @@ void main() {
         description: 'Salary for January',
       );
 
-      when(() => mockRepository.createTransaction(incomeTransaction))
-          .thenAnswer((_) async => Right(incomeTransaction));
+      when(
+        () => mockRepository.createTransaction(incomeTransaction),
+      ).thenAnswer((_) async => Right(incomeTransaction));
 
       // Act
       final result = await usecase(incomeTransaction);
 
       // Assert
       expect(result, Right(incomeTransaction));
-      verify(() => mockRepository.createTransaction(incomeTransaction))
-          .called(1);
+      verify(
+        () => mockRepository.createTransaction(incomeTransaction),
+      ).called(1);
     });
   });
 }

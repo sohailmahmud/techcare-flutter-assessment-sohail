@@ -31,7 +31,7 @@ class HiveKeyValue extends HiveObject {
     if (timestamp == null) return false;
 
     final age = DateTime.now().millisecondsSinceEpoch - timestamp!;
-  final maxAgeMs = (maxAge ?? AppConstants.cacheExpiry).inMilliseconds;
+    final maxAgeMs = (maxAge ?? AppConstants.cacheExpiry).inMilliseconds;
 
     return age <= maxAgeMs;
   }

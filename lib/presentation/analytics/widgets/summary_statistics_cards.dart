@@ -36,19 +36,16 @@ class _SummaryStatisticsCardsState extends State<SummaryStatisticsCards>
       'color': AppColors.expense,
       'icon': Icons.trending_down_rounded,
     },
-    {
-      'title': 'Net Balance',
-      'color': null,
-      'icon': null,
-    },
+    {'title': 'Net Balance', 'color': null, 'icon': null},
   ];
   late List<AnimationController> _controllers;
   late List<Animation<double>> _animations;
 
   Color _getNetBalanceColor(double netBalance) =>
       netBalance >= 0 ? AppColors.income : AppColors.expense;
-  IconData _getNetBalanceIcon(double netBalance) =>
-      netBalance >= 0 ? Icons.account_balance_wallet_rounded : Icons.warning_rounded;
+  IconData _getNetBalanceIcon(double netBalance) => netBalance >= 0
+      ? Icons.account_balance_wallet_rounded
+      : Icons.warning_rounded;
   double _getStatAmount(int index) {
     switch (index) {
       case 0:
@@ -79,9 +76,10 @@ class _SummaryStatisticsCardsState extends State<SummaryStatisticsCards>
     );
 
     _animations = _controllers.map((controller) {
-      return Tween<double>(begin: 0.0, end: 1.0).animate(
-        CurvedAnimation(parent: controller, curve: Curves.easeOutBack),
-      );
+      return Tween<double>(
+        begin: 0.0,
+        end: 1.0,
+      ).animate(CurvedAnimation(parent: controller, curve: Curves.easeOutBack));
     }).toList();
   }
 
@@ -121,33 +119,37 @@ class _SummaryStatisticsCardsState extends State<SummaryStatisticsCards>
   @override
   Widget build(BuildContext context) {
     return Row(
-      children: List.generate(3, (index) {
-        final config = _cardConfigs[index];
-        final amount = _getStatAmount(index);
-        final color = index == 2
-            ? _getNetBalanceColor(amount)
-            : config['color'] as Color;
-        final icon = index == 2
-            ? _getNetBalanceIcon(amount)
-            : config['icon'] as IconData;
-        final change = index == 0
-            ? widget.incomeChange
-            : index == 1
-                ? widget.expenseChange
-                : widget.netBalanceChange;
-        return Expanded(
-          child: _buildStatCard(
-            index: index,
-            title: config['title'] as String,
-            amount: amount,
-            change: change,
-            color: color,
-            icon: icon,
-          ),
-        );
-      }).expand((widget) => [widget, const SizedBox(width: Spacing.space12)])
-        .toList()
-        ..removeLast(),
+      children:
+          List.generate(3, (index) {
+                final config = _cardConfigs[index];
+                final amount = _getStatAmount(index);
+                final color = index == 2
+                    ? _getNetBalanceColor(amount)
+                    : config['color'] as Color;
+                final icon = index == 2
+                    ? _getNetBalanceIcon(amount)
+                    : config['icon'] as IconData;
+                final change = index == 0
+                    ? widget.incomeChange
+                    : index == 1
+                    ? widget.expenseChange
+                    : widget.netBalanceChange;
+                return Expanded(
+                  child: _buildStatCard(
+                    index: index,
+                    title: config['title'] as String,
+                    amount: amount,
+                    change: change,
+                    color: color,
+                    icon: icon,
+                  ),
+                );
+              })
+              .expand(
+                (widget) => [widget, const SizedBox(width: Spacing.space12)],
+              )
+              .toList()
+            ..removeLast(),
     );
   }
 
@@ -188,11 +190,7 @@ class _SummaryStatisticsCardsState extends State<SummaryStatisticsCards>
                         color: color.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Icon(
-                        icon,
-                        color: color,
-                        size: 20,
-                      ),
+                      child: Icon(icon, color: color, size: 20),
                     ),
                     const Spacer(),
                     _buildChangeIndicator(change, color),
@@ -253,8 +251,9 @@ class _SummaryStatisticsCardsState extends State<SummaryStatisticsCards>
         vertical: Spacing.space4,
       ),
       decoration: BoxDecoration(
-        color: (isPositive ? AppColors.income : AppColors.expense)
-            .withValues(alpha: 0.1),
+        color: (isPositive ? AppColors.income : AppColors.expense).withValues(
+          alpha: 0.1,
+        ),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -444,9 +443,7 @@ class ResponsiveSummaryStats extends StatelessWidget {
     if (displayChange < 0.01) {
       return Text(
         'No change',
-        style: AppTypography.labelSmall.copyWith(
-          color: AppColors.textTertiary,
-        ),
+        style: AppTypography.labelSmall.copyWith(color: AppColors.textTertiary),
       );
     }
 

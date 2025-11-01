@@ -38,12 +38,11 @@ class GlassMorphicContainer extends StatelessWidget {
       margin: margin,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(borderRadius),
-        border: border ??
-            Border.all(
-              color: Colors.white.withValues(alpha: 0.2),
-              width: 1.5,
-            ),
-        gradient: gradient ??
+        border:
+            border ??
+            Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1.5),
+        gradient:
+            gradient ??
             LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -110,13 +109,11 @@ class _AnimatedNumberState extends State<AnimatedNumber>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: widget.duration,
-      vsync: this,
-    );
-    _animation = Tween<double>(begin: 0, end: widget.value).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
-    );
+    _controller = AnimationController(duration: widget.duration, vsync: this);
+    _animation = Tween<double>(
+      begin: 0,
+      end: widget.value,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
     _controller.forward();
   }
 
@@ -125,12 +122,10 @@ class _AnimatedNumberState extends State<AnimatedNumber>
     super.didUpdateWidget(oldWidget);
     if (oldWidget.value != widget.value) {
       _previousValue = oldWidget.value;
-      _animation = Tween<double>(
-        begin: _previousValue,
-        end: widget.value,
-      ).animate(
-        CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
-      );
+      _animation = Tween<double>(begin: _previousValue, end: widget.value)
+          .animate(
+            CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
+          );
       _controller.reset();
       _controller.forward();
     }
@@ -181,10 +176,7 @@ class NotificationBadge extends StatelessWidget {
         color: backgroundColor ?? AppColors.error,
         shape: BoxShape.circle,
       ),
-      constraints: BoxConstraints(
-        minWidth: size,
-        minHeight: size,
-      ),
+      constraints: BoxConstraints(minWidth: size, minHeight: size),
       child: Center(
         child: Text(
           count > 99 ? '99+' : count.toString(),
@@ -225,11 +217,7 @@ class EmptyState extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              size: Spacing.iconXXL,
-              color: AppColors.textTertiary,
-            ),
+            Icon(icon, size: Spacing.iconXXL, color: AppColors.textTertiary),
             const SizedBox(height: Spacing.space16),
             Text(
               title,
@@ -241,17 +229,14 @@ class EmptyState extends StatelessWidget {
               Text(
                 subtitle!,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
+                  color: AppColors.textSecondary,
+                ),
                 textAlign: TextAlign.center,
               ),
             ],
             if (onAction != null && actionLabel != null) ...[
               const SizedBox(height: Spacing.space24),
-              ElevatedButton(
-                onPressed: onAction,
-                child: Text(actionLabel!),
-              ),
+              ElevatedButton(onPressed: onAction, child: Text(actionLabel!)),
             ],
           ],
         ),

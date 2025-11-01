@@ -25,13 +25,13 @@ class DashboardSummary extends Equatable {
 
   @override
   List<Object?> get props => [
-        totalBalance,
-        monthlyIncome,
-        monthlyExpense,
-        categoryExpenses,
-        recentTransactions,
-        lastUpdated,
-      ];
+    totalBalance,
+    monthlyIncome,
+    monthlyExpense,
+    categoryExpenses,
+    recentTransactions,
+    lastUpdated,
+  ];
 }
 
 /// Category-wise expense breakdown
@@ -52,10 +52,10 @@ class CategoryExpense extends Equatable {
 
   @override
   List<Object?> get props => [
-        categoryId,
-        categoryName,
-        amount,
-        percentage,
-        transactionCount,
-      ];
+    categoryId,
+    categoryName,
+    amount,
+    percentage,
+    transactionCount,
+  ];
 }

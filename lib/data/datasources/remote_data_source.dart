@@ -14,10 +14,7 @@ class PaginatedTransactionsResponse {
   final List<TransactionModel> data;
   final PaginationMeta meta;
 
-  const PaginatedTransactionsResponse({
-    required this.data,
-    required this.meta,
-  });
+  const PaginatedTransactionsResponse({required this.data, required this.meta});
 
   factory PaginatedTransactionsResponse.fromJson(Map<String, dynamic> json) {
     return PaginatedTransactionsResponse(
@@ -37,8 +34,9 @@ class PaginatedTransactionsResponse {
 
   PaginatedResponse<Transaction> toEntity() {
     return PaginatedResponse<Transaction>(
-      data:
-          data.map((transactionModel) => transactionModel.toEntity()).toList(),
+      data: data
+          .map((transactionModel) => transactionModel.toEntity())
+          .toList(),
       meta: meta,
     );
   }
@@ -102,7 +100,10 @@ class RemoteDataSourceImpl implements RemoteDataSource {
           }
           if (status >= 400 && status < 500) {
             // Try to extract message
-            final msg = e.response?.data is Map ? (e.response!.data['message']?.toString() ?? 'Validation error') : 'Validation error';
+            final msg = e.response?.data is Map
+                ? (e.response!.data['message']?.toString() ??
+                      'Validation error')
+                : 'Validation error';
             throw ValidationException(msg);
           }
           throw NetworkException(e.message ?? 'Network error');
@@ -137,8 +138,9 @@ class RemoteDataSourceImpl implements RemoteDataSource {
       cancelToken: cancelToken,
     );
 
-  final paginatedResponse =
-    PaginatedTransactionsResponse.fromJson(response.data!);
+    final paginatedResponse = PaginatedTransactionsResponse.fromJson(
+      response.data!,
+    );
     return paginatedResponse.toEntity();
   }
 
@@ -146,7 +148,9 @@ class RemoteDataSourceImpl implements RemoteDataSource {
   Future<Transaction> createTransaction(Transaction transaction) async {
     final transactionModel = TransactionModel.fromEntity(transaction);
 
-    final response = await _withApiCall(() => _apiService.createTransaction(transactionModel));
+    final response = await _withApiCall(
+      () => _apiService.createTransaction(transactionModel),
+    );
     final createdModel = TransactionModel.fromJson(response.data!['data']);
     return createdModel.toEntity();
   }
@@ -155,7 +159,9 @@ class RemoteDataSourceImpl implements RemoteDataSource {
   Future<Transaction> updateTransaction(Transaction transaction) async {
     final transactionModel = TransactionModel.fromEntity(transaction);
 
-  final response = await _withApiCall(() => _apiService.updateTransaction(transaction.id, transactionModel));
+    final response = await _withApiCall(
+      () => _apiService.updateTransaction(transaction.id, transactionModel),
+    );
     final updatedModel = TransactionModel.fromJson(response.data!['data']);
     return updatedModel.toEntity();
   }
@@ -167,7 +173,7 @@ class RemoteDataSourceImpl implements RemoteDataSource {
 
   @override
   Future<List<Category>> getCategories() async {
-  final response = await _withApiCall(() => _apiService.getCategories());
+    final response = await _withApiCall(() => _apiService.getCategories());
     final categoriesResponse = CategoriesResponse.fromJson(response.data!);
     return categoriesResponse.categories
         .map((model) => model.toEntity())
@@ -177,7 +183,9 @@ class RemoteDataSourceImpl implements RemoteDataSource {
   @override
   Future<Category> createCategory(Category category) async {
     final categoryModel = CategoryModel.fromEntity(category);
-    final response = await _withApiCall(() => _apiService.createCategory(categoryModel));
+    final response = await _withApiCall(
+      () => _apiService.createCategory(categoryModel),
+    );
     final createdModel = CategoryModel.fromJson(response.data!);
     return createdModel.toEntity();
   }
@@ -185,7 +193,9 @@ class RemoteDataSourceImpl implements RemoteDataSource {
   @override
   Future<Category> updateCategory(Category category) async {
     final categoryModel = CategoryModel.fromEntity(category);
-  final response = await _withApiCall(() => _apiService.updateCategory(category.id, categoryModel));
+    final response = await _withApiCall(
+      () => _apiService.updateCategory(category.id, categoryModel),
+    );
     final updatedModel = CategoryModel.fromJson(response.data!);
     return updatedModel.toEntity();
   }

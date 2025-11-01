@@ -24,20 +24,25 @@ class CategoryBreakdownChart extends StatefulWidget {
   State<CategoryBreakdownChart> createState() => _CategoryBreakdownChartState();
 }
 
-class _CategoryBreakdownChartState extends State<CategoryBreakdownChart> with TickerProviderStateMixin {
+class _CategoryBreakdownChartState extends State<CategoryBreakdownChart>
+    with TickerProviderStateMixin {
   Widget _buildCategoryIcon(IconData icon, Color color) {
     return Container(
       width: 32,
       height: 32,
       decoration: BoxDecoration(
-        color: color.withValues(alpha:0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Icon(icon, color: color, size: 18),
     );
   }
 
-  Widget _buildProgressBar(double percentage, double animationValue, Color color) {
+  Widget _buildProgressBar(
+    double percentage,
+    double animationValue,
+    Color color,
+  ) {
     return Container(
       height: 6,
       decoration: BoxDecoration(
@@ -50,7 +55,7 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart> with Ti
         child: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [color.withValues(alpha:  0.7), color],
+              colors: [color.withValues(alpha: 0.7), color],
             ),
             borderRadius: BorderRadius.circular(3),
           ),
@@ -58,6 +63,7 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart> with Ti
       ),
     );
   }
+
   late AnimationController _animationController;
   late Animation<double> _animation;
 
@@ -116,8 +122,8 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart> with Ti
           widget.isLoading
               ? _buildLoadingState()
               : widget.categoryData.isEmpty
-                  ? _buildEmptyState()
-                  : _buildChart(),
+              ? _buildEmptyState()
+              : _buildChart(),
         ],
       ),
     );
@@ -234,7 +240,9 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart> with Ti
     const maxVisibleBars = 5;
     final totalBars = widget.categoryData.length;
     final showAllBars = totalBars <= maxVisibleBars;
-    final chartHeight = showAllBars ? totalBars * barHeight : maxVisibleBars * barHeight;
+    final chartHeight = showAllBars
+        ? totalBars * barHeight
+        : maxVisibleBars * barHeight;
 
     final ScrollController barScrollController = ScrollController();
 
@@ -249,9 +257,14 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart> with Ti
               child: NotificationListener<ScrollNotification>(
                 onNotification: (notification) {
                   // If at edge, let parent scroll
-                  if (notification is ScrollUpdateNotification || notification is OverscrollNotification) {
-                    final atTop = barScrollController.position.pixels <= barScrollController.position.minScrollExtent;
-                    final atBottom = barScrollController.position.pixels >= barScrollController.position.maxScrollExtent;
+                  if (notification is ScrollUpdateNotification ||
+                      notification is OverscrollNotification) {
+                    final atTop =
+                        barScrollController.position.pixels <=
+                        barScrollController.position.minScrollExtent;
+                    final atBottom =
+                        barScrollController.position.pixels >=
+                        barScrollController.position.maxScrollExtent;
                     if (atTop || atBottom) {
                       // Allow parent scroll
                       return false;
@@ -286,19 +299,24 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart> with Ti
     final barAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _animationController,
-        curve: Interval(animationDelay, (animationDelay + 0.3).clamp(0.0, 1.0),
-            curve: Curves.easeOut),
+        curve: Interval(
+          animationDelay,
+          (animationDelay + 0.3).clamp(0.0, 1.0),
+          curve: Curves.easeOut,
+        ),
       ),
     );
     return FutureBuilder<Category>(
       future: _findCategory(data),
       builder: (context, snapshot) {
-        final cat = snapshot.data ?? Category(
-          id: data.categoryId,
-          name: data.categoryName,
-          color: AppColors.primary,
-          icon: Icons.category,
-        );
+        final cat =
+            snapshot.data ??
+            Category(
+              id: data.categoryId,
+              name: data.categoryName,
+              color: AppColors.primary,
+              icon: Icons.category,
+            );
         return AnimatedBuilder(
           animation: barAnimation,
           builder: (context, child) {
@@ -355,7 +373,10 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart> with Ti
                     ),
                     const SizedBox(height: Spacing.space8),
                     _buildProgressBar(
-                        data.percentage, barAnimation.value, cat.color),
+                      data.percentage,
+                      barAnimation.value,
+                      cat.color,
+                    ),
                   ],
                 ),
               ),
@@ -372,8 +393,9 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart> with Ti
       (sum, data) => sum + data.amount,
     );
 
-    final topCategory =
-        widget.categoryData.isNotEmpty ? widget.categoryData.first : null;
+    final topCategory = widget.categoryData.isNotEmpty
+        ? widget.categoryData.first
+        : null;
 
     return Container(
       padding: const EdgeInsets.all(Spacing.space16),
@@ -406,12 +428,14 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart> with Ti
             FutureBuilder<Category>(
               future: _findCategory(topCategory),
               builder: (context, snapshot) {
-                final cat = snapshot.data ?? Category(
-                  id: topCategory.categoryId,
-                  name: topCategory.categoryName,
-                  color: AppColors.primary,
-                  icon: Icons.category,
-                );
+                final cat =
+                    snapshot.data ??
+                    Category(
+                      id: topCategory.categoryId,
+                      name: topCategory.categoryName,
+                      color: AppColors.primary,
+                      icon: Icons.category,
+                    );
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -423,11 +447,7 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart> with Ti
                     ),
                     Row(
                       children: [
-                        Icon(
-                          cat.icon,
-                          color: cat.color,
-                          size: 16,
-                        ),
+                        Icon(cat.icon, color: cat.color, size: 16),
                         const SizedBox(width: Spacing.space4),
                         Text(
                           topCategory.categoryName,
@@ -463,12 +483,14 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart> with Ti
     return FutureBuilder<Category>(
       future: _findCategory(data),
       builder: (context, snapshot) {
-        final cat = snapshot.data ?? Category(
-          id: data.categoryId,
-          name: data.categoryName,
-          color: AppColors.primary,
-          icon: Icons.category,
-        );
+        final cat =
+            snapshot.data ??
+            Category(
+              id: data.categoryId,
+              name: data.categoryName,
+              color: AppColors.primary,
+              icon: Icons.category,
+            );
         return Container(
           padding: const EdgeInsets.all(Spacing.space24),
           decoration: const BoxDecoration(
@@ -498,14 +520,10 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart> with Ti
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: cat.color.withValues(alpha:0.1),
+                      color: cat.color.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Icon(
-                      cat.icon,
-                      color: cat.color,
-                      size: 24,
-                    ),
+                    child: Icon(cat.icon, color: cat.color, size: 24),
                   ),
                   const SizedBox(width: Spacing.space16),
                   Expanded(
@@ -586,14 +604,16 @@ class _CategoryBreakdownChartState extends State<CategoryBreakdownChart> with Ti
       ],
     );
   }
+
   Future<Category> _findCategory(CategoryBreakdown data) async {
     final category = await AppCategories.findById(data.categoryId);
     // Provide a fallback category if not found
-    return category ?? Category(
-      id: data.categoryId,
-      name: data.categoryName,
-      color: AppColors.primary,
-      icon: Icons.category,
-    );
+    return category ??
+        Category(
+          id: data.categoryId,
+          name: data.categoryName,
+          color: AppColors.primary,
+          icon: Icons.category,
+        );
   }
 }

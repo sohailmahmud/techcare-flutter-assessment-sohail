@@ -27,7 +27,8 @@ class MockApiService {
   }
 
   /// Create the MockApiService
-  MockApiService({double failureChance = 0.10}) : _failureChance = failureChance;
+  MockApiService({double failureChance = 0.10})
+    : _failureChance = failureChance;
 
   /// Initialize service with JSON data loading
   Future<void> initialize() async {
@@ -46,7 +47,8 @@ class MockApiService {
 
       _isInitialized = true;
       Logger.i(
-          'MockApiService initialized with ${_transactions.length} transactions and ${_categories.length} categories');
+        'MockApiService initialized with ${_transactions.length} transactions and ${_categories.length} categories',
+      );
     } catch (e) {
       Logger.e('Failed to initialize MockApiService', error: e);
       rethrow;
@@ -90,7 +92,9 @@ class MockApiService {
       }
     }
 
-    Logger.w('MockApiService: Simulating network error (failureChance=$_failureChance)');
+    Logger.w(
+      'MockApiService: Simulating network error (failureChance=$_failureChance)',
+    );
 
     // Choose an error class to simulate (same weighted distribution as before)
     final choice = _random.nextDouble();
@@ -113,7 +117,11 @@ class MockApiService {
       throw DioException(
         requestOptions: RequestOptions(path: ''),
         type: DioExceptionType.badResponse,
-        response: Response(requestOptions: RequestOptions(path: ''), statusCode: 500, data: {'message': 'Simulated server error'}),
+        response: Response(
+          requestOptions: RequestOptions(path: ''),
+          statusCode: 500,
+          data: {'message': 'Simulated server error'},
+        ),
         message: 'Simulated server error',
       );
     } else if (choice < 0.85) {
@@ -121,7 +129,11 @@ class MockApiService {
       throw DioException(
         requestOptions: RequestOptions(path: ''),
         type: DioExceptionType.badResponse,
-        response: Response(requestOptions: RequestOptions(path: ''), statusCode: 400, data: {'message': 'Simulated validation error'}),
+        response: Response(
+          requestOptions: RequestOptions(path: ''),
+          statusCode: 400,
+          data: {'message': 'Simulated validation error'},
+        ),
         message: 'Simulated validation error',
       );
     } else if (choice < 0.95) {
@@ -129,7 +141,11 @@ class MockApiService {
       throw DioException(
         requestOptions: RequestOptions(path: ''),
         type: DioExceptionType.badResponse,
-        response: Response(requestOptions: RequestOptions(path: ''), statusCode: 401, data: {'message': 'Simulated unauthorized'}),
+        response: Response(
+          requestOptions: RequestOptions(path: ''),
+          statusCode: 401,
+          data: {'message': 'Simulated unauthorized'},
+        ),
         message: 'Simulated unauthorized',
       );
     } else {
@@ -146,13 +162,13 @@ class MockApiService {
   Future<Response<Map<String, dynamic>>> getTransactions({
     int page = 1,
     int limit = 20,
-  List<String>? categories,
-  String? type,
-  String? search,
-  dynamic cancelToken,
-  String? startDate,
-  String? endDate,
-  Map<String, dynamic>? amountRange,
+    List<String>? categories,
+    String? type,
+    String? search,
+    dynamic cancelToken,
+    String? startDate,
+    String? endDate,
+    Map<String, dynamic>? amountRange,
   }) async {
     await initialize();
     await _simulateDelay();
@@ -162,12 +178,15 @@ class MockApiService {
 
     // Category filter (single or multiple)
     if (categories != null && categories.isNotEmpty) {
-      filteredTransactions = filteredTransactions.where((t) => categories.contains(t.category.id)).toList();
+      filteredTransactions = filteredTransactions
+          .where((t) => categories.contains(t.category.id))
+          .toList();
     }
 
     if (type != null && type.isNotEmpty) {
-      filteredTransactions =
-          filteredTransactions.where((t) => t.typeString == type).toList();
+      filteredTransactions = filteredTransactions
+          .where((t) => t.typeString == type)
+          .toList();
     }
 
     if (search != null && search.isNotEmpty) {
@@ -179,10 +198,12 @@ class MockApiService {
         searchAmount = null;
       }
       filteredTransactions = filteredTransactions.where((t) {
-        final matchesText = t.title.toLowerCase().contains(searchLower) ||
+        final matchesText =
+            t.title.toLowerCase().contains(searchLower) ||
             (t.description?.toLowerCase().contains(searchLower) ?? false) ||
             t.category.name.toLowerCase().contains(searchLower);
-        final matchesAmount = searchAmount != null && t.amount.abs() == searchAmount;
+        final matchesAmount =
+            searchAmount != null && t.amount.abs() == searchAmount;
         // Also allow partial match for amount as string
         final matchesAmountString = t.amount.toString().contains(searchLower);
         return matchesText || matchesAmount || matchesAmountString;
@@ -230,7 +251,7 @@ class MockApiService {
         'totalItems': totalItems,
         'itemsPerPage': limit,
         'hasMore': page < totalPages,
-      }
+      },
     };
 
     return Response<Map<String, dynamic>>(
@@ -274,10 +295,7 @@ class MockApiService {
       );
     }
 
-    final response = {
-      'success': true,
-      'data': _analytics!.toJson(),
-    };
+    final response = {'success': true, 'data': _analytics!.toJson()};
 
     return Response<Map<String, dynamic>>(
       data: response,
@@ -288,7 +306,9 @@ class MockApiService {
 
   /// Create transaction
   Future<Response<Map<String, dynamic>>> createTransaction(
-    TransactionModel transaction, {dynamic cancelToken}) async {
+    TransactionModel transaction, {
+    dynamic cancelToken,
+  }) async {
     await initialize();
     await _simulateDelay();
     _simulateNetworkError();
@@ -323,8 +343,10 @@ class MockApiService {
 
   /// Update transaction
   Future<Response<Map<String, dynamic>>> updateTransaction(
-    String id, TransactionModel transaction,
-    {dynamic cancelToken}) async {
+    String id,
+    TransactionModel transaction, {
+    dynamic cancelToken,
+  }) async {
     await initialize();
     await _simulateDelay();
     _simulateNetworkError();
@@ -368,8 +390,10 @@ class MockApiService {
   }
 
   /// Delete transaction
-  Future<Response<Map<String, dynamic>>> deleteTransaction(String id,
-      {dynamic cancelToken}) async {
+  Future<Response<Map<String, dynamic>>> deleteTransaction(
+    String id, {
+    dynamic cancelToken,
+  }) async {
     await initialize();
     await _simulateDelay();
     _simulateNetworkError();
@@ -402,8 +426,10 @@ class MockApiService {
   }
 
   /// Get single transaction
-  Future<Response<Map<String, dynamic>>> getTransaction(String id,
-      {dynamic cancelToken}) async {
+  Future<Response<Map<String, dynamic>>> getTransaction(
+    String id, {
+    dynamic cancelToken,
+  }) async {
     await initialize();
     await _simulateDelay();
     _simulateNetworkError();
@@ -421,10 +447,7 @@ class MockApiService {
       ),
     );
 
-    final response = {
-      'success': true,
-      'data': transaction.toJson(),
-    };
+    final response = {'success': true, 'data': transaction.toJson()};
 
     return Response<Map<String, dynamic>>(
       data: response,
@@ -435,7 +458,8 @@ class MockApiService {
 
   /// Create category
   Future<Response<Map<String, dynamic>>> createCategory(
-      CategoryModel category) async {
+    CategoryModel category,
+  ) async {
     await initialize();
     await _simulateDelay();
     _simulateNetworkError();
@@ -452,10 +476,7 @@ class MockApiService {
 
     _categories.add(newCategory);
 
-    final response = {
-      'success': true,
-      'data': newCategory.toJson(),
-    };
+    final response = {'success': true, 'data': newCategory.toJson()};
 
     return Response<Map<String, dynamic>>(
       data: response,
@@ -466,7 +487,9 @@ class MockApiService {
 
   /// Update category
   Future<Response<Map<String, dynamic>>> updateCategory(
-      String id, CategoryModel category) async {
+    String id,
+    CategoryModel category,
+  ) async {
     await initialize();
     await _simulateDelay();
     _simulateNetworkError();
@@ -494,10 +517,7 @@ class MockApiService {
 
     _categories[index] = updatedCategory;
 
-    final response = {
-      'success': true,
-      'data': updatedCategory.toJson(),
-    };
+    final response = {'success': true, 'data': updatedCategory.toJson()};
 
     return Response<Map<String, dynamic>>(
       data: response,
@@ -548,12 +568,14 @@ class MockApiService {
       _simulateNetworkError();
 
       Logger.d(
-          'MockApiService: Processing ${_transactions.length} transactions');
+        'MockApiService: Processing ${_transactions.length} transactions',
+      );
 
       // If no transactions loaded, return empty but valid response
       if (_transactions.isEmpty) {
         Logger.w(
-            'MockApiService: No transactions found, returning empty response');
+          'MockApiService: No transactions found, returning empty response',
+        );
         final response = {
           'success': true,
           'data': {
@@ -564,7 +586,7 @@ class MockApiService {
             },
             'categoryExpenses': <Map<String, dynamic>>[],
             'recentTransactions': <Map<String, dynamic>>[],
-          }
+          },
         };
         return Response<Map<String, dynamic>>(
           data: response,
@@ -578,12 +600,14 @@ class MockApiService {
       final currentMonth = DateTime(now.year, now.month, 1);
       final currentMonthTransactions = _transactions.where((t) {
         final transactionDate = t.date;
-        return transactionDate
-            .isAfter(currentMonth.subtract(const Duration(days: 1)));
+        return transactionDate.isAfter(
+          currentMonth.subtract(const Duration(days: 1)),
+        );
       }).toList();
 
       Logger.d(
-          'MockApiService: Found ${currentMonthTransactions.length} transactions for current month');
+        'MockApiService: Found ${currentMonthTransactions.length} transactions for current month',
+      );
 
       final totalIncome = currentMonthTransactions
           .where((t) => t.typeString == 'income')
@@ -594,7 +618,8 @@ class MockApiService {
           .fold<double>(0.0, (sum, t) => sum + t.amount);
 
       Logger.d(
-          'MockApiService: Total income: $totalIncome, Total expenses: $totalExpenses');
+        'MockApiService: Total income: $totalIncome, Total expenses: $totalExpenses',
+      );
 
       // Calculate category expenses
       final categoryExpenseMap = <String, Map<String, dynamic>>{};
@@ -620,8 +645,9 @@ class MockApiService {
       // Calculate percentages and create category expenses list
       final categoryExpenses = categoryExpenseMap.values.map((category) {
         final amount = category['amount'] as double;
-        final percentage =
-            totalExpenses > 0 ? (amount / totalExpenses) * 100 : 0.0;
+        final percentage = totalExpenses > 0
+            ? (amount / totalExpenses) * 100
+            : 0.0;
         return {
           'categoryId': category['categoryId'],
           'categoryName': category['categoryName'],
@@ -637,21 +663,23 @@ class MockApiService {
 
       final recentTransactions = sortedTransactions
           .take(10)
-          .map((t) => {
-                'id': t.id,
-                'title': t.title,
-                'amount': t.amount,
-                'type': t.typeString,
-                'category': {
-                  'id': t.category.id,
-                  'name': t.category.name,
-                  'icon': t.category.icon,
-                  'color': t.category.color,
-                  'budget': t.category.budget,
-                },
-                'date': t.date.toIso8601String(),
-                'description': t.description,
-              })
+          .map(
+            (t) => {
+              'id': t.id,
+              'title': t.title,
+              'amount': t.amount,
+              'type': t.typeString,
+              'category': {
+                'id': t.category.id,
+                'name': t.category.name,
+                'icon': t.category.icon,
+                'color': t.category.color,
+                'budget': t.category.budget,
+              },
+              'date': t.date.toIso8601String(),
+              'description': t.description,
+            },
+          )
           .toList();
 
       final response = {
@@ -664,11 +692,12 @@ class MockApiService {
           },
           'categoryExpenses': categoryExpenses,
           'recentTransactions': recentTransactions,
-        }
+        },
       };
 
       Logger.i(
-          'MockApiService: Returning dashboard summary with ${categoryExpenses.length} categories and ${recentTransactions.length} recent transactions');
+        'MockApiService: Returning dashboard summary with ${categoryExpenses.length} categories and ${recentTransactions.length} recent transactions',
+      );
 
       return Response<Map<String, dynamic>>(
         data: response,
@@ -676,8 +705,11 @@ class MockApiService {
         requestOptions: RequestOptions(path: '/api/dashboard/summary'),
       );
     } catch (e, stackTrace) {
-      Logger.e('MockApiService: Error in getDashboardSummary',
-          error: e, stackTrace: stackTrace);
+      Logger.e(
+        'MockApiService: Error in getDashboardSummary',
+        error: e,
+        stackTrace: stackTrace,
+      );
       rethrow;
     }
   }

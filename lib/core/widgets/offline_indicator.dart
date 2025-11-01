@@ -35,7 +35,9 @@ class _ConnectivityBannerState extends State<ConnectivityBanner> {
 
   @override
   Widget build(BuildContext context) {
-    final isOnline = _current == ConnectivityResult.wifi || _current == ConnectivityResult.mobile;
+    final isOnline =
+        _current == ConnectivityResult.wifi ||
+        _current == ConnectivityResult.mobile;
     final banner = AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       height: isOnline ? 0 : 28,

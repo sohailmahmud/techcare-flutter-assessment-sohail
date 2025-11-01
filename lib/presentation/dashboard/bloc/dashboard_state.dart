@@ -55,12 +55,12 @@ class DashboardLoaded extends DashboardState {
 
   @override
   List<Object?> get props => [
-        summary,
-        filteredTransactions,
-        selectedCategoryFilter,
-        isBalanceVisible,
-        isRefreshing,
-      ];
+    summary,
+    filteredTransactions,
+    selectedCategoryFilter,
+    isBalanceVisible,
+    isRefreshing,
+  ];
 }
 
 /// Error state
@@ -68,10 +68,7 @@ class DashboardError extends DashboardState {
   final String message;
   final bool canRetry;
 
-  const DashboardError({
-    required this.message,
-    this.canRetry = true,
-  });
+  const DashboardError({required this.message, this.canRetry = true});
 
   @override
   List<Object?> get props => [message, canRetry];

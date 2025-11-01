@@ -61,8 +61,9 @@ void main() {
     group('getTransactions', () {
       test('should return paginated transactions successfully', () async {
         // Arrange
-        when(() => mockRepository.getTransactions(any()))
-            .thenAnswer((_) async => Right(mockResponse));
+        when(
+          () => mockRepository.getTransactions(any()),
+        ).thenAnswer((_) async => Right(mockResponse));
 
         // Act
         final result = await mockRepository.getTransactions(query);
@@ -75,8 +76,9 @@ void main() {
       test('should return failure when network fails', () async {
         // Arrange
         const failure = NetworkFailure('No internet connection');
-        when(() => mockRepository.getTransactions(any()))
-            .thenAnswer((_) async => const Left(failure));
+        when(
+          () => mockRepository.getTransactions(any()),
+        ).thenAnswer((_) async => const Left(failure));
 
         // Act
         final result = await mockRepository.getTransactions(query);
@@ -89,8 +91,9 @@ void main() {
       test('should handle server errors', () async {
         // Arrange
         const failure = ServerFailure('Internal server error');
-        when(() => mockRepository.getTransactions(any()))
-            .thenAnswer((_) async => const Left(failure));
+        when(
+          () => mockRepository.getTransactions(any()),
+        ).thenAnswer((_) async => const Left(failure));
 
         // Act
         final result = await mockRepository.getTransactions(query);
@@ -110,8 +113,9 @@ void main() {
           endDate: DateTime(2024, 1, 31),
         );
 
-        when(() => mockRepository.getTransactions(filteredQuery))
-            .thenAnswer((_) async => Right(mockResponse));
+        when(
+          () => mockRepository.getTransactions(filteredQuery),
+        ).thenAnswer((_) async => Right(mockResponse));
 
         // Act
         final result = await mockRepository.getTransactions(filteredQuery);
@@ -126,8 +130,9 @@ void main() {
       test('should return single transaction by ID', () async {
         // Arrange
         const transactionId = 'trans1';
-        when(() => mockRepository.getTransaction(transactionId))
-            .thenAnswer((_) async => Right(testTransaction));
+        when(
+          () => mockRepository.getTransaction(transactionId),
+        ).thenAnswer((_) async => Right(testTransaction));
 
         // Act
         final result = await mockRepository.getTransaction(transactionId);
@@ -141,8 +146,9 @@ void main() {
         // Arrange
         const transactionId = 'invalid_id';
         const failure = NotFoundFailure('Transaction not found');
-        when(() => mockRepository.getTransaction(transactionId))
-            .thenAnswer((_) async => const Left(failure));
+        when(
+          () => mockRepository.getTransaction(transactionId),
+        ).thenAnswer((_) async => const Left(failure));
 
         // Act
         final result = await mockRepository.getTransaction(transactionId);
@@ -155,23 +161,26 @@ void main() {
     group('createTransaction', () {
       test('should create transaction successfully', () async {
         // Arrange
-        when(() => mockRepository.createTransaction(any()))
-            .thenAnswer((_) async => Right(testTransaction));
+        when(
+          () => mockRepository.createTransaction(any()),
+        ).thenAnswer((_) async => Right(testTransaction));
 
         // Act
         final result = await mockRepository.createTransaction(testTransaction);
 
         // Assert
         expect(result, Right(testTransaction));
-        verify(() => mockRepository.createTransaction(testTransaction))
-            .called(1);
+        verify(
+          () => mockRepository.createTransaction(testTransaction),
+        ).called(1);
       });
 
       test('should return validation failure for invalid data', () async {
         // Arrange
         const failure = ValidationFailure('Amount must be greater than 0');
-        when(() => mockRepository.createTransaction(any()))
-            .thenAnswer((_) async => const Left(failure));
+        when(
+          () => mockRepository.createTransaction(any()),
+        ).thenAnswer((_) async => const Left(failure));
 
         // Act
         final result = await mockRepository.createTransaction(testTransaction);
@@ -183,8 +192,9 @@ void main() {
       test('should handle server errors on creation', () async {
         // Arrange
         const failure = ServerFailure('Failed to create transaction');
-        when(() => mockRepository.createTransaction(any()))
-            .thenAnswer((_) async => const Left(failure));
+        when(
+          () => mockRepository.createTransaction(any()),
+        ).thenAnswer((_) async => const Left(failure));
 
         // Act
         final result = await mockRepository.createTransaction(testTransaction);
@@ -198,41 +208,50 @@ void main() {
       test('should update transaction successfully', () async {
         // Arrange
         final updatedTransaction = testTransaction.copyWith(amount: 30.0);
-        when(() => mockRepository.updateTransaction(any()))
-            .thenAnswer((_) async => Right(updatedTransaction));
+        when(
+          () => mockRepository.updateTransaction(any()),
+        ).thenAnswer((_) async => Right(updatedTransaction));
 
         // Act
-        final result =
-            await mockRepository.updateTransaction(updatedTransaction);
+        final result = await mockRepository.updateTransaction(
+          updatedTransaction,
+        );
 
         // Assert
         expect(result, Right(updatedTransaction));
-        verify(() => mockRepository.updateTransaction(updatedTransaction))
-            .called(1);
+        verify(
+          () => mockRepository.updateTransaction(updatedTransaction),
+        ).called(1);
         expect(result.fold((l) => null, (r) => r)?.amount, equals(30.0));
       });
 
-      test('should return not found failure for non-existent transaction',
-          () async {
-        // Arrange
-        const failure = NotFoundFailure('Transaction not found');
-        when(() => mockRepository.updateTransaction(any()))
-            .thenAnswer((_) async => const Left(failure));
+      test(
+        'should return not found failure for non-existent transaction',
+        () async {
+          // Arrange
+          const failure = NotFoundFailure('Transaction not found');
+          when(
+            () => mockRepository.updateTransaction(any()),
+          ).thenAnswer((_) async => const Left(failure));
 
-        // Act
-        final result = await mockRepository.updateTransaction(testTransaction);
+          // Act
+          final result = await mockRepository.updateTransaction(
+            testTransaction,
+          );
 
-        // Assert
-        expect(result, const Left(failure));
-      });
+          // Assert
+          expect(result, const Left(failure));
+        },
+      );
     });
 
     group('deleteTransaction', () {
       test('should delete transaction successfully', () async {
         // Arrange
         const transactionId = 'trans1';
-        when(() => mockRepository.deleteTransaction(transactionId))
-            .thenAnswer((_) async => const Right(null));
+        when(
+          () => mockRepository.deleteTransaction(transactionId),
+        ).thenAnswer((_) async => const Right(null));
 
         // Act
         final result = await mockRepository.deleteTransaction(transactionId);
@@ -246,8 +265,9 @@ void main() {
         // Arrange
         const transactionId = 'invalid_id';
         const failure = NotFoundFailure('Transaction not found');
-        when(() => mockRepository.deleteTransaction(transactionId))
-            .thenAnswer((_) async => const Left(failure));
+        when(
+          () => mockRepository.deleteTransaction(transactionId),
+        ).thenAnswer((_) async => const Left(failure));
 
         // Act
         final result = await mockRepository.deleteTransaction(transactionId);
@@ -261,8 +281,9 @@ void main() {
       test('should get cached transactions when available', () async {
         // Arrange
         final cachedTransactions = [testTransaction];
-        when(() => mockRepository.getCachedTransactions())
-            .thenAnswer((_) async => Right(cachedTransactions));
+        when(
+          () => mockRepository.getCachedTransactions(),
+        ).thenAnswer((_) async => Right(cachedTransactions));
 
         // Act
         final result = await mockRepository.getCachedTransactions();
@@ -275,8 +296,9 @@ void main() {
       test('should handle cache errors', () async {
         // Arrange
         const failure = CacheFailure('Cache read error');
-        when(() => mockRepository.getCachedTransactions())
-            .thenAnswer((_) async => const Left(failure));
+        when(
+          () => mockRepository.getCachedTransactions(),
+        ).thenAnswer((_) async => const Left(failure));
 
         // Act
         final result = await mockRepository.getCachedTransactions();
@@ -287,8 +309,9 @@ void main() {
 
       test('should clear cache successfully', () async {
         // Arrange
-        when(() => mockRepository.clearCache())
-            .thenAnswer((_) async => const Right(null));
+        when(
+          () => mockRepository.clearCache(),
+        ).thenAnswer((_) async => const Right(null));
 
         // Act
         final result = await mockRepository.clearCache();
@@ -302,9 +325,13 @@ void main() {
     group('Offline Sync', () {
       test('should sync offline changes successfully', () async {
         // Arrange
-        const successResult = SyncResult(succeededOperationIds: ['op1'], failed: []);
-        when(() => mockRepository.syncOfflineChanges())
-            .thenAnswer((_) async => const Right(successResult));
+        const successResult = SyncResult(
+          succeededOperationIds: ['op1'],
+          failed: [],
+        );
+        when(
+          () => mockRepository.syncOfflineChanges(),
+        ).thenAnswer((_) async => const Right(successResult));
 
         // Act
         final result = await mockRepository.syncOfflineChanges();
@@ -320,8 +347,9 @@ void main() {
       test('should handle sync failures', () async {
         // Arrange
         const failure = NetworkFailure('Sync failed - no connection');
-        when(() => mockRepository.syncOfflineChanges())
-            .thenAnswer((_) async => const Left(failure));
+        when(
+          () => mockRepository.syncOfflineChanges(),
+        ).thenAnswer((_) async => const Left(failure));
 
         // Act
         final result = await mockRepository.syncOfflineChanges();
@@ -343,8 +371,9 @@ void main() {
         ];
 
         for (final failure in failures) {
-          when(() => mockRepository.getTransactions(any()))
-              .thenAnswer((_) async => Left(failure));
+          when(
+            () => mockRepository.getTransactions(any()),
+          ).thenAnswer((_) async => Left(failure));
 
           final result = await mockRepository.getTransactions(query);
           expect(result, Left(failure));
@@ -355,8 +384,9 @@ void main() {
         // Arrange
         const errorMessage = 'Specific error message';
         const failure = ServerFailure(errorMessage);
-        when(() => mockRepository.getTransactions(any()))
-            .thenAnswer((_) async => const Left(failure));
+        when(
+          () => mockRepository.getTransactions(any()),
+        ).thenAnswer((_) async => const Left(failure));
 
         // Act
         final result = await mockRepository.getTransactions(query);

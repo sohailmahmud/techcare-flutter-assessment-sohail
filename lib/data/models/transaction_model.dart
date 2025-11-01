@@ -54,7 +54,8 @@ class TransactionModel {
     }
 
     throw ArgumentError(
-        'Invalid category data type: ${json.runtimeType}. Expected Map<String, dynamic> or CategoryModel, got: $json');
+      'Invalid category data type: ${json.runtimeType}. Expected Map<String, dynamic> or CategoryModel, got: $json',
+    );
   }
 
   static dynamic _categoryToJson(CategoryModel category) {
@@ -85,7 +86,8 @@ class TransactionModel {
     }
 
     throw ArgumentError(
-        'Invalid date data type: ${json.runtimeType}. Expected String, DateTime, or int, got: $json');
+      'Invalid date data type: ${json.runtimeType}. Expected String, DateTime, or int, got: $json',
+    );
   }
 
   static String _dateToJson(DateTime date) {
@@ -97,7 +99,8 @@ class TransactionModel {
       return _$TransactionModelFromJson(json);
     } catch (e) {
       throw ArgumentError(
-          'Failed to parse TransactionModel from JSON: $json. Error: $e');
+        'Failed to parse TransactionModel from JSON: $json. Error: $e',
+      );
     }
   }
 
@@ -106,7 +109,8 @@ class TransactionModel {
       return _$TransactionModelToJson(this);
     } catch (e) {
       throw ArgumentError(
-          'Failed to convert TransactionModel to JSON. Error: $e');
+        'Failed to convert TransactionModel to JSON. Error: $e',
+      );
     }
   }
 
@@ -143,7 +147,8 @@ class TransactionModel {
         return TransactionType.expense;
       default:
         throw ArgumentError(
-            'Invalid transaction type: $typeString. Expected "income" or "expense"');
+          'Invalid transaction type: $typeString. Expected "income" or "expense"',
+        );
     }
   }
 

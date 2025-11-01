@@ -117,7 +117,9 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
   }
 
   Future<void> _onLoadAnalytics(
-      LoadAnalytics event, Emitter<AnalyticsState> emit) async {
+    LoadAnalytics event,
+    Emitter<AnalyticsState> emit,
+  ) async {
     try {
       emit(const AnalyticsLoading());
 
@@ -129,8 +131,11 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
       final startDate = event.startDate ?? defaultStartDate;
       final endDate = event.endDate ?? defaultEndDate;
 
-      final analyticsData = await _calculateAnalytics(startDate, endDate,
-          period: TimePeriod.thisWeek);
+      final analyticsData = await _calculateAnalytics(
+        startDate,
+        endDate,
+        period: TimePeriod.thisWeek,
+      );
       emit(AnalyticsLoaded(analyticsData));
     } catch (error) {
       emit(AnalyticsError('Failed to load analytics: $error'));
@@ -138,12 +143,16 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
   }
 
   Future<void> _onUpdateDateRange(
-      UpdateDateRange event, Emitter<AnalyticsState> emit) async {
+    UpdateDateRange event,
+    Emitter<AnalyticsState> emit,
+  ) async {
     try {
       emit(const AnalyticsLoading());
       final analyticsData = await _calculateAnalytics(
-          event.startDate, event.endDate,
-          period: TimePeriod.custom);
+        event.startDate,
+        event.endDate,
+        period: TimePeriod.custom,
+      );
       emit(AnalyticsLoaded(analyticsData));
     } catch (error) {
       emit(AnalyticsError('Failed to update date range: $error'));
@@ -151,7 +160,9 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
   }
 
   Future<void> _onFilterByCategory(
-      FilterByCategory event, Emitter<AnalyticsState> emit) async {
+    FilterByCategory event,
+    Emitter<AnalyticsState> emit,
+  ) async {
     try {
       final currentState = state;
       if (currentState is! AnalyticsLoaded) return;
@@ -171,7 +182,9 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
   }
 
   Future<void> _onChangePeriod(
-      ChangePeriod event, Emitter<AnalyticsState> emit) async {
+    ChangePeriod event,
+    Emitter<AnalyticsState> emit,
+  ) async {
     try {
       emit(const AnalyticsLoading());
 
@@ -203,8 +216,11 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
           break;
       }
 
-      final analyticsData =
-          await _calculateAnalytics(startDate, endDate, period: event.period);
+      final analyticsData = await _calculateAnalytics(
+        startDate,
+        endDate,
+        period: event.period,
+      );
       emit(AnalyticsLoaded(analyticsData));
     } catch (error) {
       emit(AnalyticsError('Failed to change period: $error'));
@@ -212,7 +228,9 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
   }
 
   Future<void> _onRefreshAnalytics(
-      RefreshAnalytics event, Emitter<AnalyticsState> emit) async {
+    RefreshAnalytics event,
+    Emitter<AnalyticsState> emit,
+  ) async {
     try {
       final currentState = state;
       if (currentState is AnalyticsLoaded) {
@@ -242,15 +260,17 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
     String? categoryFilter,
     TimePeriod? period,
   }) async {
-  final transactions = _getTransactionsFromBloc();
-  // Use injected categories list
+    final transactions = _getTransactionsFromBloc();
+    // Use injected categories list
     final dateRange = DateRange(startDate: startDate, endDate: endDate);
 
     // Filter transactions by date range and category
     var filteredTransactions = transactions
-        .where((t) =>
-            t.date.isAfter(startDate.subtract(const Duration(days: 1))) &&
-            t.date.isBefore(endDate.add(const Duration(days: 1))))
+        .where(
+          (t) =>
+              t.date.isAfter(startDate.subtract(const Duration(days: 1))) &&
+              t.date.isBefore(endDate.add(const Duration(days: 1))),
+        )
         .toList();
 
     if (categoryFilter != null) {
@@ -270,15 +290,27 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
 
     // Calculate net balance and savings rate
     final netBalance = totalIncome - totalExpenses;
-    final savingsRate = totalIncome > 0 ? (netBalance / totalIncome) * 100 : 0.0;
+    final savingsRate = totalIncome > 0
+        ? (netBalance / totalIncome) * 100
+        : 0.0;
 
     // Generate trend data points
-    final incomeDataPoints = _generateTrendDataPoints(endDate, totalIncome, true);
-    final expenseDataPoints = _generateTrendDataPoints(endDate, totalExpenses, false);
+    final incomeDataPoints = _generateTrendDataPoints(
+      endDate,
+      totalIncome,
+      true,
+    );
+    final expenseDataPoints = _generateTrendDataPoints(
+      endDate,
+      totalExpenses,
+      false,
+    );
 
     // Create category breakdown
-    final categoryBreakdown =
-        _calculateCategoryBreakdown(filteredTransactions, totalExpenses);
+    final categoryBreakdown = _calculateCategoryBreakdown(
+      filteredTransactions,
+      totalExpenses,
+    );
 
     // Create budget progress
     final budgetProgress = _calculateBudgetProgress(filteredTransactions);
@@ -307,7 +339,10 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
   }
 
   List<ChartDataPoint> _generateTrendDataPoints(
-      DateTime endDate, double currentValue, bool isIncome) {
+    DateTime endDate,
+    double currentValue,
+    bool isIncome,
+  ) {
     final trendPoints = <ChartDataPoint>[];
 
     // Generate 6 months of realistic trend data
@@ -321,34 +356,41 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
       } else {
         if (isIncome) {
           // Income tends to be more stable, around 70k-90k
-          value = 75000.0 +
+          value =
+              75000.0 +
               (DateTime.now().millisecondsSinceEpoch % 100) * 150.0 +
               i * 1000.0;
         } else {
           // Expenses are more variable, around 30k-50k
-          value = 35000.0 +
+          value =
+              35000.0 +
               (DateTime.now().millisecondsSinceEpoch % 200) * 75.0 +
               i * 500.0;
         }
       }
 
-      trendPoints.add(ChartDataPoint(
-        label: monthDate.month.toString(),
-        value: value,
-        date: monthDate,
-      ));
+      trendPoints.add(
+        ChartDataPoint(
+          label: monthDate.month.toString(),
+          value: value,
+          date: monthDate,
+        ),
+      );
     }
 
     return trendPoints;
   }
 
   List<CategoryBreakdown> _calculateCategoryBreakdown(
-      List<tx.Transaction> transactions, double totalExpenses) {
+    List<tx.Transaction> transactions,
+    double totalExpenses,
+  ) {
     final categoryTotals = <String, double>{};
     final categoryCounts = <String, int>{};
 
-    for (final transaction
-        in transactions.where((t) => t.type == tx.TransactionType.expense)) {
+    for (final transaction in transactions.where(
+      (t) => t.type == tx.TransactionType.expense,
+    )) {
       final categoryId = transaction.categoryId;
       categoryTotals[categoryId] =
           (categoryTotals[categoryId] ?? 0) + transaction.amount;
@@ -356,14 +398,17 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
     }
 
     return categoryTotals.entries.map((entry) {
-      final percentage = totalExpenses > 0 ? (entry.value / totalExpenses) * 100 : 0.0;
+      final percentage = totalExpenses > 0
+          ? (entry.value / totalExpenses) * 100
+          : 0.0;
 
       // Find the first transaction for this category to get its entity values
 
       // Find the first transaction for this category
       bool found = false;
       final txForCategory = transactions.firstWhere(
-        (t) => t.categoryId == entry.key && t.type == tx.TransactionType.expense,
+        (t) =>
+            t.categoryId == entry.key && t.type == tx.TransactionType.expense,
         orElse: () {
           found = false;
           return tx.Transaction(
@@ -405,16 +450,20 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
         budget: budget,
         budgetUtilization: budgetUtilization,
       );
-    }).toList()
-      ..sort((a, b) => b.amount.compareTo(a.amount));
+    }).toList()..sort((a, b) => b.amount.compareTo(a.amount));
   }
 
-  List<BudgetComparison> _calculateBudgetProgress(List<tx.Transaction> transactions) {
+  List<BudgetComparison> _calculateBudgetProgress(
+    List<tx.Transaction> transactions,
+  ) {
     // Build totals per category name (from transactions)
     final categoryTotals = <String, double>{};
-    for (final transaction in transactions.where((t) => t.type == tx.TransactionType.expense)) {
+    for (final transaction in transactions.where(
+      (t) => t.type == tx.TransactionType.expense,
+    )) {
       final categoryName = transaction.categoryName.trim();
-      categoryTotals[categoryName] = (categoryTotals[categoryName] ?? 0) + transaction.amount;
+      categoryTotals[categoryName] =
+          (categoryTotals[categoryName] ?? 0) + transaction.amount;
     }
 
     // Build lookups for categories by id and by normalized name
@@ -427,13 +476,13 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
           .replaceAll(RegExp('\\s+'), ' ');
     }
 
-  final byName = {for (final c in categories) normalize(c.name): c};
+    final byName = {for (final c in categories) normalize(c.name): c};
 
     List<BudgetComparison> results = [];
 
     for (final entry in _defaultBudgets.entries) {
       final budgetKey = entry.key;
-  final normalizedKey = normalize(budgetKey);
+      final normalizedKey = normalize(budgetKey);
 
       // Try exact name match first
       Category? matched;
@@ -441,14 +490,16 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
 
       // Try contains/partial match
       matched ??= categories.firstWhere(
-          (c) => normalize(c.name).contains(normalizedKey) || normalizedKey.contains(normalize(c.name)),
-          orElse: () => Category(
-            id: '',
-            name: budgetKey,
-            icon: Icons.category,
-            color: Colors.grey,
-          ),
-        );
+        (c) =>
+            normalize(c.name).contains(normalizedKey) ||
+            normalizedKey.contains(normalize(c.name)),
+        orElse: () => Category(
+          id: '',
+          name: budgetKey,
+          icon: Icons.category,
+          color: Colors.grey,
+        ),
+      );
 
       // If still defaulted, matched.id may be empty
       final category = matched;
@@ -460,19 +511,26 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
       if (actualAmount == 0.0) {
         // Try normalized matches
         final foundKey = categoryTotals.keys.firstWhere(
-          (k) => normalize(k) == normalizedKey || normalize(k).contains(normalizedKey) || normalizedKey.contains(normalize(k)),
+          (k) =>
+              normalize(k) == normalizedKey ||
+              normalize(k).contains(normalizedKey) ||
+              normalizedKey.contains(normalize(k)),
           orElse: () => '',
         );
-        actualAmount = (foundKey.isNotEmpty) ? (categoryTotals[foundKey] ?? 0.0) : actualAmount;
+        actualAmount = (foundKey.isNotEmpty)
+            ? (categoryTotals[foundKey] ?? 0.0)
+            : actualAmount;
       }
 
-      results.add(BudgetComparison.fromAmounts(
-        categoryId: category.id,
-        categoryName: category.name,
-        budgetAmount: entry.value,
-        actualAmount: actualAmount,
-        category: category,
-      ));
+      results.add(
+        BudgetComparison.fromAmounts(
+          categoryId: category.id,
+          categoryName: category.name,
+          budgetAmount: entry.value,
+          actualAmount: actualAmount,
+          category: category,
+        ),
+      );
     }
 
     return results;

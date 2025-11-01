@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
@@ -21,8 +20,8 @@ void main() {
     late Directory tmpDir;
     setUp(() async {
       tmpDir = Directory.systemTemp.createTempSync('fintrack_local_ds_');
-  Hive.init(tmpDir.path);
-  Hive.registerAdapters();
+      Hive.init(tmpDir.path);
+      Hive.registerAdapters();
       local = LocalDataSourceImpl();
       await local.initialize();
       await local.clearAllCache();
@@ -36,7 +35,12 @@ void main() {
     });
 
     test('replaces temp id in individual cache and list caches', () async {
-      const category = Category(id: 'c1', name: 'Cat', icon: Icons.category, color: Colors.grey);
+      const category = Category(
+        id: 'c1',
+        name: 'Cat',
+        icon: Icons.category,
+        color: Colors.grey,
+      );
       final tx = Transaction(
         id: 'temp_123',
         title: 'Temp Tx',
@@ -46,9 +50,9 @@ void main() {
         date: DateTime.now(),
       );
 
-  final txModel = TransactionModel.fromEntity(tx);
-  // cache single transaction
-  await local.cacheTransaction(txModel);
+      final txModel = TransactionModel.fromEntity(tx);
+      // cache single transaction
+      await local.cacheTransaction(txModel);
 
       // verify cached individually
       final cached = await local.getCachedTransaction('temp_123');
@@ -58,7 +62,13 @@ void main() {
       const query = TransactionQuery(page: 1, limit: 20);
       final paginated = PaginatedTransactionsResponse(
         data: [txModel],
-        meta: const PaginationMeta(currentPage: 1, totalPages: 1, totalItems: 1, itemsPerPage: 20, hasMore: false),
+        meta: const PaginationMeta(
+          currentPage: 1,
+          totalPages: 1,
+          totalItems: 1,
+          itemsPerPage: 20,
+          hasMore: false,
+        ),
       );
       await local.cacheTransactions(query, paginated);
 
@@ -68,9 +78,11 @@ void main() {
       final cachedAfter = await local.getCachedTransaction('srv_999');
       expect(cachedAfter, isNotNull);
 
-  final listCached = await local.getCachedTransactions(const TransactionQuery(page: 1, limit: 20));
-  expect(listCached, isNotNull);
-  expect(listCached?.data.any((d) => d.id == 'srv_999'), isTrue);
+      final listCached = await local.getCachedTransactions(
+        const TransactionQuery(page: 1, limit: 20),
+      );
+      expect(listCached, isNotNull);
+      expect(listCached?.data.any((d) => d.id == 'srv_999'), isTrue);
     });
   });
 }

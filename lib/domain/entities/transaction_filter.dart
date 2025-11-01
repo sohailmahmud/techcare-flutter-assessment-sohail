@@ -45,8 +45,11 @@ enum DateRangePreset {
         );
       case DateRangePreset.thisMonth:
         final startOfMonth = DateTime(now.year, now.month, 1);
-        final endOfMonth = DateTime(now.year, now.month + 1, 1)
-            .subtract(const Duration(milliseconds: 1));
+        final endOfMonth = DateTime(
+          now.year,
+          now.month + 1,
+          1,
+        ).subtract(const Duration(milliseconds: 1));
         return DateRange(start: startOfMonth, end: endOfMonth);
       case DateRangePreset.lastThreeMonths:
         final threeMonthsAgo = DateTime(now.year, now.month - 3, now.day);
@@ -84,19 +87,10 @@ class DateRange extends Equatable {
   final DateTime start;
   final DateTime end;
 
-  const DateRange({
-    required this.start,
-    required this.end,
-  });
+  const DateRange({required this.start, required this.end});
 
-  DateRange copyWith({
-    DateTime? start,
-    DateTime? end,
-  }) {
-    return DateRange(
-      start: start ?? this.start,
-      end: end ?? this.end,
-    );
+  DateRange copyWith({DateTime? start, DateTime? end}) {
+    return DateRange(start: start ?? this.start, end: end ?? this.end);
   }
 
   bool contains(DateTime date) {
@@ -115,19 +109,10 @@ class AmountRange extends Equatable {
   final double min;
   final double max;
 
-  const AmountRange({
-    required this.min,
-    required this.max,
-  });
+  const AmountRange({required this.min, required this.max});
 
-  AmountRange copyWith({
-    double? min,
-    double? max,
-  }) {
-    return AmountRange(
-      min: min ?? this.min,
-      max: max ?? this.max,
-    );
+  AmountRange copyWith({double? min, double? max}) {
+    return AmountRange(min: min ?? this.min, max: max ?? this.max);
   }
 
   bool contains(double amount) {
@@ -199,13 +184,13 @@ class TransactionFilter extends Equatable {
 
   @override
   List<Object?> get props => [
-        searchQuery,
-        dateRange,
-        datePreset,
-        selectedCategories,
-        amountRange,
-        transactionType,
-      ];
+    searchQuery,
+    dateRange,
+    datePreset,
+    selectedCategories,
+    amountRange,
+    transactionType,
+  ];
 }
 
 /// Pagination information for transactions
@@ -245,6 +230,11 @@ class PaginationInfo extends Equatable {
   bool get isLastPage => !hasNextPage;
 
   @override
-  List<Object> get props =>
-      [currentPage, itemsPerPage, totalItems, hasNextPage, isLoading];
+  List<Object> get props => [
+    currentPage,
+    itemsPerPage,
+    totalItems,
+    hasNextPage,
+    isLoading,
+  ];
 }

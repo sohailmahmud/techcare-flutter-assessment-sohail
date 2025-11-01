@@ -29,9 +29,7 @@ class SkeletonLoader extends StatelessWidget {
         height: height,
         decoration: BoxDecoration(
           color: AppColors.surfaceVariant,
-          borderRadius: BorderRadius.circular(
-            borderRadius ?? Spacing.radiusS,
-          ),
+          borderRadius: BorderRadius.circular(borderRadius ?? Spacing.radiusS),
         ),
         child: child,
       ),
@@ -68,16 +66,25 @@ class DashboardSkeletonLoaders {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 SkeletonLoader(
-                    width: 100, height: 20, borderRadius: Spacing.radiusS),
+                  width: 100,
+                  height: 20,
+                  borderRadius: Spacing.radiusS,
+                ),
                 SkeletonLoader(
-                    width: 30, height: 30, borderRadius: Spacing.radiusFull),
+                  width: 30,
+                  height: 30,
+                  borderRadius: Spacing.radiusFull,
+                ),
               ],
             ),
             SizedBox(height: Spacing.space16),
 
             // Main balance amount
             SkeletonLoader(
-                width: 140, height: 32, borderRadius: Spacing.radiusS),
+              width: 140,
+              height: 32,
+              borderRadius: Spacing.radiusS,
+            ),
             SizedBox(height: Spacing.space48),
 
             // Income/Expense row
@@ -88,10 +95,16 @@ class DashboardSkeletonLoaders {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       SkeletonLoader(
-                          width: 50, height: 12, borderRadius: Spacing.radiusS),
+                        width: 50,
+                        height: 12,
+                        borderRadius: Spacing.radiusS,
+                      ),
                       SizedBox(height: Spacing.space4),
                       SkeletonLoader(
-                          width: 80, height: 18, borderRadius: Spacing.radiusS),
+                        width: 80,
+                        height: 18,
+                        borderRadius: Spacing.radiusS,
+                      ),
                     ],
                   ),
                 ),
@@ -101,10 +114,16 @@ class DashboardSkeletonLoaders {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       SkeletonLoader(
-                          width: 60, height: 12, borderRadius: Spacing.radiusS),
+                        width: 60,
+                        height: 12,
+                        borderRadius: Spacing.radiusS,
+                      ),
                       SizedBox(height: Spacing.space4),
                       SkeletonLoader(
-                          width: 85, height: 18, borderRadius: Spacing.radiusS),
+                        width: 85,
+                        height: 18,
+                        borderRadius: Spacing.radiusS,
+                      ),
                     ],
                   ),
                 ),
@@ -140,7 +159,10 @@ class DashboardSkeletonLoaders {
             const SizedBox(height: Spacing.space16),
             // Header with title and filter
             const SkeletonLoader(
-                width: 200, height: 20, borderRadius: Spacing.radiusS),
+              width: 200,
+              height: 20,
+              borderRadius: Spacing.radiusS,
+            ),
             const SizedBox(height: Spacing.space16),
 
             // Chart and legend
@@ -154,9 +176,10 @@ class DashboardSkeletonLoaders {
                       flex: 2,
                       child: Center(
                         child: SkeletonLoader(
-                            width: 180,
-                            height: 180,
-                            borderRadius: Spacing.radiusFull),
+                          width: 180,
+                          height: 180,
+                          borderRadius: Spacing.radiusFull,
+                        ),
                       ),
                     ),
                     const SizedBox(width: Spacing.space16),
@@ -167,38 +190,42 @@ class DashboardSkeletonLoaders {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: List.generate(
-                            4,
-                            (index) => Padding(
-                                  padding: EdgeInsets.only(
-                                    bottom: index < 3 ? Spacing.space12 : 0,
-                                  ),
-                                  child: const Row(
+                          4,
+                          (index) => Padding(
+                            padding: EdgeInsets.only(
+                              bottom: index < 3 ? Spacing.space12 : 0,
+                            ),
+                            child: const Row(
+                              children: [
+                                SkeletonLoader(
+                                  width: 12,
+                                  height: 12,
+                                  borderRadius: 6,
+                                ),
+                                SizedBox(width: Spacing.space8),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       SkeletonLoader(
-                                          width: 12,
-                                          height: 12,
-                                          borderRadius: 6),
-                                      SizedBox(width: Spacing.space8),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            SkeletonLoader(
-                                                width: double.infinity,
-                                                height: 12,
-                                                borderRadius: Spacing.radiusS),
-                                            SizedBox(height: 2),
-                                            SkeletonLoader(
-                                                width: 40,
-                                                height: 10,
-                                                borderRadius: Spacing.radiusS),
-                                          ],
-                                        ),
+                                        width: double.infinity,
+                                        height: 12,
+                                        borderRadius: Spacing.radiusS,
+                                      ),
+                                      SizedBox(height: 2),
+                                      SkeletonLoader(
+                                        width: 40,
+                                        height: 10,
+                                        borderRadius: Spacing.radiusS,
                                       ),
                                     ],
                                   ),
-                                )),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -242,10 +269,16 @@ class DashboardSkeletonLoaders {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SkeletonLoader(
-                    width: 80, height: 16, borderRadius: Spacing.radiusS),
+                  width: 80,
+                  height: 16,
+                  borderRadius: Spacing.radiusS,
+                ),
                 SizedBox(height: Spacing.space4),
                 SkeletonLoader(
-                    width: 140, height: 12, borderRadius: Spacing.radiusS),
+                  width: 140,
+                  height: 12,
+                  borderRadius: Spacing.radiusS,
+                ),
               ],
             ),
           ),
@@ -255,10 +288,16 @@ class DashboardSkeletonLoaders {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               SkeletonLoader(
-                  width: 70, height: 16, borderRadius: Spacing.radiusS),
+                width: 70,
+                height: 16,
+                borderRadius: Spacing.radiusS,
+              ),
               SizedBox(height: Spacing.space4),
               SkeletonLoader(
-                  width: 50, height: 12, borderRadius: Spacing.radiusS),
+                width: 50,
+                height: 12,
+                borderRadius: Spacing.radiusS,
+              ),
             ],
           ),
         ],
@@ -278,9 +317,15 @@ class DashboardSkeletonLoaders {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               SkeletonLoader(
-                  width: 200, height: 20, borderRadius: Spacing.radiusS),
+                width: 200,
+                height: 20,
+                borderRadius: Spacing.radiusS,
+              ),
               SkeletonLoader(
-                  width: 60, height: 16, borderRadius: Spacing.radiusS),
+                width: 60,
+                height: 16,
+                borderRadius: Spacing.radiusS,
+              ),
             ],
           ),
         ),
@@ -288,15 +333,16 @@ class DashboardSkeletonLoaders {
 
         // Transaction items
         ...List.generate(
-            5,
-            (index) => Padding(
-                  padding: EdgeInsets.only(
-                    left: Spacing.space16,
-                    right: Spacing.space16,
-                    bottom: index < 4 ? Spacing.space12 : 0,
-                  ),
-                  child: transactionItem(),
-                )),
+          5,
+          (index) => Padding(
+            padding: EdgeInsets.only(
+              left: Spacing.space16,
+              right: Spacing.space16,
+              bottom: index < 4 ? Spacing.space12 : 0,
+            ),
+            child: transactionItem(),
+          ),
+        ),
       ],
     );
   }
@@ -315,11 +361,7 @@ class ListItemSkeletonLoader extends StatelessWidget {
       ),
       child: Row(
         children: [
-          SkeletonLoader(
-            width: 48,
-            height: 48,
-            borderRadius: Spacing.radiusM,
-          ),
+          SkeletonLoader(width: 48, height: 48, borderRadius: Spacing.radiusM),
           SizedBox(width: Spacing.space12),
           Expanded(
             child: Column(
@@ -371,15 +413,22 @@ class AnalyticsSkeletonLoader extends StatelessWidget {
                 const Row(
                   children: [
                     SkeletonLoader(
-                        width: 24,
-                        height: 24,
-                        borderRadius: Spacing.radiusFull),
+                      width: 24,
+                      height: 24,
+                      borderRadius: Spacing.radiusFull,
+                    ),
                     SizedBox(width: Spacing.space8),
                     SkeletonLoader(
-                        width: 100, height: 20, borderRadius: Spacing.radiusS),
+                      width: 100,
+                      height: 20,
+                      borderRadius: Spacing.radiusS,
+                    ),
                     Spacer(),
                     SkeletonLoader(
-                        width: 170, height: 20, borderRadius: Spacing.radiusL),
+                      width: 170,
+                      height: 20,
+                      borderRadius: Spacing.radiusL,
+                    ),
                   ],
                 ),
                 const SizedBox(height: Spacing.space16),
@@ -387,11 +436,13 @@ class AnalyticsSkeletonLoader extends StatelessWidget {
                   spacing: Spacing.space12,
                   runSpacing: Spacing.space12,
                   children: List.generate(
-                      4,
-                      (index) => SkeletonLoader(
-                          width: 100 + (index * 5).toDouble(),
-                          height: 32,
-                          borderRadius: Spacing.radiusL)),
+                    4,
+                    (index) => SkeletonLoader(
+                      width: 100 + (index * 5).toDouble(),
+                      height: 32,
+                      borderRadius: Spacing.radiusL,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -403,53 +454,65 @@ class AnalyticsSkeletonLoader extends StatelessWidget {
             const Row(
               children: [
                 Expanded(
-                    child: SkeletonLoader(
-                        width: double.infinity,
-                        height: 80,
-                        borderRadius: Spacing.radiusL)),
+                  child: SkeletonLoader(
+                    width: double.infinity,
+                    height: 80,
+                    borderRadius: Spacing.radiusL,
+                  ),
+                ),
                 SizedBox(width: Spacing.space12),
                 Expanded(
-                    child: SkeletonLoader(
-                        width: double.infinity,
-                        height: 80,
-                        borderRadius: Spacing.radiusL)),
+                  child: SkeletonLoader(
+                    width: double.infinity,
+                    height: 80,
+                    borderRadius: Spacing.radiusL,
+                  ),
+                ),
                 SizedBox(width: Spacing.space12),
                 Expanded(
-                    child: SkeletonLoader(
-                        width: double.infinity,
-                        height: 80,
-                        borderRadius: Spacing.radiusL)),
+                  child: SkeletonLoader(
+                    width: double.infinity,
+                    height: 80,
+                    borderRadius: Spacing.radiusL,
+                  ),
+                ),
               ],
             )
           else ...[
             const Row(
               children: [
                 Expanded(
-                    child: SkeletonLoader(
-                        width: double.infinity,
-                        height: 80,
-                        borderRadius: Spacing.radiusL)),
+                  child: SkeletonLoader(
+                    width: double.infinity,
+                    height: 80,
+                    borderRadius: Spacing.radiusL,
+                  ),
+                ),
                 SizedBox(width: Spacing.space12),
                 Expanded(
-                    child: SkeletonLoader(
-                        width: double.infinity,
-                        height: 80,
-                        borderRadius: Spacing.radiusL)),
+                  child: SkeletonLoader(
+                    width: double.infinity,
+                    height: 80,
+                    borderRadius: Spacing.radiusL,
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: Spacing.space8),
             const SkeletonLoader(
-                width: double.infinity,
-                height: 80,
-                borderRadius: Spacing.radiusL),
+              width: double.infinity,
+              height: 80,
+              borderRadius: Spacing.radiusL,
+            ),
           ],
           const SizedBox(height: Spacing.space16),
 
           // Spending trend chart skeleton
           const SkeletonLoader(
-              width: double.infinity,
-              height: 220,
-              borderRadius: Spacing.radiusL),
+            width: double.infinity,
+            height: 220,
+            borderRadius: Spacing.radiusL,
+          ),
           const SizedBox(height: Spacing.space16),
 
           // Category breakdown and budget progress skeletons
@@ -458,29 +521,35 @@ class AnalyticsSkeletonLoader extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                        child: SkeletonLoader(
-                            width: double.infinity,
-                            height: 260,
-                            borderRadius: Spacing.radiusL)),
+                      child: SkeletonLoader(
+                        width: double.infinity,
+                        height: 260,
+                        borderRadius: Spacing.radiusL,
+                      ),
+                    ),
                     SizedBox(width: Spacing.space16),
                     Expanded(
-                        child: SkeletonLoader(
-                            width: double.infinity,
-                            height: 260,
-                            borderRadius: Spacing.radiusL)),
+                      child: SkeletonLoader(
+                        width: double.infinity,
+                        height: 260,
+                        borderRadius: Spacing.radiusL,
+                      ),
+                    ),
                   ],
                 )
               : const Column(
                   children: [
                     SkeletonLoader(
-                        width: double.infinity,
-                        height: 260,
-                        borderRadius: Spacing.radiusL),
+                      width: double.infinity,
+                      height: 260,
+                      borderRadius: Spacing.radiusL,
+                    ),
                     SizedBox(height: Spacing.space16),
                     SkeletonLoader(
-                        width: double.infinity,
-                        height: 260,
-                        borderRadius: Spacing.radiusL),
+                      width: double.infinity,
+                      height: 260,
+                      borderRadius: Spacing.radiusL,
+                    ),
                   ],
                 ),
           SizedBox(height: MediaQuery.of(context).size.height * 0.1),

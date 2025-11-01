@@ -50,21 +50,13 @@ class _TransactionDetailsModalState extends State<TransactionDetailsModal>
       vsync: this,
     );
 
-    _slideAnimation = Tween<double>(
-      begin: 1.0,
-      end: 0.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+    _slideAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
 
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
 
     _animationController.forward();
   }
@@ -90,8 +82,10 @@ class _TransactionDetailsModalState extends State<TransactionDetailsModal>
 
     if (dragDistance > 0) {
       // Only allow downward swipes
-      final newValue =
-          (_animationController.value - dragDistance * 2).clamp(0.0, 1.0);
+      final newValue = (_animationController.value - dragDistance * 2).clamp(
+        0.0,
+        1.0,
+      );
       _animationController.value = newValue;
     }
   }
@@ -120,8 +114,10 @@ class _TransactionDetailsModalState extends State<TransactionDetailsModal>
             return Opacity(
               opacity: _fadeAnimation.value,
               child: Transform.translate(
-                offset: Offset(0,
-                    MediaQuery.of(context).size.height * _slideAnimation.value),
+                offset: Offset(
+                  0,
+                  MediaQuery.of(context).size.height * _slideAnimation.value,
+                ),
                 child: GestureDetector(
                   onTap: () {}, // Prevent dismissal when tapping modal content
                   onVerticalDragUpdate: _onVerticalDragUpdate,
@@ -142,13 +138,15 @@ class _TransactionDetailsModalState extends State<TransactionDetailsModal>
                           children: [
                             // Drag handle
                             Container(
-                              margin:
-                                  const EdgeInsets.only(top: Spacing.space12),
+                              margin: const EdgeInsets.only(
+                                top: Spacing.space12,
+                              ),
                               width: 40,
                               height: 4,
                               decoration: BoxDecoration(
-                                color: AppColors.textSecondary
-                                    .withValues(alpha: 0.3),
+                                color: AppColors.textSecondary.withValues(
+                                  alpha: 0.3,
+                                ),
                                 borderRadius: BorderRadius.circular(2),
                               ),
                             ),
@@ -300,9 +298,7 @@ class _TransactionDetailsModalState extends State<TransactionDetailsModal>
       decoration: BoxDecoration(
         color: AppColors.background,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: AppColors.border.withValues(alpha: 0.5),
-        ),
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.5)),
       ),
       child: Row(
         children: [
@@ -313,11 +309,7 @@ class _TransactionDetailsModalState extends State<TransactionDetailsModal>
               color: category.color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(
-              category.icon,
-              color: category.color,
-              size: 24,
-            ),
+            child: Icon(category.icon, color: category.color, size: 24),
           ),
           const SizedBox(width: Spacing.space16),
           Expanded(
@@ -380,7 +372,8 @@ class _TransactionDetailsModalState extends State<TransactionDetailsModal>
         _buildDetailRow(
           'Created',
           DateFormatter.formatDisplay(
-              widget.transaction.createdAt ?? widget.transaction.date),
+            widget.transaction.createdAt ?? widget.transaction.date,
+          ),
           Icons.access_time_outlined,
         ),
       ],
@@ -399,9 +392,7 @@ class _TransactionDetailsModalState extends State<TransactionDetailsModal>
       decoration: BoxDecoration(
         color: AppColors.background,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AppColors.border.withValues(alpha: 0.5),
-        ),
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.5)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -413,11 +404,7 @@ class _TransactionDetailsModalState extends State<TransactionDetailsModal>
               color: AppColors.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(
-              icon,
-              color: AppColors.primary,
-              size: 20,
-            ),
+            child: Icon(icon, color: AppColors.primary, size: 20),
           ),
           const SizedBox(width: Spacing.space12),
           Expanded(
@@ -523,8 +510,8 @@ class _TransactionDetailsModalState extends State<TransactionDetailsModal>
 
     // Dispatch delete event
     context.read<TransactionsBloc>().add(
-          DeleteTransaction(widget.transaction.id),
-        );
+      DeleteTransaction(widget.transaction.id),
+    );
 
     // Close the modal
     _dismissModal();
@@ -536,9 +523,7 @@ class _TransactionDetailsModalState extends State<TransactionDetailsModal>
         backgroundColor: Colors.green,
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.all(Spacing.space16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
     );
   }
@@ -563,9 +548,7 @@ class DeleteConfirmationDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return AlertDialog(
       backgroundColor: AppColors.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       title: Row(
         children: [
           Container(

@@ -77,10 +77,7 @@ class TransactionDetailsForm extends StatelessWidget {
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(Spacing.radiusL),
-              borderSide: const BorderSide(
-                color: AppColors.border,
-                width: 1.5,
-              ),
+              borderSide: const BorderSide(color: AppColors.border, width: 1.5),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(Spacing.radiusL),
@@ -91,17 +88,11 @@ class TransactionDetailsForm extends StatelessWidget {
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(Spacing.radiusL),
-              borderSide: const BorderSide(
-                color: AppColors.error,
-                width: 2.0,
-              ),
+              borderSide: const BorderSide(color: AppColors.error, width: 2.0),
             ),
             focusedErrorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(Spacing.radiusL),
-              borderSide: const BorderSide(
-                color: AppColors.error,
-                width: 2.0,
-              ),
+              borderSide: const BorderSide(color: AppColors.error, width: 2.0),
             ),
             filled: true,
             fillColor: AppColors.surface,
@@ -111,19 +102,13 @@ class TransactionDetailsForm extends StatelessWidget {
               color: AppColors.textSecondary,
             ),
           ),
-          style: AppTypography.bodyLarge.copyWith(
-            color: AppColors.textPrimary,
-          ),
+          style: AppTypography.bodyLarge.copyWith(color: AppColors.textPrimary),
         ),
         if (hasError) ...[
           const SizedBox(height: Spacing.space4),
           Row(
             children: [
-              const Icon(
-                Icons.error_outline,
-                size: 16,
-                color: AppColors.error,
-              ),
+              const Icon(Icons.error_outline, size: 16, color: AppColors.error),
               const SizedBox(width: Spacing.space4),
               Expanded(
                 child: Text(
@@ -237,11 +222,7 @@ class TransactionDetailsForm extends StatelessWidget {
           const SizedBox(height: Spacing.space8),
           Row(
             children: [
-              const Icon(
-                Icons.error_outline,
-                size: 16,
-                color: AppColors.error,
-              ),
+              const Icon(Icons.error_outline, size: 16, color: AppColors.error),
               const SizedBox(width: Spacing.space4),
               Expanded(
                 child: Text(
@@ -285,10 +266,7 @@ class TransactionDetailsForm extends StatelessWidget {
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(Spacing.radiusL),
-              borderSide: const BorderSide(
-                color: AppColors.border,
-                width: 1.5,
-              ),
+              borderSide: const BorderSide(color: AppColors.border, width: 1.5),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(Spacing.radiusL),
@@ -299,17 +277,11 @@ class TransactionDetailsForm extends StatelessWidget {
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(Spacing.radiusL),
-              borderSide: const BorderSide(
-                color: AppColors.error,
-                width: 2.0,
-              ),
+              borderSide: const BorderSide(color: AppColors.error, width: 2.0),
             ),
             focusedErrorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(Spacing.radiusL),
-              borderSide: const BorderSide(
-                color: AppColors.error,
-                width: 2.0,
-              ),
+              borderSide: const BorderSide(color: AppColors.error, width: 2.0),
             ),
             filled: true,
             fillColor: AppColors.surface,
@@ -319,19 +291,13 @@ class TransactionDetailsForm extends StatelessWidget {
               color: AppColors.textSecondary,
             ),
           ),
-          style: AppTypography.bodyLarge.copyWith(
-            color: AppColors.textPrimary,
-          ),
+          style: AppTypography.bodyLarge.copyWith(color: AppColors.textPrimary),
         ),
         if (hasError) ...[
           const SizedBox(height: Spacing.space4),
           Row(
             children: [
-              const Icon(
-                Icons.error_outline,
-                size: 16,
-                color: AppColors.error,
-              ),
+              const Icon(Icons.error_outline, size: 16, color: AppColors.error),
               const SizedBox(width: Spacing.space4),
               Expanded(
                 child: Text(
@@ -359,9 +325,9 @@ class TransactionDetailsForm extends StatelessWidget {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(context).colorScheme.copyWith(
-                  primary: AppColors.primary,
-                  surface: AppColors.surface,
-                ),
+              primary: AppColors.primary,
+              surface: AppColors.surface,
+            ),
           ),
           child: child!,
         );
@@ -381,9 +347,9 @@ class TransactionDetailsForm extends StatelessWidget {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(context).colorScheme.copyWith(
-                  primary: AppColors.primary,
-                  surface: AppColors.surface,
-                ),
+              primary: AppColors.primary,
+              surface: AppColors.surface,
+            ),
           ),
           child: child!,
         );

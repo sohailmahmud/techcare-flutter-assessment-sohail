@@ -81,10 +81,7 @@ class _SpendingTrendChartState extends State<SpendingTrendChart>
           const SizedBox(height: Spacing.space16),
           Flexible(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                minHeight: 180,
-                maxHeight: 220,
-              ),
+              constraints: const BoxConstraints(minHeight: 180, maxHeight: 220),
               child: widget.isLoading ? _buildLoadingState() : _buildChart(),
             ),
           ),
@@ -257,18 +254,17 @@ class _SpendingTrendChartState extends State<SpendingTrendChart>
       titlesData: _buildTitlesData(),
       borderData: _buildBorderData(),
       minX: 0,
-      maxX: (widget.trendData.incomePoints.length
-                      .compareTo(widget.trendData.expensePoints.length) >
-                  0
-              ? widget.trendData.incomePoints.length
-              : widget.trendData.expensePoints.length - 1)
-          .toDouble(),
+      maxX:
+          (widget.trendData.incomePoints.length.compareTo(
+                        widget.trendData.expensePoints.length,
+                      ) >
+                      0
+                  ? widget.trendData.incomePoints.length
+                  : widget.trendData.expensePoints.length - 1)
+              .toDouble(),
       minY: 0,
       maxY: maxY,
-      lineBarsData: [
-        _buildIncomeLineBarData(),
-        _buildExpenseLineBarData(),
-      ],
+      lineBarsData: [_buildIncomeLineBarData(), _buildExpenseLineBarData()],
       lineTouchData: _buildTouchData(),
       clipData: const FlClipData.all(),
     );
@@ -319,8 +315,10 @@ class _SpendingTrendChartState extends State<SpendingTrendChart>
   }
 
   Widget _buildBottomTitleWidgets(double value, TitleMeta meta) {
-    final maxIndex = widget.trendData.incomePoints.length
-                .compareTo(widget.trendData.expensePoints.length) >
+    final maxIndex =
+        widget.trendData.incomePoints.length.compareTo(
+              widget.trendData.expensePoints.length,
+            ) >
             0
         ? widget.trendData.incomePoints.length
         : widget.trendData.expensePoints.length;
@@ -375,10 +373,7 @@ class _SpendingTrendChartState extends State<SpendingTrendChart>
       spots: _buildSpots(isIncome: true),
       isCurved: true,
       gradient: LinearGradient(
-        colors: [
-          AppColors.income.withValues(alpha: 0.8),
-          AppColors.income,
-        ],
+        colors: [AppColors.income.withValues(alpha: 0.8), AppColors.income],
       ),
       barWidth: 3,
       isStrokeCapRound: true,
@@ -410,10 +405,7 @@ class _SpendingTrendChartState extends State<SpendingTrendChart>
       spots: _buildSpots(isIncome: false),
       isCurved: true,
       gradient: LinearGradient(
-        colors: [
-          AppColors.expense.withValues(alpha: 0.8),
-          AppColors.expense,
-        ],
+        colors: [AppColors.expense.withValues(alpha: 0.8), AppColors.expense],
       ),
       barWidth: 3,
       isStrokeCapRound: true,
@@ -467,25 +459,26 @@ class _SpendingTrendChartState extends State<SpendingTrendChart>
       ),
       getTouchedSpotIndicator:
           (LineChartBarData barData, List<int> spotIndexes) {
-        return spotIndexes.map((spotIndex) {
-          return TouchedSpotIndicatorData(
-            FlLine(
-              color: barData.gradient?.colors.first ?? AppColors.primary,
-              strokeWidth: 2,
-              dashArray: [5, 5],
-            ),
-            FlDotData(
-              getDotPainter: (spot, percent, barData, index) =>
-                  FlDotCirclePainter(
-                radius: 6,
-                color: barData.gradient?.colors.first ?? AppColors.primary,
-                strokeWidth: 3,
-                strokeColor: AppColors.surface,
-              ),
-            ),
-          );
-        }).toList();
-      },
+            return spotIndexes.map((spotIndex) {
+              return TouchedSpotIndicatorData(
+                FlLine(
+                  color: barData.gradient?.colors.first ?? AppColors.primary,
+                  strokeWidth: 2,
+                  dashArray: [5, 5],
+                ),
+                FlDotData(
+                  getDotPainter: (spot, percent, barData, index) =>
+                      FlDotCirclePainter(
+                        radius: 6,
+                        color:
+                            barData.gradient?.colors.first ?? AppColors.primary,
+                        strokeWidth: 3,
+                        strokeColor: AppColors.surface,
+                      ),
+                ),
+              );
+            }).toList();
+          },
     );
   }
 
@@ -497,7 +490,8 @@ class _SpendingTrendChartState extends State<SpendingTrendChart>
         fontSize: 12,
       );
 
-      final dataPoint = touchedSpot.barIndex == 0 &&
+      final dataPoint =
+          touchedSpot.barIndex == 0 &&
               touchedSpot.spotIndex < widget.trendData.incomePoints.length
           ? widget.trendData.incomePoints[touchedSpot.spotIndex]
           : widget.trendData.expensePoints[touchedSpot.spotIndex];
@@ -557,7 +551,7 @@ class _SpendingTrendChartState extends State<SpendingTrendChart>
       'Sep',
       'Oct',
       'Nov',
-      'Dec'
+      'Dec',
     ];
     return months[month - 1];
   }
@@ -575,7 +569,7 @@ class _SpendingTrendChartState extends State<SpendingTrendChart>
       'September',
       'October',
       'November',
-      'December'
+      'December',
     ];
     return months[month - 1];
   }

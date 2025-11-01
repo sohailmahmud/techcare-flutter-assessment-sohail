@@ -100,15 +100,9 @@ class AppTheme {
         }),
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return const IconThemeData(
-              color: AppColors.primary,
-              size: 24,
-            );
+            return const IconThemeData(color: AppColors.primary, size: 24);
           }
-          return const IconThemeData(
-            color: AppColors.textSecondary,
-            size: 24,
-          );
+          return const IconThemeData(color: AppColors.textSecondary, size: 24);
         }),
         indicatorColor: AppColors.primary.withValues(alpha: 0.12),
         indicatorShape: RoundedRectangleBorder(
@@ -140,36 +134,51 @@ class AppTheme {
         ),
       ),
       textTheme: TextTheme(
-        displayLarge:
-            AppTypography.displayLarge.copyWith(color: AppColors.textPrimary),
-        displayMedium:
-            AppTypography.displayMedium.copyWith(color: AppColors.textPrimary),
-        displaySmall:
-            AppTypography.displaySmall.copyWith(color: AppColors.textPrimary),
-        headlineLarge:
-            AppTypography.headlineLarge.copyWith(color: AppColors.textPrimary),
-        headlineMedium:
-            AppTypography.headlineMedium.copyWith(color: AppColors.textPrimary),
-        headlineSmall:
-            AppTypography.headlineSmall.copyWith(color: AppColors.textPrimary),
-        titleLarge:
-            AppTypography.titleLarge.copyWith(color: AppColors.textPrimary),
-        titleMedium:
-            AppTypography.titleMedium.copyWith(color: AppColors.textPrimary),
-        titleSmall:
-            AppTypography.titleSmall.copyWith(color: AppColors.textPrimary),
-        bodyLarge:
-            AppTypography.bodyLarge.copyWith(color: AppColors.textPrimary),
-        bodyMedium:
-            AppTypography.bodyMedium.copyWith(color: AppColors.textPrimary),
-        bodySmall:
-            AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
-        labelLarge:
-            AppTypography.labelLarge.copyWith(color: AppColors.textPrimary),
-        labelMedium:
-            AppTypography.labelMedium.copyWith(color: AppColors.textSecondary),
-        labelSmall:
-            AppTypography.labelSmall.copyWith(color: AppColors.textSecondary),
+        displayLarge: AppTypography.displayLarge.copyWith(
+          color: AppColors.textPrimary,
+        ),
+        displayMedium: AppTypography.displayMedium.copyWith(
+          color: AppColors.textPrimary,
+        ),
+        displaySmall: AppTypography.displaySmall.copyWith(
+          color: AppColors.textPrimary,
+        ),
+        headlineLarge: AppTypography.headlineLarge.copyWith(
+          color: AppColors.textPrimary,
+        ),
+        headlineMedium: AppTypography.headlineMedium.copyWith(
+          color: AppColors.textPrimary,
+        ),
+        headlineSmall: AppTypography.headlineSmall.copyWith(
+          color: AppColors.textPrimary,
+        ),
+        titleLarge: AppTypography.titleLarge.copyWith(
+          color: AppColors.textPrimary,
+        ),
+        titleMedium: AppTypography.titleMedium.copyWith(
+          color: AppColors.textPrimary,
+        ),
+        titleSmall: AppTypography.titleSmall.copyWith(
+          color: AppColors.textPrimary,
+        ),
+        bodyLarge: AppTypography.bodyLarge.copyWith(
+          color: AppColors.textPrimary,
+        ),
+        bodyMedium: AppTypography.bodyMedium.copyWith(
+          color: AppColors.textPrimary,
+        ),
+        bodySmall: AppTypography.bodySmall.copyWith(
+          color: AppColors.textSecondary,
+        ),
+        labelLarge: AppTypography.labelLarge.copyWith(
+          color: AppColors.textPrimary,
+        ),
+        labelMedium: AppTypography.labelMedium.copyWith(
+          color: AppColors.textSecondary,
+        ),
+        labelSmall: AppTypography.labelSmall.copyWith(
+          color: AppColors.textSecondary,
+        ),
       ),
     );
   }

@@ -12,7 +12,7 @@ class SyncNotificationService {
   final _controller = StreamController<SyncResult>.broadcast();
   GlobalKey<ScaffoldMessengerState>? _scaffoldMessengerKey;
   Future<Either<dynamic, SyncResult>> Function(List<ItemSyncResult>)?
-      _retryHandler;
+  _retryHandler;
 
   Stream<SyncResult> get stream => _controller.stream;
 
@@ -21,8 +21,8 @@ class SyncNotificationService {
   }
 
   void setRetryHandler(
-      Future<Either<dynamic, SyncResult>> Function(List<ItemSyncResult>)
-          handler) {
+    Future<Either<dynamic, SyncResult>> Function(List<ItemSyncResult>) handler,
+  ) {
     _retryHandler = handler;
   }
 
@@ -47,30 +47,32 @@ class SyncNotificationService {
         } else {
           // Show a SnackBar with an inline Details button (in the content)
           // and a Retry action (SnackBarAction) that triggers immediate retry.
-          messenger.showSnackBar(SnackBar(
-            content: Row(
-              children: [
-                Expanded(child: Text(message)),
-                TextButton(
-                  onPressed: () => _showFailureDialog(result),
-                  child: const Text(
-                    'Details',
-                    style: TextStyle(color: Colors.white),
+          messenger.showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  Expanded(child: Text(message)),
+                  TextButton(
+                    onPressed: () => _showFailureDialog(result),
+                    child: const Text(
+                      'Details',
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
-                )
-              ],
+                ],
+              ),
+              action: _retryHandler != null
+                  ? SnackBarAction(
+                      label: 'Retry',
+                      onPressed: () async {
+                        try {
+                          await _retryHandler?.call(result.failed);
+                        } catch (_) {}
+                      },
+                    )
+                  : null,
             ),
-            action: _retryHandler != null
-                ? SnackBarAction(
-                    label: 'Retry',
-                    onPressed: () async {
-                      try {
-                        await _retryHandler?.call(result.failed);
-                      } catch (_) {}
-                    },
-                  )
-                : null,
-          ));
+          );
         }
       }
     } catch (_) {
@@ -78,51 +80,53 @@ class SyncNotificationService {
     }
   }
 
-    void _showFailureDialog(SyncResult result) {
-      final ctx = _scaffoldMessengerKey?.currentContext;
-      if (ctx == null) return;
+  void _showFailureDialog(SyncResult result) {
+    final ctx = _scaffoldMessengerKey?.currentContext;
+    if (ctx == null) return;
 
-      showDialog(
-        context: ctx,
-        builder: (context) {
-          return AlertDialog(
-            title: const Text('Sync Failures'),
-            content: SizedBox(
-              width: double.maxFinite,
-              child: ListView.separated(
-                shrinkWrap: true,
-                itemCount: result.failed.length,
-                separatorBuilder: (_, __) => const Divider(),
-                itemBuilder: (context, index) {
-                  final item = result.failed[index];
-                  return ListTile(
-                    title: Text('${item.operationType.toUpperCase()} ${item.resourceType}'),
-                    subtitle: Text(item.errorMessage),
-                    isThreeLine: true,
-                  );
-                },
-              ),
+    showDialog(
+      context: ctx,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Sync Failures'),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: ListView.separated(
+              shrinkWrap: true,
+              itemCount: result.failed.length,
+              separatorBuilder: (_, __) => const Divider(),
+              itemBuilder: (context, index) {
+                final item = result.failed[index];
+                return ListTile(
+                  title: Text(
+                    '${item.operationType.toUpperCase()} ${item.resourceType}',
+                  ),
+                  subtitle: Text(item.errorMessage),
+                  isThreeLine: true,
+                );
+              },
             ),
-            actions: [
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Close'),
+            ),
+            if (_retryHandler != null)
               TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Close'),
+                onPressed: () async {
+                  try {
+                    Navigator.of(context).pop();
+                    await _retryHandler?.call(result.failed);
+                  } catch (_) {}
+                },
+                child: const Text('Retry'),
               ),
-              if (_retryHandler != null)
-                TextButton(
-                  onPressed: () async {
-                    try {
-                      Navigator.of(context).pop();
-                      await _retryHandler?.call(result.failed);
-                    } catch (_) {}
-                  },
-                  child: const Text('Retry'),
-                ),
-            ],
-          );
-        },
-      );
-    }
+          ],
+        );
+      },
+    );
+  }
 
   void dispose() {
     _controller.close();

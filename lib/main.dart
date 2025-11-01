@@ -31,8 +31,7 @@ class FinTrackApp extends StatefulWidget {
   State<FinTrackApp> createState() => _FinTrackAppState();
 }
 
-class _FinTrackAppState extends State<FinTrackApp>
-    with WidgetsBindingObserver {
+class _FinTrackAppState extends State<FinTrackApp> with WidgetsBindingObserver {
   final scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
   @override
@@ -42,7 +41,9 @@ class _FinTrackAppState extends State<FinTrackApp>
 
     // Register the key with SyncNotificationService if available.
     try {
-      di.sl<SyncNotificationService>().setScaffoldMessengerKey(scaffoldMessengerKey);
+      di.sl<SyncNotificationService>().setScaffoldMessengerKey(
+        scaffoldMessengerKey,
+      );
     } catch (_) {
       // If the service isn't available yet, ignore.
     }
@@ -70,7 +71,10 @@ class _FinTrackAppState extends State<FinTrackApp>
       final cacheManager = di.sl<HiveCacheManager>();
       if (state == AppLifecycleState.paused) {
         // Soft invalidation marks entries expired but keeps pending ops.
-        cacheManager.invalidateCache(invalidateAll: true, type: CacheInvalidationType.soft);
+        cacheManager.invalidateCache(
+          invalidateAll: true,
+          type: CacheInvalidationType.soft,
+        );
       } else if (state == AppLifecycleState.detached) {
         // Hard clear on app termination
         cacheManager.clearAll();
@@ -94,16 +98,18 @@ class _FinTrackAppState extends State<FinTrackApp>
           // Wrap app content to intercept back button at root and offer
           // an exit dialog that allows clearing cache.
           return ConnectivityBanner(
-            child: Builder(builder: (context) {
-              return PopScope<void>(
-                onPopInvokedWithResult: (didPop, result) async {
-                  if (!didPop) {
-                    await _onWillPop(context);
-                  }
-                },
-                child: child!,
-              );
-            }),
+            child: Builder(
+              builder: (context) {
+                return PopScope<void>(
+                  onPopInvokedWithResult: (didPop, result) async {
+                    if (!didPop) {
+                      await _onWillPop(context);
+                    }
+                  },
+                  child: child!,
+                );
+              },
+            ),
           );
         },
       ),
@@ -119,7 +125,9 @@ class _FinTrackAppState extends State<FinTrackApp>
       builder: (ctx) {
         return AlertDialog(
           title: const Text('Exit app'),
-          content: const Text('Do you want to exit the app? You can also clear cached data before exiting.'),
+          content: const Text(
+            'Do you want to exit the app? You can also clear cached data before exiting.',
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(_ExitChoice.cancel),

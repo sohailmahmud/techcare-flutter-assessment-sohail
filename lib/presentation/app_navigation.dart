@@ -27,14 +27,14 @@ class _AppNavigationPageState extends State<AppNavigationPage> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvokedWithResult:(didPop, result){
-        if(didPop) return;
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
         final router = GoRouter.of(context);
-          if (router.state.matchedLocation != '/') {
-            router.go('/');
-          } else {
-            SystemNavigator.pop(); // exit app
-          }
+        if (router.state.matchedLocation != '/') {
+          router.go('/');
+        } else {
+          SystemNavigator.pop(); // exit app
+        }
       },
       child: Scaffold(
         body: widget.child,

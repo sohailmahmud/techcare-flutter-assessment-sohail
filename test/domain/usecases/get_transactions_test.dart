@@ -24,10 +24,7 @@ void main() {
   });
 
   group('GetTransactions UseCase', () {
-    const query = TransactionQuery(
-      page: 1,
-      limit: 20,
-    );
+    const query = TransactionQuery(page: 1, limit: 20);
 
     final mockTransactions = <Transaction>[];
     const mockMeta = PaginationMeta(
@@ -44,8 +41,9 @@ void main() {
 
     test('should get transactions from repository', () async {
       // Arrange
-      when(() => mockRepository.getTransactions(any()))
-          .thenAnswer((_) async => Right(mockResponse));
+      when(
+        () => mockRepository.getTransactions(any()),
+      ).thenAnswer((_) async => Right(mockResponse));
 
       // Act
       final result = await usecase(query);
@@ -59,8 +57,9 @@ void main() {
     test('should return failure when repository fails', () async {
       // Arrange
       const failure = ServerFailure('Server error');
-      when(() => mockRepository.getTransactions(any()))
-          .thenAnswer((_) async => const Left(failure));
+      when(
+        () => mockRepository.getTransactions(any()),
+      ).thenAnswer((_) async => const Left(failure));
 
       // Act
       final result = await usecase(query);
@@ -79,8 +78,9 @@ void main() {
         type: TransactionType.expense,
       );
 
-      when(() => mockRepository.getTransactions(customQuery))
-          .thenAnswer((_) async => Right(mockResponse));
+      when(
+        () => mockRepository.getTransactions(customQuery),
+      ).thenAnswer((_) async => Right(mockResponse));
 
       // Act
       await usecase(customQuery);
@@ -99,8 +99,9 @@ void main() {
         endDate: DateTime(2024, 1, 31),
       );
 
-      when(() => mockRepository.getTransactions(searchQuery))
-          .thenAnswer((_) async => Right(mockResponse));
+      when(
+        () => mockRepository.getTransactions(searchQuery),
+      ).thenAnswer((_) async => Right(mockResponse));
 
       // Act
       final result = await usecase(searchQuery);

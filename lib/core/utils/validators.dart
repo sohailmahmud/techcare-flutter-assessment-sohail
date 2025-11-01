@@ -27,8 +27,11 @@ class Validators {
   }
 
   /// Validate minimum length
-  static String? validateMinLength(String? value, int minLength,
-      [String fieldName = 'Field']) {
+  static String? validateMinLength(
+    String? value,
+    int minLength, [
+    String fieldName = 'Field',
+  ]) {
     if (value == null || value.isEmpty) {
       return '$fieldName is required';
     }

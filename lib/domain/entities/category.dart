@@ -21,7 +21,8 @@ class Category extends Equatable {
 
   // Helper methods for API integration
   String get iconName => _getIconName(icon);
-  String get colorHex => '#${color.toARGB32().toRadixString(16).substring(2).toUpperCase()}';
+  String get colorHex =>
+      '#${color.toARGB32().toRadixString(16).substring(2).toUpperCase()}';
 
   static String _getIconName(IconData icon) {
     // Map common icons to string names for API
@@ -103,6 +104,7 @@ class AppCategories {
     final response = await assetDataSource.getCategories();
     return response.categories.map((model) => model.toEntity()).toList();
   }
+
   /// Loads expense categories by grouping transaction categories from transactions.json
   static Future<List<Category>> expenseCategories() async {
     final assetDataSource = AssetDataSource();
@@ -111,13 +113,15 @@ class AppCategories {
     for (final txn in transactionsResponse.data) {
       if (txn.typeString.toLowerCase() == 'expense') {
         final cat = txn.category;
-        expenseCategories.add(Category(
-          id: cat.id,
-          name: cat.name,
-          icon: Category._getIconFromName(cat.icon),
-          color: Category._getColorFromHex(cat.color),
-          budget: cat.budget,
-        ));
+        expenseCategories.add(
+          Category(
+            id: cat.id,
+            name: cat.name,
+            icon: Category._getIconFromName(cat.icon),
+            color: Category._getColorFromHex(cat.color),
+            budget: cat.budget,
+          ),
+        );
       }
     }
     return expenseCategories.toList();
@@ -131,13 +135,15 @@ class AppCategories {
     for (final txn in transactionsResponse.data) {
       if (txn.typeString.toLowerCase() == 'income') {
         final cat = txn.category;
-        incomeCategories.add(Category(
-          id: cat.id,
-          name: cat.name,
-          icon: Category._getIconFromName(cat.icon),
-          color: Category._getColorFromHex(cat.color),
-          budget: cat.budget,
-        ));
+        incomeCategories.add(
+          Category(
+            id: cat.id,
+            name: cat.name,
+            icon: Category._getIconFromName(cat.icon),
+            color: Category._getColorFromHex(cat.color),
+            budget: cat.budget,
+          ),
+        );
       }
     }
     return incomeCategories.toList();

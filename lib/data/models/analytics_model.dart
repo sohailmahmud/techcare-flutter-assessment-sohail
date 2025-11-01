@@ -98,41 +98,51 @@ class AnalyticsDataModel {
       netBalance: summary.netBalance,
       savingsRate: summary.savingsRate,
       totalTransactions: categoryBreakdown.fold<int>(
-        0, (sum, cat) => sum + cat.transactionCount),
+        0,
+        (sum, cat) => sum + cat.transactionCount,
+      ),
       averageTransactionAmount: categoryBreakdown.isNotEmpty
           ? categoryBreakdown.map((c) => c.amount).reduce((a, b) => a + b) /
-              categoryBreakdown.length
+                categoryBreakdown.length
           : 0.0,
       lastUpdated: DateTime.now(),
       categoryBreakdown: categoryBreakdown
-          .map((model) => CategoryBreakdown(
-                category: model.category.toEntity(),
-                amount: model.amount,
-                percentage: model.percentage,
-                transactionCount: model.transactionCount,
-                budget: model.budget,
-                budgetUtilization: model.budgetUtilization,
-              ))
+          .map(
+            (model) => CategoryBreakdown(
+              category: model.category.toEntity(),
+              amount: model.amount,
+              percentage: model.percentage,
+              transactionCount: model.transactionCount,
+              budget: model.budget,
+              budgetUtilization: model.budgetUtilization,
+            ),
+          )
           .toList(),
       budgetComparisons: const [], // No budget comparisons in this model
       trendData: TrendData(
         dateRange: dateRange,
         incomePoints: monthlyTrend
-            .map((trend) => ChartDataPoint(
-                  label: trend.month,
-                  value: trend.income,
-                  date: _parseMonthString(trend.month),
-                ))
+            .map(
+              (trend) => ChartDataPoint(
+                label: trend.month,
+                value: trend.income,
+                date: _parseMonthString(trend.month),
+              ),
+            )
             .toList(),
         expensePoints: monthlyTrend
-            .map((trend) => ChartDataPoint(
-                  label: trend.month,
-                  value: trend.expense,
-                  date: _parseMonthString(trend.month),
-                ))
+            .map(
+              (trend) => ChartDataPoint(
+                label: trend.month,
+                value: trend.expense,
+                date: _parseMonthString(trend.month),
+              ),
+            )
             .toList(),
       ),
-      categories: categoryBreakdown.map((model) => model.category.toEntity()).toList(),
+      categories: categoryBreakdown
+          .map((model) => model.category.toEntity())
+          .toList(),
     );
   }
 

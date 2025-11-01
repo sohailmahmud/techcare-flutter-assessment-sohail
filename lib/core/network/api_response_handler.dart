@@ -10,8 +10,10 @@ class ApiResponseHandler {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
-        return NetworkFailure(error.message ??
-            'Request timeout. Please check your internet connection.');
+        return NetworkFailure(
+          error.message ??
+              'Request timeout. Please check your internet connection.',
+        );
 
       case DioExceptionType.badResponse:
         return _handleHttpError(error.response);
@@ -21,14 +23,16 @@ class ApiResponseHandler {
 
       case DioExceptionType.connectionError:
         return const NetworkFailure(
-            'No internet connection. Please check your network settings.');
+          'No internet connection. Please check your network settings.',
+        );
 
       case DioExceptionType.badCertificate:
         return const NetworkFailure('SSL certificate error. Please try again.');
 
       case DioExceptionType.unknown:
         return UnknownFailure(
-            'An unexpected error occurred: ${error.message ?? 'Unknown error'}');
+          'An unexpected error occurred: ${error.message ?? 'Unknown error'}',
+        );
     }
   }
 
@@ -60,17 +64,20 @@ class ApiResponseHandler {
         return ValidationFailure(errorMessage, code: errorCode);
       case 401:
         return const AuthenticationFailure(
-            'Authentication failed. Please log in again.');
+          'Authentication failed. Please log in again.',
+        );
       case 403:
         return const AuthenticationFailure(
-            'Access denied. You don\'t have permission to perform this action.');
+          'Access denied. You don\'t have permission to perform this action.',
+        );
       case 404:
         return const NotFoundFailure('Resource not found');
       case 422:
         return ValidationFailure(errorMessage, code: errorCode);
       case 429:
         return const NetworkFailure(
-            'Too many requests. Please try again later.');
+          'Too many requests. Please try again later.',
+        );
       case 500:
       case 502:
       case 503:
@@ -131,8 +138,8 @@ class ApiResponseHandler {
       if (attempt < maxRetries) {
         await Future.delayed(currentDelay);
         currentDelay = Duration(
-          milliseconds:
-              (currentDelay.inMilliseconds * backoffMultiplier).round(),
+          milliseconds: (currentDelay.inMilliseconds * backoffMultiplier)
+              .round(),
         );
       }
     }
@@ -149,12 +156,14 @@ class ApiResponseHandler {
 
   /// Validate API response structure
   static Either<Failure, Map<String, dynamic>> validateApiResponse(
-      Response response) {
+    Response response,
+  ) {
     if (response.statusCode == null ||
         response.statusCode! < 200 ||
         response.statusCode! >= 300) {
       return Left(
-          ServerFailure('Invalid response status: ${response.statusCode}'));
+        ServerFailure('Invalid response status: ${response.statusCode}'),
+      );
     }
 
     final data = response.data;
@@ -180,9 +189,11 @@ class ValidationFailure extends Failure {
   final String code;
   final String? field;
 
-  const ValidationFailure(String message,
-      {this.code = 'VALIDATION_ERROR', this.field})
-      : super(message);
+  const ValidationFailure(
+    String message, {
+    this.code = 'VALIDATION_ERROR',
+    this.field,
+  }) : super(message);
 
   @override
   List<Object> get props => [message, code, if (field != null) field!];
@@ -226,12 +237,7 @@ class RetryConfig {
 }
 
 /// Network state monitoring
-enum NetworkState {
-  connected,
-  disconnected,
-  slow,
-  unknown,
-}
+enum NetworkState { connected, disconnected, slow, unknown }
 
 class NetworkStateMonitor {
   static NetworkState _currentState = NetworkState.unknown;

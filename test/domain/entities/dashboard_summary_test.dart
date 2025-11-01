@@ -46,7 +46,9 @@ void main() {
       expect(dashboardSummary.categoryExpenses, contains(categoryExpense));
       expect(dashboardSummary.recentTransactions, contains(testTransaction));
       expect(
-          dashboardSummary.lastUpdated, equals(DateTime(2024, 1, 15, 10, 30)));
+        dashboardSummary.lastUpdated,
+        equals(DateTime(2024, 1, 15, 10, 30)),
+      );
     });
 
     group('Calculated Properties', () {
@@ -56,7 +58,9 @@ void main() {
 
       test('should calculate savings rate correctly', () {
         expect(
-            dashboardSummary.savingsRate, equals(62.5)); // (5000 / 8000) * 100
+          dashboardSummary.savingsRate,
+          equals(62.5),
+        ); // (5000 / 8000) * 100
       });
 
       test('should handle zero income for savings rate', () {
@@ -119,13 +123,21 @@ void main() {
       test('should include all properties in props list', () {
         expect(dashboardSummary.props, contains(dashboardSummary.totalBalance));
         expect(
-            dashboardSummary.props, contains(dashboardSummary.monthlyIncome));
+          dashboardSummary.props,
+          contains(dashboardSummary.monthlyIncome),
+        );
         expect(
-            dashboardSummary.props, contains(dashboardSummary.monthlyExpense));
-        expect(dashboardSummary.props,
-            contains(dashboardSummary.categoryExpenses));
-        expect(dashboardSummary.props,
-            contains(dashboardSummary.recentTransactions));
+          dashboardSummary.props,
+          contains(dashboardSummary.monthlyExpense),
+        );
+        expect(
+          dashboardSummary.props,
+          contains(dashboardSummary.categoryExpenses),
+        );
+        expect(
+          dashboardSummary.props,
+          contains(dashboardSummary.recentTransactions),
+        );
         expect(dashboardSummary.props, contains(dashboardSummary.lastUpdated));
       });
     });
@@ -193,18 +205,20 @@ void main() {
       expect(categoryExpense.hashCode, equals(anotherExpense.hashCode));
     });
 
-    test('should not be equal to CategoryExpense with different properties',
-        () {
-      const differentExpense = CategoryExpense(
-        categoryId: 'cat1',
-        categoryName: 'Food',
-        amount: 300.0, // Different amount
-        percentage: 25.0,
-        transactionCount: 10,
-      );
+    test(
+      'should not be equal to CategoryExpense with different properties',
+      () {
+        const differentExpense = CategoryExpense(
+          categoryId: 'cat1',
+          categoryName: 'Food',
+          amount: 300.0, // Different amount
+          percentage: 25.0,
+          transactionCount: 10,
+        );
 
-      expect(categoryExpense, isNot(equals(differentExpense)));
-    });
+        expect(categoryExpense, isNot(equals(differentExpense)));
+      },
+    );
 
     group('Edge Cases', () {
       test('should handle zero values', () {

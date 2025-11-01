@@ -13,7 +13,8 @@ class GetTransactions
 
   @override
   Future<Either<Failure, PaginatedResponse<Transaction>>> call(
-      TransactionQuery params) async {
+    TransactionQuery params,
+  ) async {
     return await repository.getTransactions(params);
   }
 }

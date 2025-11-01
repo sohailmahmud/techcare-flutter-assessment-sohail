@@ -42,13 +42,16 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
   }
 
   void _initializeAnimations() {
-    final itemCount = math.min(widget.budgetData.length,
-        12); // Allow up to 12 animations for better performance
+    final itemCount = math.min(
+      widget.budgetData.length,
+      12,
+    ); // Allow up to 12 animations for better performance
     _controllers = List.generate(
-          itemCount,
+      itemCount,
       (index) => AnimationController(
         duration: Duration(
-            milliseconds: 1000 + (index * 50)), // Reduced delay for more items
+          milliseconds: 1000 + (index * 50),
+        ), // Reduced delay for more items
         vsync: this,
       ),
     );
@@ -56,9 +59,9 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
     _animations = _controllers.map((controller) {
       return Tween<double>(begin: 0.0, end: 1.0).animate(
         CurvedAnimation(
-            parent: controller,
-            curve: Curves
-                .easeOutCubic), // Changed from easeOutBack to avoid values > 1.0
+          parent: controller,
+          curve: Curves.easeOutCubic,
+        ), // Changed from easeOutBack to avoid values > 1.0
       );
     }).toList();
   }
@@ -94,7 +97,8 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
   bool _listEquals(List<BudgetComparison> a, List<BudgetComparison> b) {
     if (a.length != b.length) return false;
     for (int i = 0; i < a.length; i++) {
-      if (a[i].categoryId != b[i].categoryId || a[i].percentage != b[i].percentage) {
+      if (a[i].categoryId != b[i].categoryId ||
+          a[i].percentage != b[i].percentage) {
         return false;
       }
     }
@@ -140,8 +144,8 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
           widget.isLoading
               ? _buildLoadingState()
               : widget.budgetData.isEmpty
-                  ? _buildEmptyState()
-                  : _buildBudgetGrid(),
+              ? _buildEmptyState()
+              : _buildBudgetGrid(),
         ],
       ),
     );
@@ -191,8 +195,9 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
   Widget _buildOverallStatus() {
     if (widget.budgetData.isEmpty) return const SizedBox.shrink();
 
-    final overBudgetCount =
-        widget.budgetData.where((b) => b.isOverBudget).length;
+    final overBudgetCount = widget.budgetData
+        .where((b) => b.isOverBudget)
+        .length;
     final approachingCount = widget.budgetData
         .where((b) => _getBudgetStatus(b) == BudgetStatus.approaching)
         .length;
@@ -308,15 +313,17 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final availableWidth = constraints.maxWidth > 0 ? constraints.maxWidth : 300.0;
+        final availableWidth = constraints.maxWidth > 0
+            ? constraints.maxWidth
+            : 300.0;
         // Determine cross axis count based on available width and desired min item width
-  const minItemWidth = 160.0; // desired minimum card width
+        const minItemWidth = 160.0; // desired minimum card width
         int crossAxisCount = (availableWidth / minItemWidth).floor();
         if (crossAxisCount < 1) crossAxisCount = 1;
         if (crossAxisCount > 3) crossAxisCount = 3; // cap columns
 
         final itemWidth = availableWidth / crossAxisCount;
-  const baseItemHeight = 200.0; // desired base height for card
+        const baseItemHeight = 200.0; // desired base height for card
         final childAspectRatio = itemWidth / baseItemHeight;
 
         return ClipRRect(
@@ -343,7 +350,10 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
     );
   }
 
-  Widget _buildBudgetCard(BudgetComparison budget, Animation<double>? animation) {
+  Widget _buildBudgetCard(
+    BudgetComparison budget,
+    Animation<double>? animation,
+  ) {
     Widget card = _buildBudgetCardContent(budget, animation);
     if (animation != null) {
       return AnimatedBuilder(
@@ -354,10 +364,7 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
             scale: animation.value,
             child: Opacity(
               opacity: animation.value.clamp(0.0, 1.0),
-              child: _buildBudgetCardContent(
-                budget,
-                animation,
-              ),
+              child: _buildBudgetCardContent(budget, animation),
             ),
           );
         },
@@ -367,7 +374,10 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
     return card;
   }
 
-  Widget _buildBudgetCardContent(BudgetComparison budget, Animation<double>? animation) {
+  Widget _buildBudgetCardContent(
+    BudgetComparison budget,
+    Animation<double>? animation,
+  ) {
     final status = _getBudgetStatus(budget);
     final statusColor = _getStatusColor(status);
     // Improved fallback logic: match by id, then by name (case-insensitive, trimmed)
@@ -377,7 +387,9 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
       injectedCategory = byId.first;
     } else {
       final byName = widget.categories.where(
-        (cat) => cat.name.trim().toLowerCase() == budget.categoryName.trim().toLowerCase(),
+        (cat) =>
+            cat.name.trim().toLowerCase() ==
+            budget.categoryName.trim().toLowerCase(),
       );
       if (byName.isNotEmpty) {
         injectedCategory = byName.first;
@@ -398,10 +410,7 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: statusColor.withValues(alpha: 0.2),
-          width: 1,
-        ),
+        border: Border.all(color: statusColor.withValues(alpha: 0.2), width: 1),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -466,8 +475,8 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
                       status == BudgetStatus.underBudget
                           ? 'Under'
                           : status == BudgetStatus.approaching
-                              ? 'Approaching'
-                              : 'Over',
+                          ? 'Approaching'
+                          : 'Over',
                       style: AppTypography.labelSmall.copyWith(
                         color: AppColors.textSecondary,
                         fontSize: 9,
@@ -523,7 +532,6 @@ class _BudgetProgressIndicatorsState extends State<BudgetProgressIndicators>
     }
   }
 
-
   Color _getStatusColor(BudgetStatus status) {
     switch (status) {
       case BudgetStatus.underBudget:
@@ -562,7 +570,10 @@ class CompactBudgetProgress extends StatelessWidget {
         Category? resolved;
         if (categories != null) {
           resolved = categories!.firstWhere(
-            (c) => c.id == budget.categoryId || c.name.trim().toLowerCase() == budget.categoryName.trim().toLowerCase(),
+            (c) =>
+                c.id == budget.categoryId ||
+                c.name.trim().toLowerCase() ==
+                    budget.categoryName.trim().toLowerCase(),
             orElse: () => Category(
               id: '',
               name: budget.categoryName,
@@ -583,9 +594,7 @@ class CompactBudgetProgress extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppColors.surface,
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: statusColor.withValues(alpha: 0.2),
-            ),
+            border: Border.all(color: statusColor.withValues(alpha: 0.2)),
           ),
           child: Row(
             children: [
@@ -597,11 +606,7 @@ class CompactBudgetProgress extends StatelessWidget {
                   color: categoryColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
-                  categoryIcon,
-                  color: categoryColor,
-                  size: 16,
-                ),
+                child: Icon(categoryIcon, color: categoryColor, size: 16),
               ),
               const SizedBox(width: Spacing.space12),
               // Category name and progress
@@ -620,9 +625,7 @@ class CompactBudgetProgress extends StatelessWidget {
                     LinearProgressIndicator(
                       value: budget.percentage / 100,
                       backgroundColor: AppColors.border,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        statusColor,
-                      ),
+                      valueColor: AlwaysStoppedAnimation<Color>(statusColor),
                     ),
                   ],
                 ),

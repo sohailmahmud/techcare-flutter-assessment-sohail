@@ -57,8 +57,9 @@ void main() {
 
     test('should get dashboard summary from repository', () async {
       // Arrange
-      when(() => mockRepository.getDashboardSummary())
-          .thenAnswer((_) async => Right(mockSummary));
+      when(
+        () => mockRepository.getDashboardSummary(),
+      ).thenAnswer((_) async => Right(mockSummary));
 
       // Act
       final result = await usecase(NoParams());
@@ -72,8 +73,9 @@ void main() {
     test('should return failure when repository fails', () async {
       // Arrange
       const failure = ServerFailure('Failed to load dashboard');
-      when(() => mockRepository.getDashboardSummary())
-          .thenAnswer((_) async => const Left(failure));
+      when(
+        () => mockRepository.getDashboardSummary(),
+      ).thenAnswer((_) async => const Left(failure));
 
       // Act
       final result = await usecase(NoParams());
@@ -86,8 +88,9 @@ void main() {
     test('should handle network failure', () async {
       // Arrange
       const networkFailure = NetworkFailure('No internet connection');
-      when(() => mockRepository.getDashboardSummary())
-          .thenAnswer((_) async => const Left(networkFailure));
+      when(
+        () => mockRepository.getDashboardSummary(),
+      ).thenAnswer((_) async => const Left(networkFailure));
 
       // Act
       final result = await usecase(NoParams());
@@ -100,8 +103,9 @@ void main() {
     test('should handle cache failure', () async {
       // Arrange
       const cacheFailure = CacheFailure('Cache read error');
-      when(() => mockRepository.getDashboardSummary())
-          .thenAnswer((_) async => const Left(cacheFailure));
+      when(
+        () => mockRepository.getDashboardSummary(),
+      ).thenAnswer((_) async => const Left(cacheFailure));
 
       // Act
       final result = await usecase(NoParams());
@@ -113,8 +117,9 @@ void main() {
 
     test('should not require any parameters', () async {
       // Arrange
-      when(() => mockRepository.getDashboardSummary())
-          .thenAnswer((_) async => Right(mockSummary));
+      when(
+        () => mockRepository.getDashboardSummary(),
+      ).thenAnswer((_) async => Right(mockSummary));
 
       // Act
       final result = await usecase(NoParams());
@@ -135,8 +140,9 @@ void main() {
         lastUpdated: DateTime.now(),
       );
 
-      when(() => mockRepository.getDashboardSummary())
-          .thenAnswer((_) async => Right(emptySummary));
+      when(
+        () => mockRepository.getDashboardSummary(),
+      ).thenAnswer((_) async => Right(emptySummary));
 
       // Act
       final result = await usecase(NoParams());

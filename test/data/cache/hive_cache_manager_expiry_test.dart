@@ -32,10 +32,14 @@ void main() {
         await tmpDir.delete(recursive: true);
       } catch (_) {}
     });
-    
 
     test('cached transactions expire after TTL', () async {
-  const category = Category(id: 'c1', name: 'Cat', icon: Icons.category, color: Colors.grey);
+      const category = Category(
+        id: 'c1',
+        name: 'Cat',
+        icon: Icons.category,
+        color: Colors.grey,
+      );
       final tx = Transaction(
         id: 't1',
         title: 'Test',
@@ -46,7 +50,9 @@ void main() {
       );
 
       // Cache with short TTL
-      await manager.cacheTransactions([tx], ttl: const Duration(milliseconds: 100));
+      await manager.cacheTransactions([
+        tx,
+      ], ttl: const Duration(milliseconds: 100));
 
       // Immediately available
       final first = await manager.getCachedTransactions();

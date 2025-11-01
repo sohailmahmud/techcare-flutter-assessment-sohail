@@ -53,8 +53,8 @@ class _TransactionsPageState extends State<TransactionsPage>
       categoryRepository: di.sl<CategoryRepository>(),
       onApplyFilters: (filter) {
         context.read<TransactionsBloc>().add(
-              FilterTransactions(_convertToFiltersMap(filter)),
-            );
+          FilterTransactions(_convertToFiltersMap(filter)),
+        );
       },
       onClearFilters: () {
         // Clear filters by applying empty filter
@@ -137,9 +137,9 @@ class _TransactionsPageState extends State<TransactionsPage>
   void _onLoadMore() {
     final currentState = context.read<TransactionsBloc>().state;
     if (currentState is TransactionLoaded) {
-      context
-          .read<TransactionsBloc>()
-          .add(LoadTransactions(page: currentState.currentPage + 1));
+      context.read<TransactionsBloc>().add(
+        LoadTransactions(page: currentState.currentPage + 1),
+      );
     }
   }
 
@@ -214,48 +214,45 @@ class _TransactionsPageState extends State<TransactionsPage>
         systemNavigationBarIconBrightness: Brightness.dark,
       ),
       child: GestureDetector(
-        onTap:()=>FocusScope.of(context).unfocus(),
+        onTap: () => FocusScope.of(context).unfocus(),
         child: Scaffold(
-        backgroundColor: AppColors.background,
-        appBar: AppBar(
-          title: Text(
-            'Transactions',
-            style: AppTypography.titleLarge.copyWith(
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
           backgroundColor: AppColors.background,
-          foregroundColor: AppColors.textPrimary,
-          elevation: 0,
-          scrolledUnderElevation: 0,
+          appBar: AppBar(
+            title: Text(
+              'Transactions',
+              style: AppTypography.titleLarge.copyWith(
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            backgroundColor: AppColors.background,
+            foregroundColor: AppColors.textPrimary,
+            elevation: 0,
+            scrolledUnderElevation: 0,
+          ),
+          body: BlocBuilder<TransactionsBloc, TransactionsState>(
+            builder: (context, state) {
+              return Column(
+                children: [
+                  _buildSearchBar(state),
+                  Expanded(child: _buildContent(state)),
+                ],
+              );
+            },
+          ),
+          floatingActionButton: FloatingActionButton(
+            heroTag: "add_transaction_fab",
+            onPressed: _showAddTransaction,
+            backgroundColor: AppColors.primary,
+            foregroundColor: Colors.white,
+            child: const Icon(Icons.add_rounded),
+          ),
         ),
-        body: BlocBuilder<TransactionsBloc, TransactionsState>(
-          builder: (context, state) {
-            return Column(
-              children: [
-                _buildSearchBar(state),
-                Expanded(
-                  child: _buildContent(state),
-                ),
-              ],
-            );
-          },
-        ),
-        floatingActionButton: FloatingActionButton(
-          heroTag: "add_transaction_fab",
-          onPressed: _showAddTransaction,
-          backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
-          child: const Icon(Icons.add_rounded),
-        ),
-      ),
       ),
     );
   }
 
   Widget _buildSearchBar(TransactionsState state) {
-
     String currentQuery = '';
     int activeFilterCount = 0;
     bool isSearching = false;
@@ -267,7 +264,8 @@ class _TransactionsPageState extends State<TransactionsPage>
       if ((filters['categories'] as List?)?.isNotEmpty ?? false) {
         activeFilterCount++;
       }
-      if ((filters['startDate'] != null && filters['endDate'] != null) || filters['datePreset'] != null) {
+      if ((filters['startDate'] != null && filters['endDate'] != null) ||
+          filters['datePreset'] != null) {
         activeFilterCount++;
       }
       if (filters['type'] != null && filters['type'] != 'all') {
@@ -318,13 +316,14 @@ class _TransactionsPageState extends State<TransactionsPage>
       );
     }
 
-    return const Center(
-      child: CircularProgressIndicator(),
-    );
+    return const Center(child: CircularProgressIndicator());
   }
 
-  Widget _buildErrorWidget(String message,
-      {VoidCallback? onRetry, String? title}) {
+  Widget _buildErrorWidget(
+    String message, {
+    VoidCallback? onRetry,
+    String? title,
+  }) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(Spacing.space32),
@@ -349,16 +348,15 @@ class _TransactionsPageState extends State<TransactionsPage>
               Text(
                 title,
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             if (title != null) const SizedBox(height: Spacing.space8),
             Text(
               message,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color:
-                        Theme.of(context).colorScheme.onSurface.withAlpha(153),
-                  ),
+                color: Theme.of(context).colorScheme.onSurface.withAlpha(153),
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: Spacing.space24),

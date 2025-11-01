@@ -9,11 +9,13 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('RemoteDataSource integration tests (MockApiService)', () {
-  late TestableMockApiService apiService;
-  late RemoteDataSourceImpl remote;
+    late TestableMockApiService apiService;
+    late RemoteDataSourceImpl remote;
 
     setUp(() async {
-      apiService = TestableMockApiService(failureChance: 0.0); // deterministic success
+      apiService = TestableMockApiService(
+        failureChance: 0.0,
+      ); // deterministic success
       await apiService.initialize();
       remote = RemoteDataSourceImpl(apiService.service);
     });
@@ -30,19 +32,25 @@ void main() {
       expect(created.id, isNotEmpty);
     });
 
-    test('simulate timeout via failureChance producing receiveTimeout', () async {
-      // Use a high failureChance and run multiple times to hit different
-      // error types. This test asserts that when MockApiService throws a
-      // DioException with receiveTimeout, RemoteDataSource._withApiCall
-      // should surface a NetworkException (as an Exception here).
-      final flaky = TestableMockApiService(failureChance: 0.0);
-      await flaky.initialize();
-      // Force a timeout for the next call
-      flaky.forceNextError(TestableMockApiService.receiveTimeout());
-      final remoteFail = RemoteDataSourceImpl(flaky.service);
+    test(
+      'simulate timeout via failureChance producing receiveTimeout',
+      () async {
+        // Use a high failureChance and run multiple times to hit different
+        // error types. This test asserts that when MockApiService throws a
+        // DioException with receiveTimeout, RemoteDataSource._withApiCall
+        // should surface a NetworkException (as an Exception here).
+        final flaky = TestableMockApiService(failureChance: 0.0);
+        await flaky.initialize();
+        // Force a timeout for the next call
+        flaky.forceNextError(TestableMockApiService.receiveTimeout());
+        final remoteFail = RemoteDataSourceImpl(flaky.service);
 
-      expect(() async => await remoteFail.getTransactions(), throwsA(isA<Exception>()));
-    });
+        expect(
+          () async => await remoteFail.getTransactions(),
+          throwsA(isA<Exception>()),
+        );
+      },
+    );
 
     test('server 500 is mapped to ServerException', () async {
       // Forcing a server error deterministically is not supported by the
@@ -55,7 +63,12 @@ void main() {
       flaky.forceNextError(TestableMockApiService.server500());
       final remoteFail = RemoteDataSourceImpl(flaky.service);
 
-      expect(() async => await remoteFail.createTransaction((await remote.getTransactions(limit: 1)).data.first), throwsA(isA<Exception>()));
+      expect(
+        () async => await remoteFail.createTransaction(
+          (await remote.getTransactions(limit: 1)).data.first,
+        ),
+        throwsA(isA<Exception>()),
+      );
     });
 
     test('validation error (400) surfaces as ValidationException', () async {
@@ -66,21 +79,35 @@ void main() {
       flaky.forceNextError(TestableMockApiService.validation400());
       final remoteFail = RemoteDataSourceImpl(flaky.service);
 
-      expect(() async => await remoteFail.createTransaction((await remote.getTransactions(limit: 1)).data.first), throwsA(isA<Exception>()));
+      expect(
+        () async => await remoteFail.createTransaction(
+          (await remote.getTransactions(limit: 1)).data.first,
+        ),
+        throwsA(isA<Exception>()),
+      );
     });
 
-    test('offline mode: when service is unreachable throws NetworkException', () async {
-      // Simulate offline by creating a MockApiService that throws connectionError
-      final offline = TestableMockApiService(failureChance: 0.0);
-      await offline.initialize();
-      offline.forceNextError(TestableMockApiService.connectionError());
-      final remoteOffline = RemoteDataSourceImpl(offline.service);
+    test(
+      'offline mode: when service is unreachable throws NetworkException',
+      () async {
+        // Simulate offline by creating a MockApiService that throws connectionError
+        final offline = TestableMockApiService(failureChance: 0.0);
+        await offline.initialize();
+        offline.forceNextError(TestableMockApiService.connectionError());
+        final remoteOffline = RemoteDataSourceImpl(offline.service);
 
-      expect(() async => await remoteOffline.getTransactions(), throwsA(isA<Exception>()));
-    });
+        expect(
+          () async => await remoteOffline.getTransactions(),
+          throwsA(isA<Exception>()),
+        );
+      },
+    );
 
     test('concurrent requests do not crash and return independently', () async {
-      final futures = List.generate(5, (_) => remote.getTransactions(page: 1, limit: 5));
+      final futures = List.generate(
+        5,
+        (_) => remote.getTransactions(page: 1, limit: 5),
+      );
       final results = await Future.wait(futures);
       expect(results.length, 5);
       for (final r in results) {

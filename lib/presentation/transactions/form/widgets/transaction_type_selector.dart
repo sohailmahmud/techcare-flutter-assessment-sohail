@@ -68,10 +68,7 @@ class _TransactionTypeSelectorState extends State<TransactionTypeSelector>
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(Spacing.radiusL),
-        border: Border.all(
-          color: AppColors.border,
-          width: 1,
-        ),
+        border: Border.all(color: AppColors.border, width: 1),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -97,12 +94,13 @@ class _TransactionTypeSelectorState extends State<TransactionTypeSelector>
                             ? AppColors.expense
                             : Colors.transparent,
                         borderRadius: BorderRadius.circular(Spacing.radiusM),
-                        boxShadow: widget.selectedType ==
-                                TransactionType.expense
+                        boxShadow:
+                            widget.selectedType == TransactionType.expense
                             ? [
                                 BoxShadow(
-                                  color:
-                                      AppColors.expense.withValues(alpha: 0.3),
+                                  color: AppColors.expense.withValues(
+                                    alpha: 0.3,
+                                  ),
                                   blurRadius: 8,
                                   offset: const Offset(0, 2),
                                 ),
@@ -116,19 +114,20 @@ class _TransactionTypeSelectorState extends State<TransactionTypeSelector>
                             duration: const Duration(milliseconds: 200),
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: widget.selectedType ==
-                                      TransactionType.expense
+                              color:
+                                  widget.selectedType == TransactionType.expense
                                   ? Colors.white.withValues(alpha: 0.2)
                                   : AppColors.expense.withValues(alpha: 0.1),
-                              borderRadius:
-                                  BorderRadius.circular(Spacing.radiusS),
+                              borderRadius: BorderRadius.circular(
+                                Spacing.radiusS,
+                              ),
                             ),
                             child: Icon(
                               Icons.arrow_downward_rounded,
                               color:
                                   widget.selectedType == TransactionType.expense
-                                      ? Colors.white
-                                      : AppColors.expense,
+                                  ? Colors.white
+                                  : AppColors.expense,
                               size: 20,
                             ),
                           ),
@@ -138,8 +137,8 @@ class _TransactionTypeSelectorState extends State<TransactionTypeSelector>
                             style: AppTypography.titleMedium.copyWith(
                               color:
                                   widget.selectedType == TransactionType.expense
-                                      ? Colors.white
-                                      : AppColors.textPrimary,
+                                  ? Colors.white
+                                  : AppColors.textPrimary,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -167,8 +166,9 @@ class _TransactionTypeSelectorState extends State<TransactionTypeSelector>
                         boxShadow: widget.selectedType == TransactionType.income
                             ? [
                                 BoxShadow(
-                                  color:
-                                      AppColors.income.withValues(alpha: 0.3),
+                                  color: AppColors.income.withValues(
+                                    alpha: 0.3,
+                                  ),
                                   blurRadius: 8,
                                   offset: const Offset(0, 2),
                                 ),
@@ -184,17 +184,18 @@ class _TransactionTypeSelectorState extends State<TransactionTypeSelector>
                             decoration: BoxDecoration(
                               color:
                                   widget.selectedType == TransactionType.income
-                                      ? Colors.white.withValues(alpha: 0.2)
-                                      : AppColors.income.withValues(alpha: 0.1),
-                              borderRadius:
-                                  BorderRadius.circular(Spacing.radiusS),
+                                  ? Colors.white.withValues(alpha: 0.2)
+                                  : AppColors.income.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(
+                                Spacing.radiusS,
+                              ),
                             ),
                             child: Icon(
                               Icons.arrow_upward_rounded,
                               color:
                                   widget.selectedType == TransactionType.income
-                                      ? Colors.white
-                                      : AppColors.income,
+                                  ? Colors.white
+                                  : AppColors.income,
                               size: 20,
                             ),
                           ),
@@ -204,8 +205,8 @@ class _TransactionTypeSelectorState extends State<TransactionTypeSelector>
                             style: AppTypography.titleMedium.copyWith(
                               color:
                                   widget.selectedType == TransactionType.income
-                                      ? Colors.white
-                                      : AppColors.textPrimary,
+                                  ? Colors.white
+                                  : AppColors.textPrimary,
                               fontWeight: FontWeight.w600,
                             ),
                           ),

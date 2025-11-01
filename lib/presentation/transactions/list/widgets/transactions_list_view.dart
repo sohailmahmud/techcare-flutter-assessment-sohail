@@ -64,7 +64,8 @@ class _TransactionsListViewState extends State<TransactionsListView> {
   }
 
   Map<String, List<tx.Transaction>> _groupTransactionsByDate(
-      List<tx.Transaction> transactions) {
+    List<tx.Transaction> transactions,
+  ) {
     final Map<String, List<tx.Transaction>> grouped = {};
 
     for (final transaction in transactions) {
@@ -79,7 +80,8 @@ class _TransactionsListViewState extends State<TransactionsListView> {
   }
 
   int _getTotalItemCount(
-      Map<String, List<tx.Transaction>> groupedTransactions) {
+    Map<String, List<tx.Transaction>> groupedTransactions,
+  ) {
     int count = 0;
     for (final entry in groupedTransactions.entries) {
       count += 1; // Header
@@ -89,7 +91,9 @@ class _TransactionsListViewState extends State<TransactionsListView> {
   }
 
   Widget _buildGroupedTransactions(
-      Map<String, List<tx.Transaction>> groupedTransactions, int globalIndex) {
+    Map<String, List<tx.Transaction>> groupedTransactions,
+    int globalIndex,
+  ) {
     int currentIndex = 0;
 
     for (final entry in groupedTransactions.entries) {
@@ -155,21 +159,14 @@ class _TransactionsListViewState extends State<TransactionsListView> {
             right: Spacing.space16,
           ),
           sliver: SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                return _buildGroupedTransactions(groupedTransactions, index);
-              },
-              childCount: _getTotalItemCount(groupedTransactions),
-            ),
+            delegate: SliverChildBuilderDelegate((context, index) {
+              return _buildGroupedTransactions(groupedTransactions, index);
+            }, childCount: _getTotalItemCount(groupedTransactions)),
           ),
         ),
         if (widget.hasNextPage)
-          SliverToBoxAdapter(
-            child: _buildLoadingIndicator(),
-          ),
-        const SliverPadding(
-          padding: EdgeInsets.only(bottom: Spacing.space24),
-        ),
+          SliverToBoxAdapter(child: _buildLoadingIndicator()),
+        const SliverPadding(padding: EdgeInsets.only(bottom: Spacing.space24)),
       ],
     );
   }
@@ -186,7 +183,7 @@ class _TransactionsListViewState extends State<TransactionsListView> {
           if (direction == DismissDirection.endToStart) {
             // Delete action
             return await _showDeleteConfirmation(transaction);
-          } 
+          }
           if (direction == DismissDirection.startToEnd) {
             // Edit action
             widget.onEdit?.call(transaction);
@@ -359,8 +356,9 @@ class _TransactionsListViewState extends State<TransactionsListView> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Transaction'),
-        content:
-            Text('Are you sure you want to delete "${transaction.title}"?'),
+        content: Text(
+          'Are you sure you want to delete "${transaction.title}"?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -405,8 +403,8 @@ class _TransactionsListViewState extends State<TransactionsListView> {
           Text(
             'Loading more transactions...',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface.withAlpha(153),
-                ),
+              color: Theme.of(context).colorScheme.onSurface.withAlpha(153),
+            ),
           ),
         ],
       ),
@@ -436,25 +434,24 @@ class _TransactionsListViewState extends State<TransactionsListView> {
             const SizedBox(height: Spacing.space20),
             Text(
               'No Transactions Found',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: Spacing.space8),
             Text(
               'Try adjusting your search or filters to find what you\'re looking for.',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color:
-                        Theme.of(context).colorScheme.onSurface.withAlpha(153),
-                  ),
+                color: Theme.of(context).colorScheme.onSurface.withAlpha(153),
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: Spacing.space24),
             ElevatedButton.icon(
               onPressed: () {
-                context
-                    .read<TransactionsBloc>()
-                    .add(const FilterTransactions({}));
+                context.read<TransactionsBloc>().add(
+                  const FilterTransactions({}),
+                );
               },
               icon: const Icon(Icons.clear_all_rounded),
               label: const Text('Clear Filters'),
@@ -476,10 +473,7 @@ class _TransactionsListViewState extends State<TransactionsListView> {
 class TransactionListSkeleton extends StatelessWidget {
   final int itemCount;
 
-  const TransactionListSkeleton({
-    super.key,
-    this.itemCount = 10,
-  });
+  const TransactionListSkeleton({super.key, this.itemCount = 10});
 
   @override
   Widget build(BuildContext context) {
@@ -539,15 +533,8 @@ class TransactionListSkeleton extends StatelessWidget {
                   spacing: Spacing.space8,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    SkeletonLoader(
-                      width: 50,
-                      height: 15,
-                    ),
-                    SkeletonLoader(
-                      width: 60,
-                      height: 15,
-                    ),
-                    
+                    SkeletonLoader(width: 50, height: 15),
+                    SkeletonLoader(width: 60, height: 15),
                   ],
                 ),
               ],

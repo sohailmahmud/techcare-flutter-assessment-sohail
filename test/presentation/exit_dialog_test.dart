@@ -20,26 +20,26 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('Exit dialog', () {
-  late TestHiveCacheManager testCache;
+    late TestHiveCacheManager testCache;
 
     setUp(() async {
-  testCache = TestHiveCacheManager();
+      testCache = TestHiveCacheManager();
 
       // Reset service locator registrations for test
       di.sl.reset();
 
       // Minimal DI registrations needed for the exit wrapper to call
       // cache manager.
-  di.sl.registerLazySingleton<HiveCacheManager>(() => testCache);
+      di.sl.registerLazySingleton<HiveCacheManager>(() => testCache);
     });
 
-    testWidgets('shows exit dialog and clears cache on Exit & Clear Cache', (tester) async {
+    testWidgets('shows exit dialog and clears cache on Exit & Clear Cache', (
+      tester,
+    ) async {
       // Build a minimal widget with the same exit dialog/WillPopScope logic
       // to avoid pulling in the entire app router and dependent blocs.
       await tester.pumpWidget(
-        MaterialApp(
-          home: TestExitApp(cacheManager: testCache),
-        ),
+        MaterialApp(home: TestExitApp(cacheManager: testCache)),
       );
       await tester.pump();
 
@@ -55,8 +55,8 @@ void main() {
       await tester.tap(find.text('Exit & Clear Cache'));
       await tester.pumpAndSettle();
 
-  // Verify clearAll was called on the registered test cache
-  expect(testCache.cleared, isTrue);
+      // Verify clearAll was called on the registered test cache
+      expect(testCache.cleared, isTrue);
     });
   });
 }
@@ -74,7 +74,9 @@ class TestExitApp extends StatelessWidget {
         builder: (ctx) {
           return AlertDialog(
             title: const Text('Exit app'),
-            content: const Text('Do you want to exit the app? You can also clear cached data before exiting.'),
+            content: const Text(
+              'Do you want to exit the app? You can also clear cached data before exiting.',
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(_ExitChoice.cancel),
@@ -85,7 +87,8 @@ class TestExitApp extends StatelessWidget {
                 child: const Text('Exit'),
               ),
               TextButton(
-                onPressed: () => Navigator.of(ctx).pop(_ExitChoice.exitAndClear),
+                onPressed: () =>
+                    Navigator.of(ctx).pop(_ExitChoice.exitAndClear),
                 child: const Text('Exit & Clear Cache'),
               ),
             ],

@@ -74,8 +74,10 @@ void main() {
 
       test('should return formatted date for single day range', () {
         final singleDay = DateTime(2024, 3, 15);
-        final singleDayRange =
-            DateRange(startDate: singleDay, endDate: singleDay);
+        final singleDayRange = DateRange(
+          startDate: singleDay,
+          endDate: singleDay,
+        );
 
         expect(singleDayRange.description, equals('15/3/2024'));
       });
@@ -93,8 +95,10 @@ void main() {
     group('dayCount property', () {
       test('should calculate correct day count for single day', () {
         final singleDay = DateTime(2024, 1, 15);
-        final singleDayRange =
-            DateRange(startDate: singleDay, endDate: singleDay);
+        final singleDayRange = DateRange(
+          startDate: singleDay,
+          endDate: singleDay,
+        );
 
         expect(singleDayRange.dayCount, equals(1));
       });
@@ -117,16 +121,22 @@ void main() {
       test('should return true for dates within range', () {
         expect(dateRange.contains(DateTime(2024, 1, 15)), isTrue); // Start date
         expect(
-            dateRange.contains(DateTime(2024, 1, 17)), isTrue); // Middle date
+          dateRange.contains(DateTime(2024, 1, 17)),
+          isTrue,
+        ); // Middle date
         expect(dateRange.contains(DateTime(2024, 1, 20)), isTrue); // End date
       });
 
       test('should return false for dates outside range', () {
         expect(
-            dateRange.contains(DateTime(2024, 1, 14)), isFalse); // Before start
+          dateRange.contains(DateTime(2024, 1, 14)),
+          isFalse,
+        ); // Before start
         expect(dateRange.contains(DateTime(2024, 1, 21)), isFalse); // After end
         expect(
-            dateRange.contains(DateTime(2023, 12, 31)), isFalse); // Way before
+          dateRange.contains(DateTime(2023, 12, 31)),
+          isFalse,
+        ); // Way before
       });
 
       test('should ignore time components when checking containment', () {
@@ -192,7 +202,9 @@ void main() {
         );
 
         expect(
-            sameTimeRange.dayCount, equals(3)); // Should count days, not time
+          sameTimeRange.dayCount,
+          equals(3),
+        ); // Should count days, not time
         expect(sameTimeRange.contains(DateTime(2024, 1, 16, 15, 45)), isTrue);
       });
     });

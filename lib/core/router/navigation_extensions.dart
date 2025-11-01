@@ -30,10 +30,7 @@ extension AppNavigation on BuildContext {
     if (sourcePage != null) {
       extra['sourcePage'] = sourcePage;
     }
-    go(
-      AppRoutes.addTransaction,
-      extra: extra.isNotEmpty ? extra : null,
-    );
+    go(AppRoutes.addTransaction, extra: extra.isNotEmpty ? extra : null);
   }
 
   // Edit transaction

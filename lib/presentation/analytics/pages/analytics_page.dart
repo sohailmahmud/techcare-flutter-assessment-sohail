@@ -126,11 +126,12 @@ class _AnalyticsPageState extends State<AnalyticsPage>
     final AssetDataSource assetDataSource = AssetDataSource();
     final categoriesResponse = await assetDataSource.getCategories();
     if (categoriesResponse.categories.isNotEmpty) {
-      return categoriesResponse.categories.map((model) => model.toEntity()).toList();
+      return categoriesResponse.categories
+          .map((model) => model.toEntity())
+          .toList();
     }
 
     return <Category>[];
-    
   }
 
   Widget _buildScaffold({required Widget body}) {
@@ -225,8 +226,12 @@ class _AnalyticsPageState extends State<AnalyticsPage>
     );
   }
 
-  Widget _buildErrorWidget(BuildContext context, String message,
-      {VoidCallback? onRetry, String? title}) {
+  Widget _buildErrorWidget(
+    BuildContext context,
+    String message, {
+    VoidCallback? onRetry,
+    String? title,
+  }) {
     return SizedBox(
       height: MediaQuery.of(context).size.height * 0.6,
       child: Center(
@@ -288,7 +293,8 @@ class _AnalyticsPageState extends State<AnalyticsPage>
     }
     if (previousData.expensePoints.length > 1) {
       previousExpenses = previousData
-          .expensePoints[previousData.expensePoints.length - 2].value;
+          .expensePoints[previousData.expensePoints.length - 2]
+          .value;
     }
     previousNetBalance = previousIncome - previousExpenses;
 
@@ -314,13 +320,12 @@ class _AnalyticsPageState extends State<AnalyticsPage>
           },
           onCustomRangeChanged: (range) {
             context.read<AnalyticsBloc>().add(
-                  ChangePeriod(TimePeriod.custom, customRange: range),
-                );
+              ChangePeriod(TimePeriod.custom, customRange: range),
+            );
           },
         ),
 
         const SizedBox(height: Spacing.space16), // Reduced spacing
-
         // Summary Statistics
         ResponsiveSummaryStats(
           statistics: data,
@@ -330,7 +335,6 @@ class _AnalyticsPageState extends State<AnalyticsPage>
         ),
 
         const SizedBox(height: Spacing.space16), // Reduced spacing
-
         // Spending Trend Chart with constrained height
         ConstrainedBox(
           constraints: const BoxConstraints(maxHeight: 280),
@@ -341,7 +345,6 @@ class _AnalyticsPageState extends State<AnalyticsPage>
         ),
 
         const SizedBox(height: Spacing.space16), // Reduced spacing
-
         // Category Breakdown and Budget Progress (side by side on tablets/desktop)
         LayoutBuilder(
           builder: (context, constraints) {
@@ -392,9 +395,7 @@ class _AnalyticsPageState extends State<AnalyticsPage>
         ),
 
         // Bottom spacing for better scroll experience - adjusted for mobile
-        SizedBox(
-          height: MediaQuery.of(context).size.height * 0.1,
-        ),
+        SizedBox(height: MediaQuery.of(context).size.height * 0.1),
       ],
     );
   }

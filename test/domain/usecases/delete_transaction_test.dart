@@ -21,8 +21,9 @@ void main() {
 
     test('should delete transaction through repository', () async {
       // Arrange
-      when(() => mockRepository.deleteTransaction(any()))
-          .thenAnswer((_) async => const Right(null));
+      when(
+        () => mockRepository.deleteTransaction(any()),
+      ).thenAnswer((_) async => const Right(null));
 
       // Act
       final result = await usecase(transactionId);
@@ -36,8 +37,9 @@ void main() {
     test('should return failure when repository fails', () async {
       // Arrange
       const failure = ServerFailure('Failed to delete transaction');
-      when(() => mockRepository.deleteTransaction(any()))
-          .thenAnswer((_) async => const Left(failure));
+      when(
+        () => mockRepository.deleteTransaction(any()),
+      ).thenAnswer((_) async => const Left(failure));
 
       // Act
       final result = await usecase(transactionId);
@@ -50,8 +52,9 @@ void main() {
     test('should handle not found error', () async {
       // Arrange
       const notFoundFailure = NotFoundFailure('Transaction not found');
-      when(() => mockRepository.deleteTransaction(any()))
-          .thenAnswer((_) async => const Left(notFoundFailure));
+      when(
+        () => mockRepository.deleteTransaction(any()),
+      ).thenAnswer((_) async => const Left(notFoundFailure));
 
       // Act
       final result = await usecase(transactionId);
@@ -64,8 +67,9 @@ void main() {
     test('should handle network failure', () async {
       // Arrange
       const networkFailure = NetworkFailure('No internet connection');
-      when(() => mockRepository.deleteTransaction(any()))
-          .thenAnswer((_) async => const Left(networkFailure));
+      when(
+        () => mockRepository.deleteTransaction(any()),
+      ).thenAnswer((_) async => const Left(networkFailure));
 
       // Act
       final result = await usecase(transactionId);
@@ -78,24 +82,28 @@ void main() {
     test('should pass correct transaction ID to repository', () async {
       // Arrange
       const customTransactionId = 'custom_trans_456';
-      when(() => mockRepository.deleteTransaction(customTransactionId))
-          .thenAnswer((_) async => const Right(null));
+      when(
+        () => mockRepository.deleteTransaction(customTransactionId),
+      ).thenAnswer((_) async => const Right(null));
 
       // Act
       await usecase(customTransactionId);
 
       // Assert
-      verify(() => mockRepository.deleteTransaction(customTransactionId))
-          .called(1);
+      verify(
+        () => mockRepository.deleteTransaction(customTransactionId),
+      ).called(1);
     });
 
     test('should handle empty transaction ID', () async {
       // Arrange
       const emptyId = '';
-      const validationFailure =
-          ValidationFailure('Transaction ID cannot be empty');
-      when(() => mockRepository.deleteTransaction(emptyId))
-          .thenAnswer((_) async => const Left(validationFailure));
+      const validationFailure = ValidationFailure(
+        'Transaction ID cannot be empty',
+      );
+      when(
+        () => mockRepository.deleteTransaction(emptyId),
+      ).thenAnswer((_) async => const Left(validationFailure));
 
       // Act
       final result = await usecase(emptyId);

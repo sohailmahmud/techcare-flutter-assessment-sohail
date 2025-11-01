@@ -57,16 +57,14 @@ void main() {
         'emits [DashboardLoading, DashboardLoaded] when dashboard loads successfully',
         build: () => dashboardBloc,
         setUp: () {
-          when(() => mockGetDashboardSummary(any()))
-              .thenAnswer((_) async => Right(mockSummary));
+          when(
+            () => mockGetDashboardSummary(any()),
+          ).thenAnswer((_) async => Right(mockSummary));
         },
         act: (bloc) => bloc.add(const LoadDashboard()),
         expect: () => [
           const DashboardLoading(),
-          DashboardLoaded(
-            summary: mockSummary,
-            filteredTransactions: const [],
-          ),
+          DashboardLoaded(summary: mockSummary, filteredTransactions: const []),
         ],
         verify: (_) {
           verify(() => mockGetDashboardSummary(NoParams())).called(1);
@@ -78,7 +76,8 @@ void main() {
         build: () => dashboardBloc,
         setUp: () {
           when(() => mockGetDashboardSummary(any())).thenAnswer(
-              (_) async => const Left(NetworkFailure('Network error')));
+            (_) async => const Left(NetworkFailure('Network error')),
+          );
         },
         act: (bloc) => bloc.add(const LoadDashboard()),
         expect: () => [
@@ -100,16 +99,14 @@ void main() {
         'refreshes dashboard data successfully',
         build: () => dashboardBloc,
         setUp: () {
-          when(() => mockRefreshDashboard(any()))
-              .thenAnswer((_) async => Right(mockSummary));
+          when(
+            () => mockRefreshDashboard(any()),
+          ).thenAnswer((_) async => Right(mockSummary));
         },
         act: (bloc) => bloc.add(const RefreshDashboardData()),
         expect: () => [
           const DashboardLoading(),
-          DashboardLoaded(
-            summary: mockSummary,
-            filteredTransactions: const [],
-          ),
+          DashboardLoaded(summary: mockSummary, filteredTransactions: const []),
         ],
         verify: (_) {
           verify(() => mockRefreshDashboard(NoParams())).called(1);
@@ -120,8 +117,9 @@ void main() {
         'handles refresh error',
         build: () => dashboardBloc,
         setUp: () {
-          when(() => mockRefreshDashboard(any()))
-              .thenAnswer((_) async => const Left(CacheFailure('Cache error')));
+          when(
+            () => mockRefreshDashboard(any()),
+          ).thenAnswer((_) async => const Left(CacheFailure('Cache error')));
         },
         act: (bloc) => bloc.add(const RefreshDashboardData()),
         expect: () => [
@@ -162,20 +160,16 @@ void main() {
         'retries loading dashboard after error',
         build: () => dashboardBloc,
         setUp: () {
-          when(() => mockGetDashboardSummary(any()))
-              .thenAnswer((_) async => Right(mockSummary));
+          when(
+            () => mockGetDashboardSummary(any()),
+          ).thenAnswer((_) async => Right(mockSummary));
         },
-        seed: () => const DashboardError(
-          message: 'Previous error',
-          canRetry: true,
-        ),
+        seed: () =>
+            const DashboardError(message: 'Previous error', canRetry: true),
         act: (bloc) => bloc.add(const RetryLoadDashboard()),
         expect: () => [
           const DashboardLoading(),
-          DashboardLoaded(
-            summary: mockSummary,
-            filteredTransactions: const [],
-          ),
+          DashboardLoaded(summary: mockSummary, filteredTransactions: const []),
         ],
         verify: (_) {
           verify(() => mockGetDashboardSummary(NoParams())).called(1);

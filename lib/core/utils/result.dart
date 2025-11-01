@@ -237,10 +237,9 @@ extension FutureResultExtension<T> on Future<Result<T>> {
     try {
       return await this.timeout(timeout);
     } catch (e) {
-      return const ResultFailure(NetworkFailure(
-        'Operation timed out',
-        code: 'TIMEOUT',
-      ));
+      return const ResultFailure(
+        NetworkFailure('Operation timed out', code: 'TIMEOUT'),
+      );
     }
   }
 }

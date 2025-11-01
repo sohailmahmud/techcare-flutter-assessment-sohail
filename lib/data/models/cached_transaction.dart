@@ -82,14 +82,15 @@ class CachedTransaction extends HiveObject {
       notes: transaction.notes,
       createdAt: transaction.createdAt ?? now,
       cachedAt: now,
-  expiresAt: now.add(effectiveTtl),
+      expiresAt: now.add(effectiveTtl),
     );
   }
 
   /// Convert to domain entity (async for category lookup)
   Future<Transaction> toTransaction() async {
     // Find the category by ID, with fallback
-    final category = (await AppCategories.findById(categoryId)) ??
+    final category =
+        (await AppCategories.findById(categoryId)) ??
         Category(
           id: categoryId,
           name: categoryName,

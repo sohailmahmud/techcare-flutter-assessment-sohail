@@ -55,19 +55,15 @@ class Transaction extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        title,
-        amount,
-        type,
-        category,
-        date,
-        description,
-        createdAt,
-      ];
+    id,
+    title,
+    amount,
+    type,
+    category,
+    date,
+    description,
+    createdAt,
+  ];
 }
 
-enum TransactionType {
-  all,
-  income,
-  expense,
-}
+enum TransactionType { all, income, expense }

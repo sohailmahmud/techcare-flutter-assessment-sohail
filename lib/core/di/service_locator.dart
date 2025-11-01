@@ -48,8 +48,9 @@ Future<void> initializeDependencies() async {
   );
 
   // Cache Manager
-  serviceLocator
-      .registerLazySingleton<HiveCacheManager>(() => HiveCacheManager());
+  serviceLocator.registerLazySingleton<HiveCacheManager>(
+    () => HiveCacheManager(),
+  );
 
   // Repositories
   serviceLocator.registerLazySingleton<TransactionRepository>(
@@ -77,9 +78,7 @@ Future<void> initializeDependencies() async {
   );
 
   serviceLocator.registerLazySingleton<DashboardRepository>(
-    () => DashboardRepositoryImpl(
-      apiService: serviceLocator<MockApiService>(),
-    ),
+    () => DashboardRepositoryImpl(apiService: serviceLocator<MockApiService>()),
   );
 
   // Use cases
@@ -100,14 +99,14 @@ Future<void> initializeDependencies() async {
   );
 
   serviceLocator.registerFactory<CategoryBloc>(
-    () => CategoryBloc(
-      categoryRepository: serviceLocator<CategoryRepository>(),
-    ),
+    () =>
+        CategoryBloc(categoryRepository: serviceLocator<CategoryRepository>()),
   );
 
   serviceLocator.registerFactory<AnalyticsBloc>(
     () => AnalyticsBloc(
-      transactionsBloc: serviceLocator<TransactionsBloc>(), categories: [],
+      transactionsBloc: serviceLocator<TransactionsBloc>(),
+      categories: [],
     ),
   );
 

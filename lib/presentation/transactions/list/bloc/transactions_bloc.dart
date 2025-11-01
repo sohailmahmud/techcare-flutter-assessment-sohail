@@ -103,8 +103,13 @@ class TransactionLoaded extends TransactionsState {
   });
 
   @override
-  List<Object?> get props =>
-      [transactions, hasMore, currentPage, currentFilters, searchQuery];
+  List<Object?> get props => [
+    transactions,
+    hasMore,
+    currentPage,
+    currentFilters,
+    searchQuery,
+  ];
 
   TransactionLoaded copyWith({
     List<tx.Transaction>? transactions,
@@ -162,7 +167,8 @@ class TransactionError extends TransactionsState {
 
 class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
   List<tx.Transaction> _allUnfilteredTransactions = [];
-  List<tx.Transaction> get allUnfilteredTransactions => _allUnfilteredTransactions;
+  List<tx.Transaction> get allUnfilteredTransactions =>
+      _allUnfilteredTransactions;
   final HiveCacheManager cacheManager;
   final TransactionRepository transactionRepository;
   List<tx.Transaction> _allTransactions = [];
@@ -214,15 +220,17 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
     // Search with debounce to prevent excessive API calls
     on<SearchTransactions>(
       _onSearchTransactions,
-      transformer:
-          EventTransformers.debounce(const Duration(milliseconds: 300)),
+      transformer: EventTransformers.debounce(
+        const Duration(milliseconds: 300),
+      ),
     );
 
     // Filter with throttle to prevent excessive filtering
     on<FilterTransactions>(
       _onFilterTransactions,
-      transformer:
-          EventTransformers.throttle(const Duration(milliseconds: 150)),
+      transformer: EventTransformers.throttle(
+        const Duration(milliseconds: 150),
+      ),
     );
 
     // Internal event for applying id mappings (tempId -> serverId)
@@ -232,7 +240,9 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
   }
 
   Future<void> _onLoadTransactions(
-      LoadTransactions event, Emitter<TransactionsState> emit) async {
+    LoadTransactions event,
+    Emitter<TransactionsState> emit,
+  ) async {
     final requestId = ++_latestRequestId;
     try {
       if (event.page == 1) emit(const TransactionLoading());
@@ -261,7 +271,10 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
 
       result.fold(
         (failure) {
-          Logger.e('Error loading transactions from repository', error: failure.message);
+          Logger.e(
+            'Error loading transactions from repository',
+            error: failure.message,
+          );
           emit(TransactionError(error: failure.message));
         },
         (paginatedResponse) {
@@ -271,8 +284,11 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
           if (event.page == 1) {
             _allTransactions = List<tx.Transaction>.from(transactions);
             // Set unfiltered transactions only if no filters or search query
-            if ((event.filters == null || event.filters!.isEmpty) && (_currentSearchQuery == null || _currentSearchQuery!.isEmpty)) {
-              _allUnfilteredTransactions = List<tx.Transaction>.from(transactions);
+            if ((event.filters == null || event.filters!.isEmpty) &&
+                (_currentSearchQuery == null || _currentSearchQuery!.isEmpty)) {
+              _allUnfilteredTransactions = List<tx.Transaction>.from(
+                transactions,
+              );
             }
           } else {
             // Prevent duplicates by checking IDs before adding
@@ -281,13 +297,15 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
             _allTransactions.addAll(transactions);
           }
 
-          emit(TransactionLoaded(
-            transactions: _allTransactions,
-            hasMore: hasMore,
-            currentPage: event.page,
-            currentFilters: event.filters,
-            searchQuery: _currentSearchQuery,
-          ));
+          emit(
+            TransactionLoaded(
+              transactions: _allTransactions,
+              hasMore: hasMore,
+              currentPage: event.page,
+              currentFilters: event.filters,
+              searchQuery: _currentSearchQuery,
+            ),
+          );
         },
       );
     } catch (error) {
@@ -299,26 +317,32 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
   }
 
   Future<void> _onAddTransaction(
-      AddTransaction event, Emitter<TransactionsState> emit) async {
+    AddTransaction event,
+    Emitter<TransactionsState> emit,
+  ) async {
     try {
-  // Immediately show the transaction in UI (optimistic)
-  // Remove any existing entries with same id to avoid duplicates
-  _allTransactions.removeWhere((t) => t.id == event.transaction.id);
-  _allUnfilteredTransactions.removeWhere((t) => t.id == event.transaction.id);
-  _allTransactions.insert(0, event.transaction);
-  _allUnfilteredTransactions.insert(0, event.transaction);
+      // Immediately show the transaction in UI (optimistic)
+      // Remove any existing entries with same id to avoid duplicates
+      _allTransactions.removeWhere((t) => t.id == event.transaction.id);
+      _allUnfilteredTransactions.removeWhere(
+        (t) => t.id == event.transaction.id,
+      );
+      _allTransactions.insert(0, event.transaction);
+      _allUnfilteredTransactions.insert(0, event.transaction);
 
-  // Ensure no duplicate ids after optimistic insert
-  _allTransactions = _uniqueById(_allTransactions);
-  _allUnfilteredTransactions = _uniqueById(_allUnfilteredTransactions);
+      // Ensure no duplicate ids after optimistic insert
+      _allTransactions = _uniqueById(_allTransactions);
+      _allUnfilteredTransactions = _uniqueById(_allUnfilteredTransactions);
 
-      emit(TransactionLoaded(
-        transactions: _allTransactions,
-        hasMore: false,
-        currentPage: _currentPage,
-        currentFilters: _currentFilters,
-        searchQuery: _currentSearchQuery,
-      ));
+      emit(
+        TransactionLoaded(
+          transactions: _allTransactions,
+          hasMore: false,
+          currentPage: _currentPage,
+          currentFilters: _currentFilters,
+          searchQuery: _currentSearchQuery,
+        ),
+      );
 
       // Since persistence is centralized in the repository (the form calls
       // repository.createTransaction before dispatching this event), this
@@ -326,12 +350,13 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
       _allTransactions = _uniqueById(_allTransactions);
       _allUnfilteredTransactions = _uniqueById(_allUnfilteredTransactions);
 
-      emit(const TransactionOperationSuccess(
-        message: 'Transaction added (optimistic)',
-        transactions: [],
-        hasMore: false,
-      ));
-
+      emit(
+        const TransactionOperationSuccess(
+          message: 'Transaction added (optimistic)',
+          transactions: [],
+          hasMore: false,
+        ),
+      );
     } catch (error) {
       Logger.e('Error adding transaction', error: error);
       emit(TransactionError(error: 'Failed to add transaction: $error'));
@@ -353,38 +378,50 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
   }
 
   Future<void> _onUpdateTransaction(
-      UpdateTransaction event, Emitter<TransactionsState> emit) async {
+    UpdateTransaction event,
+    Emitter<TransactionsState> emit,
+  ) async {
     try {
       emit(const TransactionOperationInProgress('Updating transaction'));
 
-      final result =
-          await transactionRepository.updateTransaction(event.transaction);
+      final result = await transactionRepository.updateTransaction(
+        event.transaction,
+      );
       result.fold(
         (failure) {
           Logger.e('Error updating transaction', error: failure.message);
-          emit(TransactionError(
-              error: 'Failed to update transaction: ${failure.message}'));
+          emit(
+            TransactionError(
+              error: 'Failed to update transaction: ${failure.message}',
+            ),
+          );
         },
         (updatedTransaction) {
           // Optimistically update in-memory lists
           _allTransactions.removeWhere((t) => t.id == updatedTransaction.id);
           _allTransactions.insert(0, updatedTransaction);
-          _allUnfilteredTransactions.removeWhere((t) => t.id == updatedTransaction.id);
+          _allUnfilteredTransactions.removeWhere(
+            (t) => t.id == updatedTransaction.id,
+          );
           _allUnfilteredTransactions.insert(0, updatedTransaction);
 
-          emit(TransactionOperationSuccess(
-            message: 'Transaction updated successfully',
-            transactions: [updatedTransaction],
-            hasMore: false,
-          ));
+          emit(
+            TransactionOperationSuccess(
+              message: 'Transaction updated successfully',
+              transactions: [updatedTransaction],
+              hasMore: false,
+            ),
+          );
 
-          emit(TransactionLoaded(
-            transactions: _allTransactions,
-            hasMore: false,
-            currentPage: _currentPage,
-            currentFilters: _currentFilters,
-            searchQuery: _currentSearchQuery,
-          ));
+          emit(
+            TransactionLoaded(
+              transactions: _allTransactions,
+              hasMore: false,
+              currentPage: _currentPage,
+              currentFilters: _currentFilters,
+              searchQuery: _currentSearchQuery,
+            ),
+          );
         },
       );
     } catch (error) {
@@ -394,7 +431,9 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
   }
 
   Future<void> _onDeleteTransaction(
-      DeleteTransaction event, Emitter<TransactionsState> emit) async {
+    DeleteTransaction event,
+    Emitter<TransactionsState> emit,
+  ) async {
     try {
       emit(const TransactionOperationInProgress('Deleting transaction'));
 
@@ -402,27 +441,34 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
       result.fold(
         (failure) {
           Logger.e('Error deleting transaction', error: failure.message);
-          emit(TransactionError(
-              error: 'Failed to delete transaction: ${failure.message}'));
+          emit(
+            TransactionError(
+              error: 'Failed to delete transaction: ${failure.message}',
+            ),
+          );
         },
         (_) {
           // Optimistically remove from in-memory lists
           _allTransactions.removeWhere((t) => t.id == event.id);
           _allUnfilteredTransactions.removeWhere((t) => t.id == event.id);
 
-          emit(const TransactionOperationSuccess(
-            message: 'Transaction deleted successfully',
-            transactions: [],
-            hasMore: false,
-          ));
+          emit(
+            const TransactionOperationSuccess(
+              message: 'Transaction deleted successfully',
+              transactions: [],
+              hasMore: false,
+            ),
+          );
 
-          emit(TransactionLoaded(
-            transactions: _allTransactions,
-            hasMore: false,
-            currentPage: _currentPage,
-            currentFilters: _currentFilters,
-            searchQuery: _currentSearchQuery,
-          ));
+          emit(
+            TransactionLoaded(
+              transactions: _allTransactions,
+              hasMore: false,
+              currentPage: _currentPage,
+              currentFilters: _currentFilters,
+              searchQuery: _currentSearchQuery,
+            ),
+          );
         },
       );
     } catch (error) {
@@ -432,7 +478,9 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
   }
 
   Future<void> _onRefreshTransactions(
-      RefreshTransactions event, Emitter<TransactionsState> emit) async {
+    RefreshTransactions event,
+    Emitter<TransactionsState> emit,
+  ) async {
     try {
       // Clear repository cache and reload
       await transactionRepository.clearCache();
@@ -445,7 +493,9 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
   }
 
   Future<void> _onSearchTransactions(
-      SearchTransactions event, Emitter<TransactionsState> emit) async {
+    SearchTransactions event,
+    Emitter<TransactionsState> emit,
+  ) async {
     final requestId = ++_latestRequestId;
     try {
       emit(const TransactionLoading());
@@ -478,22 +528,27 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
       result.fold(
         (failure) {
           Logger.e('Error searching transactions', error: failure.message);
-          emit(TransactionError(
-              error: 'Failed to search transactions: ${failure.message}'));
+          emit(
+            TransactionError(
+              error: 'Failed to search transactions: ${failure.message}',
+            ),
+          );
         },
         (paginatedResponse) {
           _allTransactions = paginatedResponse.data;
 
-          emit(TransactionLoaded(
-            transactions: paginatedResponse.data,
-            hasMore: paginatedResponse.meta.hasMore,
-            currentPage: 1,
-            currentFilters: _currentFilters,
-            searchQuery: _currentSearchQuery,
-          ));
+          emit(
+            TransactionLoaded(
+              transactions: paginatedResponse.data,
+              hasMore: paginatedResponse.meta.hasMore,
+              currentPage: 1,
+              currentFilters: _currentFilters,
+              searchQuery: _currentSearchQuery,
+            ),
+          );
         },
       );
-      } catch (error) {
+    } catch (error) {
       // Ignore errors from stale requests
       if (requestId != _latestRequestId) return;
       Logger.e('Error searching transactions', error: error);
@@ -502,7 +557,9 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
   }
 
   Future<void> _onFilterTransactions(
-      FilterTransactions event, Emitter<TransactionsState> emit) async {
+    FilterTransactions event,
+    Emitter<TransactionsState> emit,
+  ) async {
     final requestId = ++_latestRequestId;
     try {
       emit(const TransactionLoading());
@@ -510,7 +567,8 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
       _currentPage = 1;
 
       dynamic categoryFilter;
-      if (_currentFilters?['categories'] != null && (_currentFilters?['categories'] as List).isNotEmpty) {
+      if (_currentFilters?['categories'] != null &&
+          (_currentFilters?['categories'] as List).isNotEmpty) {
         categoryFilter = List<String>.from(_currentFilters?['categories']);
       } else if (_currentFilters?['categories'] != null) {
         categoryFilter = _currentFilters?['categories'];
@@ -521,8 +579,12 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
         searchQuery: _currentSearchQuery,
         type: _parseTransactionType(_currentFilters?['type']),
         categories: categoryFilter as List<String>?,
-        startDate: _currentFilters?['startDate'] != null ? DateTime.parse(_currentFilters?['startDate']) : null,
-        endDate: _currentFilters?['endDate'] != null ? DateTime.parse(_currentFilters?['endDate']) : null,
+        startDate: _currentFilters?['startDate'] != null
+            ? DateTime.parse(_currentFilters?['startDate'])
+            : null,
+        endDate: _currentFilters?['endDate'] != null
+            ? DateTime.parse(_currentFilters?['endDate'])
+            : null,
         amountRange: _currentFilters?['amountRange'],
       );
 
@@ -541,19 +603,24 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
       result.fold(
         (failure) {
           Logger.e('Error filtering transactions', error: failure.message);
-          emit(TransactionError(
-              error: 'Failed to filter transactions: ${failure.message}'));
+          emit(
+            TransactionError(
+              error: 'Failed to filter transactions: ${failure.message}',
+            ),
+          );
         },
         (paginatedResponse) {
           _allTransactions = paginatedResponse.data;
 
-          emit(TransactionLoaded(
-            transactions: paginatedResponse.data,
-            hasMore: paginatedResponse.meta.hasMore,
-            currentPage: 1,
-            currentFilters: _currentFilters,
-            searchQuery: _currentSearchQuery,
-          ));
+          emit(
+            TransactionLoaded(
+              transactions: paginatedResponse.data,
+              hasMore: paginatedResponse.meta.hasMore,
+              currentPage: 1,
+              currentFilters: _currentFilters,
+              searchQuery: _currentSearchQuery,
+            ),
+          );
         },
       );
     } catch (error) {
@@ -578,7 +645,10 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
     }
   }
 
-  Future<void> _onApplyIdMap(ApplyIdMap event, Emitter<TransactionsState> emit) async {
+  Future<void> _onApplyIdMap(
+    ApplyIdMap event,
+    Emitter<TransactionsState> emit,
+  ) async {
     try {
       final idMap = event.idMap;
       if (idMap.isEmpty) return;
@@ -592,19 +662,22 @@ class TransactionsBloc extends Bloc<TransactionsEvent, TransactionsState> {
         }
         for (var i = 0; i < _allUnfilteredTransactions.length; i++) {
           if (_allUnfilteredTransactions[i].id == tempId) {
-            _allUnfilteredTransactions[i] = _allUnfilteredTransactions[i].copyWith(id: serverId);
+            _allUnfilteredTransactions[i] = _allUnfilteredTransactions[i]
+                .copyWith(id: serverId);
           }
         }
       });
 
       // Emit a new loaded state reflecting replacements so UI updates regardless
-      emit(TransactionLoaded(
-        transactions: List<tx.Transaction>.from(_allTransactions),
-        hasMore: false,
-        currentPage: _currentPage,
-        currentFilters: _currentFilters,
-        searchQuery: _currentSearchQuery,
-      ));
+      emit(
+        TransactionLoaded(
+          transactions: List<tx.Transaction>.from(_allTransactions),
+          hasMore: false,
+          currentPage: _currentPage,
+          currentFilters: _currentFilters,
+          searchQuery: _currentSearchQuery,
+        ),
+      );
     } catch (error) {
       Logger.e('Error applying id map', error: error);
     }

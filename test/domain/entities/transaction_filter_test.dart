@@ -16,8 +16,10 @@ void main() {
         expect(DateRangePreset.today.displayName, equals('Today'));
         expect(DateRangePreset.thisWeek.displayName, equals('This Week'));
         expect(DateRangePreset.thisMonth.displayName, equals('This Month'));
-        expect(DateRangePreset.lastThreeMonths.displayName,
-            equals('Last 3 Months'));
+        expect(
+          DateRangePreset.lastThreeMonths.displayName,
+          equals('Last 3 Months'),
+        );
         expect(DateRangePreset.custom.displayName, equals('Custom Range'));
       });
     });
@@ -36,8 +38,11 @@ void main() {
       test('should return week range for thisWeek preset', () {
         final range = DateRangePreset.thisWeek.getDateRange();
         final now = DateTime.now();
-        final startOfWeek = DateTime(now.year, now.month, now.day)
-            .subtract(Duration(days: now.weekday - 1));
+        final startOfWeek = DateTime(
+          now.year,
+          now.month,
+          now.day,
+        ).subtract(Duration(days: now.weekday - 1));
 
         expect(range.start.year, equals(startOfWeek.year));
         expect(range.start.month, equals(startOfWeek.month));
@@ -203,8 +208,9 @@ void main() {
       });
 
       test('should return true when filters are active', () {
-        final filter =
-            baseFilter.copyWith(transactionType: TransactionType.income);
+        final filter = baseFilter.copyWith(
+          transactionType: TransactionType.income,
+        );
         expect(filter.hasActiveFilters, isTrue);
       });
     });
@@ -226,14 +232,16 @@ void main() {
 
     group('copyWith method', () {
       test('should create copy with modified type', () {
-        final copied =
-            baseFilter.copyWith(transactionType: TransactionType.income);
+        final copied = baseFilter.copyWith(
+          transactionType: TransactionType.income,
+        );
         expect(copied.transactionType, equals(TransactionType.income));
       });
 
       test('should create copy with modified categories', () {
-        final copied =
-            baseFilter.copyWith(selectedCategories: ['cat1', 'cat2']);
+        final copied = baseFilter.copyWith(
+          selectedCategories: ['cat1', 'cat2'],
+        );
         expect(copied.selectedCategories, containsAll(['cat1', 'cat2']));
       });
     });

@@ -9,17 +9,21 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: const Center(
-            child: Text('FinTrack Test'),
-          ),
+          body: const Center(child: Text('FinTrack Test')),
           bottomNavigationBar: NavigationBar(
             destinations: const [
               NavigationDestination(
-                  icon: Icon(Icons.dashboard), label: 'Dashboard'),
+                icon: Icon(Icons.dashboard),
+                label: 'Dashboard',
+              ),
               NavigationDestination(
-                  icon: Icon(Icons.list), label: 'Transactions'),
+                icon: Icon(Icons.list),
+                label: 'Transactions',
+              ),
               NavigationDestination(
-                  icon: Icon(Icons.analytics), label: 'Analytics'),
+                icon: Icon(Icons.analytics),
+                label: 'Analytics',
+              ),
             ],
           ),
         ),

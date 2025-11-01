@@ -23,10 +23,7 @@ class AppPageTransitions {
           offsetTween.chain(CurveTween(curve: Curves.easeInOutCubic)),
         );
 
-        return SlideTransition(
-          position: slideAnimation,
-          child: child,
-        );
+        return SlideTransition(position: slideAnimation, child: child);
       },
     );
   }
@@ -42,9 +39,7 @@ class AppPageTransitions {
       reverseTransitionDuration: AppConstants.pageTransition,
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         return FadeTransition(
-          opacity: animation.drive(
-            CurveTween(curve: Curves.easeInOut),
-          ),
+          opacity: animation.drive(CurveTween(curve: Curves.easeInOut)),
           child: child,
         );
       },
@@ -63,14 +58,13 @@ class AppPageTransitions {
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         return ScaleTransition(
           scale: animation.drive(
-            Tween<double>(begin: 0.85, end: 1.0).chain(
-              CurveTween(curve: Curves.easeInOutCubic),
-            ),
+            Tween<double>(
+              begin: 0.85,
+              end: 1.0,
+            ).chain(CurveTween(curve: Curves.easeInOutCubic)),
           ),
           child: FadeTransition(
-            opacity: animation.drive(
-              CurveTween(curve: Curves.easeInOut),
-            ),
+            opacity: animation.drive(CurveTween(curve: Curves.easeInOut)),
             child: child,
           ),
         );
@@ -111,12 +105,7 @@ class AppPageTransitions {
   }
 }
 
-enum SlideDirection {
-  fromLeft,
-  fromRight,
-  fromTop,
-  fromBottom,
-}
+enum SlideDirection { fromLeft, fromRight, fromTop, fromBottom }
 
 /// Custom hero animation for FAB to form screen
 class FABHeroRoute<T> extends PageRoute<T> {
@@ -161,19 +150,12 @@ class FABHeroRoute<T> extends PageRoute<T> {
     Widget child,
   ) {
     return SlideTransition(
-      position: Tween<Offset>(
-        begin: const Offset(0.0, 1.0),
-        end: Offset.zero,
-      ).animate(
-        CurvedAnimation(
-          parent: animation,
-          curve: Curves.easeInOutCubic,
-        ),
-      ),
+      position: Tween<Offset>(begin: const Offset(0.0, 1.0), end: Offset.zero)
+          .animate(
+            CurvedAnimation(parent: animation, curve: Curves.easeInOutCubic),
+          ),
       child: FadeTransition(
-        opacity: animation.drive(
-          CurveTween(curve: Curves.easeInOut),
-        ),
+        opacity: animation.drive(CurveTween(curve: Curves.easeInOut)),
         child: child,
       ),
     );

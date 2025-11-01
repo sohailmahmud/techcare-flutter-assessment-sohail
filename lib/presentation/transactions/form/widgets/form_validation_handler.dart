@@ -116,15 +116,14 @@ class FormValidationHandler {
     final descriptionError = validateDescription(description);
     if (descriptionError != null) errors['description'] = descriptionError;
 
-    return FormValidationStatus(
-      isValid: errors.isEmpty,
-      errors: errors,
-    );
+    return FormValidationStatus(isValid: errors.isEmpty, errors: errors);
   }
 
   /// Format number with commas
   static String _formatNumber(double number) {
-    return number.toStringAsFixed(0).replaceAllMapped(
+    return number
+        .toStringAsFixed(0)
+        .replaceAllMapped(
           RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
           (Match m) => '${m[1]},',
         );
@@ -165,10 +164,7 @@ class FormValidationStatus {
   final bool isValid;
   final Map<String, String> errors;
 
-  const FormValidationStatus({
-    required this.isValid,
-    required this.errors,
-  });
+  const FormValidationStatus({required this.isValid, required this.errors});
 
   String? getError(String field) => errors[field];
   bool hasError(String field) => errors.containsKey(field);
@@ -180,10 +176,7 @@ class FieldValidationResult {
   final bool isValid;
   final String? error;
 
-  const FieldValidationResult({
-    required this.isValid,
-    this.error,
-  });
+  const FieldValidationResult({required this.isValid, this.error});
 
   factory FieldValidationResult.valid() {
     return const FieldValidationResult(isValid: true);

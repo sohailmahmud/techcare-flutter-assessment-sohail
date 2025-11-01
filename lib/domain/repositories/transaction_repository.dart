@@ -89,10 +89,7 @@ class PaginatedResponse<T> {
   final List<T> data;
   final PaginationMeta meta;
 
-  const PaginatedResponse({
-    required this.data,
-    required this.meta,
-  });
+  const PaginatedResponse({required this.data, required this.meta});
 }
 
 /// Repository interface for transaction data
@@ -109,11 +106,13 @@ abstract class TransactionRepository {
 
   /// Create a new transaction
   Future<Either<Failure, Transaction>> createTransaction(
-      Transaction transaction);
+    Transaction transaction,
+  );
 
   /// Update an existing transaction
   Future<Either<Failure, Transaction>> updateTransaction(
-      Transaction transaction);
+    Transaction transaction,
+  );
 
   /// Delete a transaction
   Future<Either<Failure, void>> deleteTransaction(String id);
@@ -137,7 +136,8 @@ abstract class TransactionRepository {
   /// Accepts the failed items (with operation data) and attempts to re-enqueue
   /// and resync them. Returns a SyncResult describing the outcome of the retry.
   Future<Either<Failure, SyncResult>> retryOperations(
-      List<ItemSyncResult> failedItems);
+    List<ItemSyncResult> failedItems,
+  );
 }
 
 /// Summary result of a sync run containing succeeded operation ids and
@@ -147,7 +147,11 @@ class SyncResult {
   final List<ItemSyncResult> failed;
   final Map<String, String> idMap; // tempId -> serverId
 
-  const SyncResult({required this.succeededOperationIds, required this.failed, this.idMap = const {}});
+  const SyncResult({
+    required this.succeededOperationIds,
+    required this.failed,
+    this.idMap = const {},
+  });
 
   bool get hasFailures => failed.isNotEmpty;
 

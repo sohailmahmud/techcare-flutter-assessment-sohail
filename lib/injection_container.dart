@@ -59,10 +59,7 @@ Future<void> init() async {
   //! Features - Dashboard
   // Bloc
   sl.registerFactory(
-    () => DashboardBloc(
-      getDashboardSummary: sl(),
-      refreshDashboard: sl(),
-    ),
+    () => DashboardBloc(getDashboardSummary: sl(), refreshDashboard: sl()),
   );
 
   //! Features - Transactions
@@ -73,10 +70,12 @@ Future<void> init() async {
   sl.registerLazySingleton(() => delete_usecase.DeleteTransaction(sl()));
 
   // Bloc
-  sl.registerLazySingleton(() => TransactionsBloc(
-        cacheManager: sl(),
-        transactionRepository: sl<TransactionRepository>(),
-      ));
+  sl.registerLazySingleton(
+    () => TransactionsBloc(
+      cacheManager: sl(),
+      transactionRepository: sl<TransactionRepository>(),
+    ),
+  );
 
   // Attach sync listener to TransactionsBloc to handle id replacements
   // when pending creations are synced and server returns real IDs.
@@ -96,14 +95,17 @@ Future<void> init() async {
   //! Features - Transaction Form
   // Bloc
   sl.registerFactory(
-      () => TransactionFormBloc(transactionsBloc: sl<TransactionsBloc>()));
+    () => TransactionFormBloc(transactionsBloc: sl<TransactionsBloc>()),
+  );
 
   //! Features - Analytics
   // Use cases
   sl.registerLazySingleton(() => GetAnalytics(sl()));
 
   // Bloc
-  sl.registerFactory(() => AnalyticsBloc(transactionsBloc: sl(), categories: []));
+  sl.registerFactory(
+    () => AnalyticsBloc(transactionsBloc: sl(), categories: []),
+  );
 
   //! Features - Categories
   // Bloc
@@ -140,13 +142,18 @@ Future<void> init() async {
   // variable `MOCK_API_FAILURE_CHANCE` (value between 0.0 and 1.0). If not
   // provided or invalid, the default of 0.10 is used.
   const double defaultFailureChance = 0.10;
-  const String envRaw = String.fromEnvironment('MOCK_API_FAILURE_CHANCE', defaultValue: '');
+  const String envRaw = String.fromEnvironment(
+    'MOCK_API_FAILURE_CHANCE',
+    defaultValue: '',
+  );
   double failureChance = defaultFailureChance;
   final parsed = double.tryParse(envRaw);
   if (parsed != null && parsed >= 0.0 && parsed <= 1.0) {
     failureChance = parsed;
   }
-  sl.registerLazySingleton<MockApiService>(() => MockApiService(failureChance: failureChance));
+  sl.registerLazySingleton<MockApiService>(
+    () => MockApiService(failureChance: failureChance),
+  );
 
   sl.registerLazySingleton<RemoteDataSource>(
     () => RemoteDataSourceImpl(sl<MockApiService>()),
@@ -164,14 +171,19 @@ Future<void> init() async {
   // delegates to the TransactionRepository.retryOperations method.
   try {
     sl<SyncNotificationService>().setRetryHandler((failedItems) async {
-      final result = await sl<TransactionRepository>().retryOperations(failedItems);
-      result.fold((failure) {
-        // nothing to notify on failure
-      }, (syncResult) {
-        try {
-          sl<SyncNotificationService>().notify(syncResult);
-        } catch (_) {}
-      });
+      final result = await sl<TransactionRepository>().retryOperations(
+        failedItems,
+      );
+      result.fold(
+        (failure) {
+          // nothing to notify on failure
+        },
+        (syncResult) {
+          try {
+            sl<SyncNotificationService>().notify(syncResult);
+          } catch (_) {}
+        },
+      );
       return result;
     });
   } catch (_) {
@@ -187,7 +199,9 @@ Future<void> init() async {
   // Also attempt a startup sync if the device is currently online.
   try {
     final current = await sl<Connectivity>().checkConnectivity();
-    final isOnlineNow = current == ConnectivityResult.wifi || current == ConnectivityResult.mobile;
+    final isOnlineNow =
+        current == ConnectivityResult.wifi ||
+        current == ConnectivityResult.mobile;
     if (isOnlineNow) {
       // Schedule a short delayed sync to avoid racing startup tasks
       syncDebounce = Timer(const Duration(milliseconds: 250), () async {
@@ -195,15 +209,18 @@ Future<void> init() async {
         syncInProgress = true;
         try {
           final result = await sl<TransactionRepository>().syncOfflineChanges();
-          result.fold((failure) {
-            // ignore for startup
-          }, (syncResult) {
-            try {
-              sl<SyncNotificationService>().notify(syncResult);
-            } catch (_) {}
-          });
-        } catch (_) {}
-        finally {
+          result.fold(
+            (failure) {
+              // ignore for startup
+            },
+            (syncResult) {
+              try {
+                sl<SyncNotificationService>().notify(syncResult);
+              } catch (_) {}
+            },
+          );
+        } catch (_) {
+        } finally {
           syncInProgress = false;
         }
       });
@@ -214,7 +231,9 @@ Future<void> init() async {
 
   sl<Connectivity>().onConnectivityChanged.listen((result) async {
     // Consider wifi or mobile as "online". Other values (none) are offline.
-    final isOnline = result == ConnectivityResult.wifi || result == ConnectivityResult.mobile;
+    final isOnline =
+        result == ConnectivityResult.wifi ||
+        result == ConnectivityResult.mobile;
     if (!isOnline) return;
 
     // Debounce quick flapping connectivity events
@@ -226,16 +245,19 @@ Future<void> init() async {
         final result = await sl<TransactionRepository>().syncOfflineChanges();
         // If sync succeeded (even partially), notify the UI through the
         // SyncNotificationService so the app can present a summary.
-        result.fold((failure) {
-          // On failure, we still notify with an empty SyncResult? Prefer
-          // not to surface anything in UI; errors can be observed separately.
-        }, (syncResult) {
-          try {
-            sl<SyncNotificationService>().notify(syncResult);
-          } catch (_) {
-            // Ignore notification errors
-          }
-        });
+        result.fold(
+          (failure) {
+            // On failure, we still notify with an empty SyncResult? Prefer
+            // not to surface anything in UI; errors can be observed separately.
+          },
+          (syncResult) {
+            try {
+              sl<SyncNotificationService>().notify(syncResult);
+            } catch (_) {
+              // Ignore notification errors
+            }
+          },
+        );
       } catch (_) {
         // Swallow errors here; sync logic will persist failures to local store.
       } finally {
@@ -250,13 +272,9 @@ Future<void> init() async {
 
   //! Existing - Repository
   sl.registerLazySingleton<DashboardRepository>(
-    () => DashboardRepositoryImpl(
-      apiService: sl(),
-    ),
+    () => DashboardRepositoryImpl(apiService: sl()),
   );
 
   //! Existing - Cache Manager
-  sl.registerLazySingleton<HiveCacheManager>(
-    () => HiveCacheManager(),
-  );
+  sl.registerLazySingleton<HiveCacheManager>(() => HiveCacheManager());
 }
